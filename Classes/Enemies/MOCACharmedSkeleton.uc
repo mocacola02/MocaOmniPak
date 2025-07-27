@@ -442,6 +442,7 @@ state stateHitBySpell
 
     die:
         isDown = True;
+        SetCollision(false, false, false);
         PlayAnim('Defeated');
         FinishAnim();
         GotoState('stateDead');
@@ -525,6 +526,7 @@ state stateDead
         GroundSpeed = 50.0;
         PlayAnim('DefeatToResurrect', 3.0);
         FinishAnim();
+        SetCollision(true, true, true);
         GotoState('stateIdle');
 
     finalDie:
