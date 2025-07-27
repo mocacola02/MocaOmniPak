@@ -1,19 +1,11 @@
-class MOCACauldronCake extends HProp;
-
-var() Sound good;
-var() Sound Bad;
-var float fPickupFlyTime;
-var() bool bFallsToGround;
-var int iSkinTexture;
-var bool bInitialized;
+class MOCACauldronCake extends MOCACollectible;
 
 function Touch (Actor Other)
 {
   Super.Touch(Other);
   if ( Other.IsA('Tut1Gnome') )
   {
-    PlaySound(soundPickup);
-    Destroy();
+    return;
   }
 }
 
@@ -35,7 +27,8 @@ auto state BounceIntoPlace
 defaultproperties
 {
      bFallsToGround=True
-     soundPickup=Sound'HPSounds.Magic_sfx.pickup11'
+     pickUpSound=Sound'MocaSoundPak.Magic.pastie_pickup'
+     soundPickup=Sound'MocaSoundPak.Magic.pastie_pickup'
      bPickupOnTouch=True
      EventToSendOnPickup=CakePickupEvent
      PickupFlyTo=FT_HudPosition

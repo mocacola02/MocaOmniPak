@@ -8,7 +8,7 @@ var bool lastWasRight;
 var bool firstLook;
 //var harry PlayerHarry;
 var MOCAStealthTrigger stealthTrig1;
-var MOCAStealthTrigger stealthTrig2;
+//var MOCAStealthTrigger stealthTrig2;
 //var MOCABeam stealthLight;
 var int randLook;
 var bool isAwake;
@@ -53,11 +53,11 @@ simulated event Tick(float DeltaTime)
 {
     Super.Tick(DeltaTime);
     local Vector LocationForTrigger1;
-    local Vector LocationForTrigger2;
-    LocationForTrigger1 = BonePos('TriggerPoint2');
-    LocationForTrigger2 = BonePos('TriggerPoint');
+    //local Vector LocationForTrigger2;
+    LocationForTrigger1 = BonePos('TriggerPoint');
+    //LocationForTrigger2 = BonePos('TriggerPoint');
     stealthTrig1.SetLocation(LocationForTrigger1);
-    stealthTrig2.SetLocation(LocationForTrigger2);
+    //stealthTrig2.SetLocation(LocationForTrigger2);
     //stealthLight.SetLocation(LocationForTrigger);
 }
 
@@ -99,37 +99,39 @@ function Trigger (Actor Other, Pawn EventInstigator)
 auto state asleep 
 {
   begin:
+  Log("KNIGHT IS SLEEPING!!!!!!!!!!!");
     if (stealthTrig1 != None)
     {
       stealthTrig1.Destroy();
       //stealthLight.TurnDynamicLightOff();
     }
-    if (stealthTrig2 != None)
+    /*if (stealthTrig2 != None)
     {
       stealthTrig2.Destroy();
-    }
+    }*/
     if (!asleepOnSpawn)
     {
       GotoState('stateIdle');
     }
     MultiSkins[1] = Texture'MocaTexturePak.Misc.transparent';
-    LoopAnim('idle');
+    LoopAnim('Idle');
 }
 
 state stateIdle
 {
   begin:
+    Log("KNIGHT IS IDLE!!!!!!!!!!!!!!!!!");
     if (stealthTrig1 == None)
     {
       stealthTrig1 = Spawn(Class'MOCAStealthTrigger',self);
-      //stealthLight.TurnDynamicLightOn();
       stealthTrig1.attachedToKnight = True;
     }
+    /*
     if (stealthTrig2 == None)
     {
       stealthTrig2 = Spawn(Class'MOCAStealthTrigger',self);
       stealthTrig2.attachedToKnight = True;
-    }
+    }*/
     //Log("Idling");
     determineTTL(False);
     randLook = RandRange(0, randLookProbability);
@@ -137,26 +139,25 @@ state stateIdle
     sleep(timeToLook);
     if (firstLook)
     {
-      //Log("Determining first look");
       lastWasRight = bool(RandRange(0, 1));
       firstLook = False;
     }
     if (lastWasRight && randLook == 0) // 25% chance to switch direction again
     {
-      //Log("try right");
+      Log("try right");
       GotoState('lookRight');
     }
     else if (!lastWasRight && randLook == 0) // 25% chance to switch direction again
     {
-      //Log("try left");
+      Log("try left");
       GotoState('lookLeft');
     }
     else if (!lastWasRight) {
-      //Log("try right");
+      Log("try right");
       GotoState('lookRight');
     }
     else {
-      //Log("try left");
+      Log("try left");
       GotoState('lookLeft');
     }
 }
@@ -167,14 +168,14 @@ state lookLeft
   begin:
     lastWasRight = False;
     PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-    //Log("Left");
+    Log("Left");
     determineTTL(True);
-    PlayAnim('idle2lookleft');
+    PlayAnim('Idle2Left');
     FinishAnim();
-    LoopAnim('lookleft');
+    LoopAnim('IdleLeft');
     sleep(timeToLook);
     PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-    PlayAnim('lookleft2idle');
+    PlayAnim('Left2Idle');
     FinishAnim();
     GotoState('stateIdle'); // Transition back to idle state
 }
@@ -184,14 +185,14 @@ state lookRight
   begin:
     lastWasRight = True;
     PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-    //Log("Right");
+    Log("Right");
     determineTTL(True);
-    PlayAnim('idle2lookright');
+    PlayAnim('Idle2Right');
     FinishAnim();
-    LoopAnim('lookright');
+    LoopAnim('IdleRight');
     sleep(timeToLook);
     PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-    PlayAnim('lookright2idle');
+    PlayAnim('Right2Idle');
     FinishAnim();
     GotoState('stateIdle'); // Transition back to idle state
 }
@@ -199,7 +200,8 @@ state lookRight
 state catch
 {
   begin:
-    LoopAnim('wobble');
+    Log("CAUGHT HARRY!!!!!!!!!!!!!!!!!");
+    LoopAnim('StandHit');
     PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
     sleep(2.0);
     GotoState('stateIdle');
