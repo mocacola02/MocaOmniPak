@@ -4,17 +4,7 @@
 
 class MOCAEssence extends HProp;
 
-var(JellyBeand) bool bFallsToGround;
-
-function Touch (Actor Other)
-{
-  Super.Touch(Other);
-  if ( Other.IsA('Tut1Gnome') )
-  {
-    PlaySound(soundPickup);
-    Destroy();
-  }
-}
+var() bool bFallsToGround;
 
 auto state BounceIntoPlace
 {

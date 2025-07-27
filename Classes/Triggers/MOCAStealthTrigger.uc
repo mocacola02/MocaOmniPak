@@ -40,6 +40,12 @@ defaultproperties
     CollisionHeight=35
     CollisionRadius=42
     CollisionWidth=0
-    CollideType=CT_AlignedCylinder
+    CollideType=CT_Box
     attachedToKnight=False
+    LightBrightness=128
+    LightHue=128
+    LightSaturation=128
+    bDynamicLight=true
+    LightRadius=8
+    LightType=LT_Steady
 }    
