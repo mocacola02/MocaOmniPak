@@ -2,7 +2,7 @@
 // MOCABundimun.
 //================================================================================
 
-class MOCABundimun extends HChar;
+class MOCABundimun extends MOCAChar;
 
 var() bool StayAboveGround; //Moca: Should it always be above ground?
 var() int BumpDamage; //Moca: How much damage from bumping into its body?
@@ -24,7 +24,16 @@ function PreBeginPlay()
     ShadowScale = 0;
 }
 
-function ProcessStomp ()
+event PostBeginPlay()
+{
+    Super.PostBeginPlay();
+    if (!ActorExistenceCheck(Class'MOCAharry'))
+    {
+        EnterErrorMode();
+    }
+}
+
+function ProcessStomp()
 {
     Log('Processing stomp');
     if (isStunned == True && isDying == False)
@@ -228,4 +237,5 @@ defaultproperties
     SoundVolMult=1.3
     CollisionHeight=20
     CollisionRadius=20
+    DebugErrMessage="The MOCABundimun class requires MOCAharry, not the regular harry class.";
 }

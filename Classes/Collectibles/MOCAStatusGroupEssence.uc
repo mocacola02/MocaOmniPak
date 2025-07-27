@@ -6,7 +6,7 @@ function GetGroupFinalXY_2 (bool bMenuMode, int nCanvasSizeX, int nCanvasSizeY, 
 
 	fScaleFactor 	= GetScaleFactor(nCanvasSizeX);
 	nOutX 			= fScaleFactor * 4;
-	nOutY 			= fScaleFactor * 244;
+	nOutY 			= fScaleFactor * 192;
 }
 
 function GetGroupFlyOriginXY (bool bMenuMode, Canvas Canvas, int nIconWidth, int nIconHeight, out int nX, out int nY)
