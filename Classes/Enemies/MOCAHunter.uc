@@ -162,7 +162,6 @@ defaultproperties
      attemptsToFindHarry=3
      DebugErrMessage="WARNING: Requires path nodes."
      hitsToKill=2
-     ShadowClass=None
      GroundSpeed=100
      SightRadius=2500
      BaseEyeHeight=20.75
