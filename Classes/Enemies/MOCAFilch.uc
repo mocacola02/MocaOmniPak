@@ -28,7 +28,7 @@ state patrol
 defaultproperties
 {
     Mesh=SkeletalMesh'MocaModelPak.skfilchlanternMesh'
-    DebugErrMessage="WARNING: Filch requires PatrolPoints to be placed and configured in the level. Please do so. Check stock HP2 maps for PatrolPoint examples.";
+    DebugErrMessage="WARNING: Filch requires PatrolPoints to be placed and configured in the level. Check stock HP2 maps for PatrolPoint examples.";
     IdleAnimName=Breathe
     WalkAnimName=Walk
     RunAnimName=run
