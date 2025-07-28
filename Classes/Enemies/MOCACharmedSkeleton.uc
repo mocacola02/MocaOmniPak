@@ -25,13 +25,11 @@ class MOCACharmedSkeleton extends MOCAChar;
 
 var() float WakeUpRadius;                           //Moca: How far can skelly be woken up from
 var() bool NeverSleep;                              //Moca: Should skelly always be awake
-var() float travelFromHome;                         //Moca: How far can skelly wander
 
 var() int Damage;                                   //Moca: How much damage should bones do
 var() float ThrowTime;                              //Moca: How long should throws take
 var class<MOCASkellyBone> thrownObject;             //Moca: Object skelly should throw
 var MOCASkellyBone objectToThrow;
-var int HitsLeft;
 var() bool canRevive;                               //Moca: Can skelly revive if another skelly is near
 var() float reviveDist;                             //Moca: Maximum distance between skellys to allow a revive
 var() int reviveChecks;                             //Moca: How many nearby skelly checks should it take to revive (checks are every 0.5 secs)

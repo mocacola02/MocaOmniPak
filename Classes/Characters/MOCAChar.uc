@@ -5,8 +5,10 @@ var bool inErrorMode;
 var name PreviousState;
 var() bool bypassErrorMode;
 var() int hitsToKill; //Moca: How many hits to kill it? 0 means invincible.
+var int HitsLeft;
 var() float maxTravelDistance;
 var() bool affectAmbience; //Moca: Should this actor contribute to the frequency of ambience being played by MOCAAmbiencePlayer
+var() float travelFromHome;
 var Vector vHome;
 var Vector vNewPos;
 var NavigationPoint prevNavP;
@@ -181,6 +183,51 @@ function bool ShouldStrafeTo (NavigationPoint WayPoint) //very loosely based on 
     return false;
 }
 
+function bool CloseToHome()
+{
+  if ( VSize(Location - vHome) < travelFromHome )
+  {
+    return True;
+  }
+  return False;
+}
+
+function Vector RandomPosition (Vector NewPos, float fAccuracy)
+{
+  local Rotator R;
+  local Vector D;
+  local Vector V;
+  local Vector rv;
+  local float spread;
+
+  spread = (1.0 - fAccuracy) * 8192;
+  D.X = NewPos.X;
+  D.Y = NewPos.Y;
+  D.Z = 0.0;
+  R = rotator(D);
+  R.Yaw += RandRange(-spread,spread);
+  V = vector(R);
+  rv = V * VSize(D);
+  rv.Z = NewPos.Z;
+  
+  return rv;
+}
+
+function bool isHarryNear()
+{
+    local float Size;
+    Size = VSize(PlayerHarry.Location - Location);
+    PlayerHarry.ClientMessage("Distance" @ string(Size));
+    if (VSize(PlayerHarry.Location - Location) < SightRadius)
+    {
+        Log("is close");
+        lastHarryPos = PlayerHarry.Location;
+        return True;
+    }
+    Log("not close");
+    return False;
+}
+
 state stateError
 {
     begin:
@@ -196,4 +243,5 @@ state stateError
 defaultproperties
 {
      maxTravelDistance=2000
+     travelFromHome=150
 }

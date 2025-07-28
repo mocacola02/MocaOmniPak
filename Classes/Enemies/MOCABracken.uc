@@ -1,5 +1,5 @@
 //=============================================================================
-// MOCABracken - Fixed version with better retreating and pathfinding.
+// MOCABracken
 //=============================================================================
 
 class MOCABracken extends MOCAChar;
