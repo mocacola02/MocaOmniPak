@@ -5,6 +5,7 @@
 class MOCAWatcherHunter extends MOCAHunter;
 
 var() float chaseSpeed; //How fast to chase after harry Def: 230
+var() PathNode homeNode;
 
 event Bump( Actor Other )
   {
@@ -125,28 +126,35 @@ state stateIdle
 
 state stateChase
 {
-    begin:
+    function BeginState()
+    {
         GroundSpeed = chaseSpeed;
         LoopAnim(walkAnim, GetWalkSpeed());
-        navP = NavigationPoint(FindPathToward(PlayerHarry));
-        Log(string(navP));
-        MoveToward(navP);
-        Log("DONE MOVING?????????/");
-        if (GetDistanceFromHarry() < 50 || navP == None)
-        {
-            goto('derail');
-        }
-        if(SeesHarry())
-        {
-            goto('begin');
-        }
+    }
 
-        GotoState('stateIdle', 'followharry');
+    function Tick(Float DeltaTime)
+    {
+        if (!CanSeeHarry)
+        {
+            GotoState('stateIdle', 'followharry');
+        }
+    }
+
+    begin:
+        while(true)
+        {
+            navP = NavigationPoint(FindPathToward(PlayerHarry));
+            MoveToward(navP)
+            SleepForTick();
+
+            if (GetDistanceFromHarry() < 50 || navP == None)
+            {
+                goto('derail');
+            }
+        }
 
     derail:
-        Log("DERAILING!!!!!!!!!!!!!!!!!!!!!!!!!");
-        LoopAnim(walkAnim,GetWalkSpeed());
-        MoveTo(PlayerHarry.Location);
+        MoveToward(PlayerHarry);
         if (SeesHarry())
         {
             goto('derail');
@@ -165,7 +173,7 @@ state stateCatch
     PlayAnim('StandIdle2Caught', 2.0);
     FinishAnim();
     LoopAnim('StandCaught');
-    sleep(2.0);
+    sleep(4.0);
     GotoState('stateIdle');
 }
 
