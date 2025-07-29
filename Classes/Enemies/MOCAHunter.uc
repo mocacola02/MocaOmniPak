@@ -263,7 +263,7 @@ state stateCatch
     TurnTo(PlayerHarry.Location);
     Log("CAUGHT HARRY!!!!!!!!!!!!!!!!!");
     PlaySound(caughtSound);
-    if (caughtTransAnim != None)
+    if (caughtTransAnim != '')
     {
         PlayAnim(caughtTransAnim, 4.0);
         FinishAnim();

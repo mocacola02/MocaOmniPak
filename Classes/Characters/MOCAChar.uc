@@ -155,7 +155,7 @@ function bool isHarryNear(optional float requiredDistance)
     Size = VSize(PlayerHarry.Location - Location);
     PlayerHarry.ClientMessage("Distance" @ string(Size));
 
-    if (requiredDistance != None)
+    if (requiredDistance > 0)
     {
         distToCheck = requiredDistance;
     }
