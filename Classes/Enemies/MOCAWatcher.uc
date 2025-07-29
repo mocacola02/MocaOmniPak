@@ -6,10 +6,7 @@ class MOCAWatcher extends MOCAChar;
 
 var bool lastWasRight;
 var bool firstLook;
-//var harry PlayerHarry;
 var MOCAStealthTrigger stealthTrig1;
-//var MOCAStealthTrigger stealthTrig2;
-//var MOCABeam stealthLight;
 var int randLook;
 var bool isAwake;
 
@@ -27,7 +24,6 @@ function PreBeginPlay()
   Super.PreBeginPlay();
   PlayerHarry = Harry(Level.PlayerHarryActor);
   GotoState('stateIdle');
-  //stealthLight = Spawn(Class'MOCABeam',self);
 }
 
 event PostBeginPlay()
@@ -53,22 +49,14 @@ simulated event Tick(float DeltaTime)
 {
     Super.Tick(DeltaTime);
     local Vector LocationForTrigger1;
-    //local Vector LocationForTrigger2;
     LocationForTrigger1 = BonePos('TriggerPoint');
-    //LocationForTrigger2 = BonePos('TriggerPoint');
     stealthTrig1.SetLocation(LocationForTrigger1);
-    //stealthTrig2.SetLocation(LocationForTrigger2);
-    //stealthLight.SetLocation(LocationForTrigger);
 }
 
 function determineTTL (bool lookBack)
   {
     if (randomTimeToLook)
     {
-      /*if (!lookback)
-      {
-        minTime = minTime - 0.5;
-      }*/
       timeToLook = RandRange(minTime, maxTime);
     }
   }
@@ -103,12 +91,7 @@ auto state asleep
     if (stealthTrig1 != None)
     {
       stealthTrig1.Destroy();
-      //stealthLight.TurnDynamicLightOff();
     }
-    /*if (stealthTrig2 != None)
-    {
-      stealthTrig2.Destroy();
-    }*/
     if (!asleepOnSpawn)
     {
       GotoState('stateIdle');
@@ -126,39 +109,16 @@ state stateIdle
       stealthTrig1 = Spawn(Class'MOCAStealthTrigger',self);
       stealthTrig1.attachedToKnight = True;
     }
-    /*
-    if (stealthTrig2 == None)
-    {
-      stealthTrig2 = Spawn(Class'MOCAStealthTrigger',self);
-      stealthTrig2.attachedToKnight = True;
-    }*/
-    //Log("Idling");
     determineTTL(False);
-    randLook = RandRange(0, randLookProbability);
-    //Log(randLook);
+    randLook = RandRange(0, 1);
     sleep(timeToLook);
-    if (firstLook)
+    if (randLook == 0)
     {
-      lastWasRight = bool(RandRange(0, 1));
-      firstLook = False;
-    }
-    if (lastWasRight && randLook == 0) // 25% chance to switch direction again
-    {
-      Log("try right");
-      GotoState('lookRight');
-    }
-    else if (!lastWasRight && randLook == 0) // 25% chance to switch direction again
-    {
-      Log("try left");
       GotoState('lookLeft');
     }
-    else if (!lastWasRight) {
-      Log("try right");
+    else
+    {
       GotoState('lookRight');
-    }
-    else {
-      Log("try left");
-      GotoState('lookLeft');
     }
 }
 
@@ -211,7 +171,6 @@ defaultproperties
 {
   Mesh=SkeletalMesh'MocaModelPak.skKnightWatcher'
   firstLook=True
-  timeToLook=1.0
   timeToLook=1.0
   randomTimeToLook=True
   DrawScale=1.2
