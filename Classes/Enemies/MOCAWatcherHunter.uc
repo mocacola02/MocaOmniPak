@@ -28,6 +28,7 @@ function bool SeesHarry()
         {
             if (IsFacing(PlayerHarry, 0.25))
             {
+                lastHarryPos = PlayerHarry.Location;
                 return true;
             }
         }
@@ -62,7 +63,11 @@ state stateIdle
 
     function Tick( float DeltaTime )
     {
-        SeesHarry();
+        if(SeesHarry())
+        {
+            prevNavP = navP;
+            GotoState('stateChase');
+        }
     }
 
     begin:
@@ -93,12 +98,7 @@ state stateIdle
         Log("Going somewhere");
         LoopAnim(walkAnim);
         navP = FindRandomDest();
-        while (tempNavP != navP)
-        {
-            tempNavP = NavigationPoint(FindPathToward(navP));
-            SleepForTick();
-            MoveToward(tempNavP);
-        }
+        MoveToward(navP);
         correctingPath = False;
         goto 'begin';
         
@@ -106,15 +106,7 @@ state stateIdle
         Log("going home");
         LoopAnim(walkAnim);
         navP = NavigationPoint(FindPathTo(vHome));
-        Log(string(navP));
-        while (tempNavP != navP)
-        {
-            Log("first check for harry");
-            tempNavP = NavigationPoint(FindPathToward(navP));
-            SleepForTick();
-            MoveToward(tempNavP);
-        }
-        MoveTo(vHome);
+        MoveToward(navP);
         goto 'begin';
 
     followharry:
@@ -122,14 +114,7 @@ state stateIdle
         GroundSpeed = chaseSpeed;
         LoopAnim(walkAnim, GetWalkSpeed());
         navP = NavigationPoint(FindPathTo(lastHarryPos));
-        Log(string(navP));
-        while (tempNavP != navP)
-        {
-            Log("first check for harry");
-            tempNavP = NavigationPoint(FindPathToward(navP));
-            SleepForTick();
-            MoveToward(tempNavP);
-        }
+        MoveToward(navP);
         goto 'begin';
     
     awaken:
@@ -143,38 +128,38 @@ state stateChase
     begin:
         GroundSpeed = chaseSpeed;
         LoopAnim(walkAnim, GetWalkSpeed());
-        navP = NavigationPoint(FindPathTo(PlayerHarry.Location));
-        if (prevNavP == navP || GetDistanceFromHarry() < 50)
+        navP = NavigationPoint(FindPathToward(PlayerHarry));
+        Log(string(navP));
+        MoveToward(navP);
+        Log("DONE MOVING?????????/");
+        if (GetDistanceFromHarry() < 50 || navP == None)
         {
             goto('derail');
         }
-        prevNavP = navP;
-        while (tempNavP != navP)
-        {
-            tempNavP = NavigationPoint(FindPathToward(navP));
-            SleepForTick();
-            MoveToward(tempNavP);
-        }
-        goto('begin');
-
-    derail:
-        if (GetDistanceFromHarry() > 32)
+        if(SeesHarry())
         {
             goto('begin');
         }
+
+        GotoState('stateIdle', 'followharry');
+
+    derail:
+        Log("DERAILING!!!!!!!!!!!!!!!!!!!!!!!!!");
         LoopAnim(walkAnim,GetWalkSpeed());
-        vNewPos = Location + 4 * (Location - PlayerHarry.Location) / VSize(Location - PlayerHarry.Location);
-        MoveTo(vNewPos);
+        MoveTo(PlayerHarry.Location);
         if (SeesHarry())
         {
             goto('derail');
         }
-        GotoState('stateIdle');
+        GotoState('stateIdle', 'followharry');
 }
 
 state stateCatch
 {
   begin:
+    Acceleration = vect(0.00,0.00,0.00);
+    Velocity = vect(0.00,0.00,0.00);
+    TurnTo(PlayerHarry.Location);
     Log("CAUGHT HARRY!!!!!!!!!!!!!!!!!");
     PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
     PlayAnim('StandIdle2Caught', 2.0);
@@ -216,7 +201,7 @@ defaultproperties
     attemptsToFindHarry=3
     DebugErrMessage="WARNING: Requires path nodes."
     hitsToKill=2
-    GroundSpeed=150
+    GroundSpeed=100
     chaseSpeed=230
     SightRadius=2500
     BaseEyeHeight=20.75

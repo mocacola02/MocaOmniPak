@@ -220,7 +220,7 @@ function bool isHarryNear()
     PlayerHarry.ClientMessage("Distance" @ string(Size));
     if (VSize(PlayerHarry.Location - Location) < SightRadius)
     {
-        Log("is close");
+        Log("is close: " $ string(VSize(PlayerHarry.Location - Location) < SightRadius));
         lastHarryPos = PlayerHarry.Location;
         return True;
     }
