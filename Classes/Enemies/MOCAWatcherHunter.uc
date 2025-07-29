@@ -176,10 +176,12 @@ state stateChase
         {
             if (attemptsMade > round(attemptsToFindHarry / 1.63))
             {
+                Log("Guessing where player went");
                 navP = NavigationPoint(FindPathTo(GetNearbyNavPointInView()));
             }
             else
             {
+                Log("Following where playing went");
                 navP = NavigationPoint(FindPathToward(PlayerHarry));
             }
             if (navP != None)
