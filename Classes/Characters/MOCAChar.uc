@@ -5,10 +5,11 @@ var bool inErrorMode;
 var name PreviousState;
 var() bool bypassErrorMode;
 var() int hitsToKill; //Moca: How many hits to kill it? 0 means invincible.
+var() bool tiltOnMovement; //Moca: Whether or not the actor should tilt during movement like stock actors. Def: True
 var int HitsLeft;
 var() float maxTravelDistance;
 var() bool affectAmbience; //Moca: Should this actor contribute to the frequency of ambience being played by MOCAAmbiencePlayer
-var() float travelFromHome;
+var() float travelFromHome; //Moca: How far from home can we go?
 var Vector vHome;
 var Vector vNewPos;
 var NavigationPoint prevNavP;
@@ -21,6 +22,16 @@ event PostBeginPlay()
     Super.PostBeginPlay();
     prevNavP = Level.NavigationPointList;
     vHome = Location;
+}
+
+event AlterDestination()
+{
+    Super.AlterDestination();
+    Spawn(Class'DebugSprite');
+    if (!tiltOnMovement)
+    {
+        DesiredRotation.Pitch = 0.0;
+    }
 }
 
 function bool ActorExistenceCheck(Class<Actor> ActorToCheck)
@@ -135,6 +146,38 @@ function bool isValidNavP()
     return true;
 }
 
+function vector GetNearbyNavPointInView()
+{
+    local NavigationPoint Nav;
+    local vector DirToNav, Forward;
+    local float Distance, DotProduct, ClosestDist;
+    local vector BestLocation;
+
+    ClosestDist = 1000.0; // max distance
+    BestLocation = Location; // fallback if none found
+
+    Forward = vector(Rotation); // actor's forward direction
+
+    foreach AllActors(class'NavigationPoint', Nav)
+    {
+        DirToNav = Normal(Nav.Location - Location);
+        Distance = VSize(Nav.Location - Location);
+        DotProduct = DirToNav Dot Forward;
+
+        // Check distance and that it's in front (~90 degrees FOV)
+        if (Distance <= 1000 && DotProduct > 0.0)
+        {
+            if (Distance < ClosestDist)
+            {
+                ClosestDist = Distance;
+                BestLocation = Nav.Location;
+            }
+        }
+    }
+
+    return BestLocation;
+}
+
 function NavigationPoint GetFurthestNavPoint(actor actorToCheck)
 {
     local NavigationPoint Nav;
@@ -183,9 +226,9 @@ function bool ShouldStrafeTo (NavigationPoint WayPoint) //very loosely based on 
     return false;
 }
 
-function bool CloseToHome()
+function bool CloseToHome(float distanceAllowance)
 {
-  if ( VSize(Location - vHome) < travelFromHome )
+  if ( VSize(Location - vHome) < distanceAllowance )
   {
     return True;
   }
@@ -244,4 +287,5 @@ defaultproperties
 {
      maxTravelDistance=2000
      travelFromHome=150
+     tiltOnMovement=True
 }

@@ -112,15 +112,6 @@ function bool wakeUpCheck()
     return False;
 }
 
-function bool CloseToHome()
-{
-  if ( VSize(Location - vHome) < travelFromHome )
-  {
-    return True;
-  }
-  return False;
-}
-
 function GetObjectToThrow()
 {
   objectToThrow = Spawn(thrownObject);
@@ -277,7 +268,7 @@ state stateIdle
         }
         Sleep(RandRange(0.75,2.0));
 
-        if (  !CloseToHome() )
+        if (  !CloseToHome(travelFromHome) )
         {
             Log("Go home");
             goto 'gohome';

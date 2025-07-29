@@ -5,7 +5,7 @@
 class MOCAWatcherHunter extends MOCAHunter;
 
 var() float chaseSpeed; //How fast to chase after harry Def: 230
-var() PathNode homeNode;
+var NavigationPoint randNavP;
 
 event Bump( Actor Other )
   {
@@ -29,8 +29,11 @@ function bool SeesHarry()
         {
             if (IsFacing(PlayerHarry, 0.25))
             {
-                lastHarryPos = PlayerHarry.Location;
-                return true;
+                if (Abs(PlayerHarry.Location.Z - Location.Z) <= 50)
+                {
+                    lastHarryPos = PlayerHarry.Location;
+                    return true;
+                }
             }
         }
     return false;
@@ -53,6 +56,7 @@ auto state stateSleep
             GotoState('stateIdle', 'awaken');
         }
         sleep(0.5);
+        goto('loop');
 }
 
 state stateIdle
@@ -84,7 +88,7 @@ state stateIdle
         }
         Sleep(RandRange(0.75,2.0));
 
-        if (  !CloseToHome() )
+        if (  !CloseToHome(travelFromHome) )
         {
             Log("Go home");
             goto 'gohome';
@@ -95,27 +99,33 @@ state stateIdle
 
 
     gosomewhere:
-        GroundSpeed = Default.GroundSpeed;
         Log("Going somewhere");
         LoopAnim(walkAnim);
-        navP = FindRandomDest();
-        MoveToward(navP);
-        correctingPath = False;
+        randNavP = FindRandomDest();
+        navP = NavigationPoint(FindPathToward(randNavP));
+        while (navP != randNavP && navP != None)
+        {
+            MoveToward(navP);
+            navP = NavigationPoint(FindPathToward(randNavP));
+            SleepForTick();
+        }
         goto 'begin';
         
     gohome:
         Log("going home");
         LoopAnim(walkAnim);
-        navP = NavigationPoint(FindPathTo(vHome));
-        MoveToward(navP);
-        goto 'begin';
-
-    followharry:
-        Log("Searching for harry");
-        GroundSpeed = chaseSpeed;
-        LoopAnim(walkAnim, GetWalkSpeed());
-        navP = NavigationPoint(FindPathTo(lastHarryPos));
-        MoveToward(navP);
+        while(!CloseToHome(200))
+        {
+            navP = NavigationPoint(FindPathTo(vHome));
+            if (navP != None)
+            {
+                MoveToward(navP);
+            }
+            else
+            {
+                break;
+            }
+        }
         goto 'begin';
     
     awaken:
@@ -130,36 +140,77 @@ state stateChase
     {
         GroundSpeed = chaseSpeed;
         LoopAnim(walkAnim, GetWalkSpeed());
+        SetTimer(1.0,true);
     }
 
-    function Tick(Float DeltaTime)
+    function EndState()
     {
-        if (!CanSeeHarry)
+        GroundSpeed = Default.GroundSpeed;
+    }
+
+    function Timer()
+    {
+        if(!SeesHarry())
         {
-            GotoState('stateIdle', 'followharry');
+            attemptsMade++;
+            Log("Attempts made: " $ string(attemptsMade) $ " out of " $ string(attemptsToFindHarry));
+            if (attemptsMade > attemptsToFindHarry)
+            {
+                GotoState('stateIdle');
+            }
+        }
+    }
+
+    event AlterDestination()
+    {
+        Super.AlterDestination();
+        if (SeesHarry())
+        {
+            attemptsMade = 0;
+            GotoState('stateDerailed');
         }
     }
 
     begin:
         while(true)
         {
-            navP = NavigationPoint(FindPathToward(PlayerHarry));
-            MoveToward(navP)
-            SleepForTick();
-
-            if (GetDistanceFromHarry() < 50 || navP == None)
+            if (attemptsMade > round(attemptsToFindHarry / 1.63))
             {
-                goto('derail');
+                navP = NavigationPoint(FindPathTo(GetNearbyNavPointInView()));
             }
+            else
+            {
+                navP = NavigationPoint(FindPathToward(PlayerHarry));
+            }
+            if (navP != None)
+            {
+                MoveToward(navP);
+            }
+            else
+            {
+                GotoState('stateIdle');
+            }
+            
+            SleepForTick();
+        }       
+}
+
+state stateDerailed
+{
+    function EndState()
+    {
+        GroundSpeed = Default.GroundSpeed;
+    }
+
+    begin:
+        GroundSpeed = chaseSpeed;
+        while (SeesHarry())
+        {
+            MoveToward(PlayerHarry);
+            SleepForTick();
         }
 
-    derail:
-        MoveToward(PlayerHarry);
-        if (SeesHarry())
-        {
-            goto('derail');
-        }
-        GotoState('stateIdle', 'followharry');
+        GotoState('stateChase');
 }
 
 state stateCatch
@@ -173,7 +224,8 @@ state stateCatch
     PlayAnim('StandIdle2Caught', 2.0);
     FinishAnim();
     LoopAnim('StandCaught');
-    sleep(4.0);
+    sleep(3.0);
+    SetLocation(vHome);
     GotoState('stateIdle');
 }
 
@@ -206,12 +258,12 @@ defaultproperties
     sleepAnim=Idle
     walkAnim=StandWalk
     idleAnim=StandIdle
-    attemptsToFindHarry=3
+    attemptsToFindHarry=10
     DebugErrMessage="WARNING: Requires path nodes."
-    hitsToKill=2
+    hitsToKill=3
     GroundSpeed=100
     chaseSpeed=230
-    SightRadius=2500
+    SightRadius=500
     BaseEyeHeight=20.75
     EyeHeight=20.75
     eVulnerableToSpell=SPELL_None
@@ -219,4 +271,9 @@ defaultproperties
     CollisionHeight=58
     Mesh=SkeletalMesh'MocaModelPak.skKnightWatcher'
     ShadowScale=0.5
+    bAdvancedTactics=True
+    travelFromHome=1000
+    MultiSkins(1)=Texture'MocaTexturePak.Misc.transparent'
+    tiltOnMovement=False
+    RotationRate=(Pitch=4096,Yaw=100000,Roll=3072)
 }

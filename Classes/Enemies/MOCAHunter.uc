@@ -7,11 +7,12 @@ class MOCAHunter extends MOCAChar;
 
 var() bool NeverSleep;                              //Moca: Should actor always be awake
 
-var() int attemptsToFindHarry;                      //Moca: Currently not functional. How many additional times should skelly try to find a path to harry after losing sight? (Skelly will always check a single time)
+var() int attemptsToFindHarry;                      //Moca: How many seconds should hunter try to find a path to harry after losing sight?
 var() name sleepAnim;
 var() name walkAnim;
 var() name idleAnim;
-var int attemptsLeft;
+var NavigationPoint homeNode;
+var int attemptsMade;
 var vector predictedLocation;
 var bool correctingPath;
 
@@ -80,7 +81,7 @@ state stateIdle
     }
 
     begin:
-        attemptsLeft = attemptsToFindHarry;
+        attemptsMade = attemptsToFindHarry;
         eVulnerableToSpell=default.eVulnerableToSpell;
         log("beginning idle");
         if (PreviousState == 'stateSleep')
@@ -91,7 +92,7 @@ state stateIdle
         }
         Sleep(RandRange(0.75,2.0));
 
-        if (  !CloseToHome() )
+        if (  !CloseToHome(travelFromHome) )
         {
             Log("Go home");
             goto 'gohome';
@@ -159,9 +160,9 @@ state stateDead
 
 defaultproperties
 {
-     attemptsToFindHarry=3
+     attemptsToFindHarry=10
      DebugErrMessage="WARNING: Requires path nodes."
-     hitsToKill=2
+     hitsToKill=3
      GroundSpeed=100
      SightRadius=2500
      BaseEyeHeight=20.75
@@ -169,5 +170,6 @@ defaultproperties
      eVulnerableToSpell=SPELL_None
      DrawScale=1.0
      CollisionHeight=65
-     CollisionRadius=18
+     CollisionRadius=15
+     bAdvancedTactics=True
 }
