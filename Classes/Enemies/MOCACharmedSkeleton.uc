@@ -44,7 +44,7 @@ var() int attemptsToFindHarry;                      //Moca: Currently not functi
 var int attemptsLeft;
 var vector predictedLocation;
 var bool correctingPath;
-
+/*
 struct ParticleParams
 {
   var() Class<ParticleFX> Died;
@@ -534,7 +534,7 @@ state stateDead
         sleep(4.0);
         isDying = True;
 }
-
+ */
 defaultproperties
 {
      WakeUpRadius=250
