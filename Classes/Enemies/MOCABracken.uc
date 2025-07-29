@@ -19,7 +19,7 @@ var Sound sfxAnger;
 var Sound sfxKill;
 var Sound sfxStun;
 var Sound sfxRetreat;
-
+/*
 event PostBeginPlay()
 {
     Super.PostBeginPlay();
@@ -271,7 +271,7 @@ state stateKill
 {
 
 }
-
+ */
 defaultproperties
 {
     Mesh=SkeletalMesh'MocaModelPak.skBracken'

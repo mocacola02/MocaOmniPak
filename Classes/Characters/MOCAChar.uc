@@ -1,21 +1,23 @@
 class MOCAChar extends HChar;
 
-var string DebugErrMessage;
-var bool inErrorMode;
-var name PreviousState;
+var() bool affectAmbience;
 var() bool bypassErrorMode;
-var() int hitsToKill; //Moca: How many hits to kill it? 0 means invincible.
-var() bool tiltOnMovement; //Moca: Whether or not the actor should tilt during movement like stock actors. Def: True
-var int HitsLeft;
+var() int hitsToKill;
 var() float maxTravelDistance;
-var() bool affectAmbience; //Moca: Should this actor contribute to the frequency of ambience being played by MOCAAmbiencePlayer
-var() float travelFromHome; //Moca: How far from home can we go?
+var() bool tiltOnMovement;
+var() float travelFromHome;
+
+var bool inErrorMode;
+var int HitsLeft;
+var name PreviousState;
+var NavigationPoint prevNavP;
+var string DebugErrMessage;
+
+var Vector lastHarryDirection;
+var Vector lastHarryPos;
 var Vector vHome;
 var Vector vNewPos;
-var NavigationPoint prevNavP;
 
-var Vector lastHarryPos;
-var Vector lastHarryDirection;
 
 event PostBeginPlay()
 {
@@ -53,6 +55,15 @@ function bool ActorExistenceCheck(Class<Actor> ActorToCheck)
     return false;
 }
 
+function bool CloseToHome(float distanceAllowance)
+{
+  if ( VSize(Location - vHome) < distanceAllowance )
+  {
+    return True;
+  }
+  return False;
+}
+
 function EnterErrorMode()
 {
     DrawType = DT_Sprite;
@@ -68,82 +79,40 @@ function EnableTurnTo(actor TurnTarget)
     MakeTurnToPermanentController();
 }
 
-function bool IsFacing(Actor Other, float MinDot)  //Courtesy of Omega
-{
-    local float Dot;
-    Dot = Vector(Rotation) Dot Normal(Other.Location - Location);
-
-    if (Dot > MinDot)
-    {
-        return true;
-    }
-    return false;
-}
-
-function bool IsOtherFacing(Actor Other, float MinDot)
-{
-    local float Dot;
-
-    // Calculate the direction the 'Other' actor is facing
-    Dot = Vector(Other.Rotation) Dot Normal(Location - Other.Location);
-
-    // Check if the current actor is within 'Other's view range based on the MinDot threshold
-    if (Dot > MinDot)
-    {
-        return true;
-    }
-    return false;
-}
-
-function vector GetPointBehindActor(float Distance)
-{
-    local vector ForwardVector;
-    local vector BehindLocation;
-
-    ForwardVector = Vector(Rotation);
-
-    BehindLocation = Location - (ForwardVector * Distance);
-
-    Spawn(Class'MocaTexturePak.MOCADebugSprite',,,BehindLocation);
-
-    return BehindLocation;
-}
-
-function bool IsOtherLookingAt(Actor Other, float minDot)
-{
-    if (IsOtherFacing(Other, minDot) && PlayerCanSeeMe())
-    {
-        return true;
-    }
-    return false;
-}
-
-function StoreNavP(NavigationPoint inputNav)
-{
-    prevNavP = inputNav;
-}
-
-function bool CheckCost(NavigationPoint inNav)
-{
-    if (inNav.cost > 0)
-    {
-        return true;
-    }
-    return false;
-}
-
 function float GetDistanceFromHarry()
 {
     return VSize(Location - PlayerHarry.Location);
 }
 
-function bool isValidNavP()
+function NavigationPoint GetFurthestNavPoint(actor actorToCheck)
 {
-    if (navP == None || navP == prevNavP)
+    local NavigationPoint Nav;
+    local NavigationPoint FurthestNav;
+    local float currentDistance;
+    local float maxDistance;
+    local vector actorLocation;
+
+    actorLocation = actorToCheck.Location;
+
+    maxDistance = 0;
+
+    Nav = Level.NavigationPointList;
+
+    while (Nav != None)
     {
-        return false;
+        currentDistance = VSize(Nav.Location - actorLocation);
+
+        if (currentDistance > maxDistance)
+        {
+            maxDistance = currentDistance;
+            FurthestNav = Nav;
+        }
+
+        Nav = Nav.nextNavigationPoint;
     }
-    return true;
+    Log("Furthest navP: " @ string(FurthestNav));
+
+    return FurthestNav;
 }
 
 function vector GetNearbyNavPointInView()
@@ -178,97 +147,79 @@ function vector GetNearbyNavPointInView()
     return BestLocation;
 }
 
-function NavigationPoint GetFurthestNavPoint(actor actorToCheck)
-{
-    local NavigationPoint Nav;
-    local NavigationPoint FurthestNav;
-    local float currentDistance;
-    local float maxDistance;
-    local vector actorLocation;
-
-    actorLocation = actorToCheck.Location;
-
-    maxDistance = 0;
-
-    Nav = Level.NavigationPointList;
-
-    while (Nav != None)
-    {
-        currentDistance = VSize(Nav.Location - actorLocation);
-
-        if (currentDistance > maxDistance)
-        {
-            maxDistance = currentDistance;
-            FurthestNav = Nav;
-        }
-
-        Nav = Nav.nextNavigationPoint;
-    }
-    Log("Furthest navP: " @ string(FurthestNav));
-
-    return FurthestNav;
-}
-
-function bool ShouldStrafeTo (NavigationPoint WayPoint) //very loosely based on UT
-{
-    if (WayPoint != None)
-    {
-        Log("navP != None");
-        if (WayPoint.Extracost > 200)
-        {
-            Log("cost too high");
-            return false;
-        }
-        Log("ShouldStrafeTo");
-        return true;
-    }
-    Log("navP = None");
-    return false;
-}
-
-function bool CloseToHome(float distanceAllowance)
-{
-  if ( VSize(Location - vHome) < distanceAllowance )
-  {
-    return True;
-  }
-  return False;
-}
-
-function Vector RandomPosition (Vector NewPos, float fAccuracy)
-{
-  local Rotator R;
-  local Vector D;
-  local Vector V;
-  local Vector rv;
-  local float spread;
-
-  spread = (1.0 - fAccuracy) * 8192;
-  D.X = NewPos.X;
-  D.Y = NewPos.Y;
-  D.Z = 0.0;
-  R = rotator(D);
-  R.Yaw += RandRange(-spread,spread);
-  V = vector(R);
-  rv = V * VSize(D);
-  rv.Z = NewPos.Z;
-  
-  return rv;
-}
-
-function bool isHarryNear()
+function bool isHarryNear(optional float requiredDistance)
 {
     local float Size;
+    local float distToCheck;
+    distToCheck = SightRadius;
     Size = VSize(PlayerHarry.Location - Location);
     PlayerHarry.ClientMessage("Distance" @ string(Size));
-    if (VSize(PlayerHarry.Location - Location) < SightRadius)
+
+    if (requiredDistance != None)
     {
-        Log("is close: " $ string(VSize(PlayerHarry.Location - Location) < SightRadius));
+        distToCheck = requiredDistance;
+    }
+
+    if (VSize(PlayerHarry.Location - Location) < distToCheck)
+    {
+        Log("is close: " $ string(VSize(PlayerHarry.Location - Location) < distToCheck));
         lastHarryPos = PlayerHarry.Location;
         return True;
     }
     Log("not close");
     return False;
+}
+
+function bool IsFacing(Actor Other, float MinDot)  //Courtesy of Omega
+{
+    local float Dot;
+    Dot = Vector(Rotation) Dot Normal(Other.Location - Location);
+
+    if (Dot > MinDot)
+    {
+        return true;
+    }
+    return false;
+}
+
+function bool IsOtherFacing(Actor Other, float MinDot)
+{
+    local float Dot;
+
+    // Calculate the direction the 'Other' actor is facing
+    Dot = Vector(Other.Rotation) Dot Normal(Location - Other.Location);
+
+    // Check if the current actor is within 'Other's view range based on the MinDot threshold
+    if (Dot > MinDot)
+    {
+        return true;
+    }
+    return false;
+}
+
+function bool IsOtherLookingAt(Actor Other, float minDot)
+{
+    if (IsOtherFacing(Other, minDot) && PlayerCanSeeMe())
+    {
+        return true;
+    }
+    return false;
+}
+
+function bool SeesHarry()
+{
+    if (PlayerCanSeeMe())
+        {
+            if (IsFacing(PlayerHarry, 0.25))
+            {
+                if (Abs(PlayerHarry.Location.Z - Location.Z) <= 50)
+                {
+                    lastHarryPos = PlayerHarry.Location;
+                    return true;
+                }
+            }
+        }
+    return false;
 }
 
 state stateError

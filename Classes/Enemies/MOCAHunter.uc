@@ -4,17 +4,21 @@
 
 class MOCAHunter extends MOCAChar;
 
+var() bool neverSleep;                          //Should the actor never sleep? Def: False
+var() float chaseSpeed;                         //How fast to chase after harry Def: 230
+var() float wakeUpDistance;                     //The distance at which Harry will wake up the actor Def: 400
+var() int attemptsToFindHarry;                  //How many seconds should the actor attempt to find Harry after losing him? Def: 10
+var() name awakenAnim;                          //Name of the wake up animation
+var() name caughtAnim;                          //Name of the catch animation
+var() name caughtTransAnim;                     //Name of the transition to catch animation (skipped if blank)
+var() name idleAnim;                            //Name of the idle animation
+var() name sleepAnim;                           //Name of the sleeping animation
+var() name walkAnim;                            //Name of the walking animation
+var() Sound caughtSound;                        //Sound to play when catching Harry
 
-var() bool NeverSleep;                              //Moca: Should actor always be awake
-
-var() int attemptsToFindHarry;                      //Moca: How many seconds should hunter try to find a path to harry after losing sight?
-var() name sleepAnim;
-var() name walkAnim;
-var() name idleAnim;
-var NavigationPoint homeNode;
-var int attemptsMade;
-var vector predictedLocation;
 var bool correctingPath;
+var int attemptsMade;
+var NavigationPoint randNavP;
 
 
 event PreBeginPlay()
@@ -58,8 +62,41 @@ function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector 
   return True;
 }
 
+function float GetWalkSpeed()
+{
+    return GroundSpeed / Default.GroundSpeed;
+}
+
+event Bump( Actor Other )
+{
+    Super.Bump(Other);
+    Log("Touched by" $ Other);
+    if (!IsInState('asleep') && !PlayerHarry.IsInState('caught') && (Other.IsA('MOCAharry')))
+    {
+        PlayerHarry.GotoState('caught');
+        GotoState('stateCatch');
+    }
+}
+
 auto state stateSleep
 {
+    event EndState()
+    {
+        PreviousState = GetStateName();
+    }
+    
+    begin:
+        eVulnerableToSpell = SPELL_None;
+        LoopAnim(sleepAnim);
+        goto('loop');
+    
+    loop:
+        if(isHarryNear(wakeUpDistance) || neverSleep == true)
+        {
+            GotoState('stateIdle', 'awaken');
+        }
+        sleep(0.5);
+        goto('loop');
 }
 
 state stateIdle
@@ -71,19 +108,18 @@ state stateIdle
 
     function Tick( float DeltaTime )
     {
-        if (PlayerCanSeeMe())
+        if(SeesHarry())
         {
-            if (IsFacing(PlayerHarry, 0.25))
-            {
-                GotoState('stateAction');
-            }
+            prevNavP = navP;
+            GotoState('stateChase');
         }
     }
 
     begin:
-        attemptsMade = attemptsToFindHarry;
+        GroundSpeed = Default.GroundSpeed;
         eVulnerableToSpell=default.eVulnerableToSpell;
         log("beginning idle");
+        LoopAnim(idleAnim);
         if (PreviousState == 'stateSleep')
         {
             Log("lookin at harry");
@@ -105,45 +141,137 @@ state stateIdle
     gosomewhere:
         Log("Going somewhere");
         LoopAnim(walkAnim);
-        navP = FindRandomDest();
-        while (tempNavP != navP)
+        randNavP = FindRandomDest();
+        navP = NavigationPoint(FindPathToward(randNavP));
+        while (navP != randNavP && navP != None)
         {
-            tempNavP = NavigationPoint(FindPathToward(navP));
+            MoveToward(navP);
+            navP = NavigationPoint(FindPathToward(randNavP));
             SleepForTick();
-            MoveToward(tempNavP);
         }
-        correctingPath = False;
         goto 'begin';
         
     gohome:
         Log("going home");
         LoopAnim(walkAnim);
-        navP = NavigationPoint(FindPathTo(vHome));
-        Log(string(navP));
-        while (tempNavP != navP)
+        while(!CloseToHome(200))
         {
-            Log("first check for harry");
-            tempNavP = NavigationPoint(FindPathToward(navP));
-            SleepForTick();
-            MoveToward(tempNavP);
+            navP = NavigationPoint(FindPathTo(vHome));
+            if (navP != None)
+            {
+                MoveToward(navP);
+            }
+            else
+            {
+                break;
+            }
         }
-        MoveTo(vHome);
         goto 'begin';
+    
+    awaken:
+        PlayAnim(awakenAnim);
+        FinishAnim();
+        Goto('begin');
+}
 
-    followharry:
-        Log("Searching for harry");
-        GroundSpeed = 100;
-        LoopAnim(walkAnim);
-        navP = NavigationPoint(FindPathTo(lastHarryPos));
-        Log(string(navP));
-        while (tempNavP != navP)
+state stateChase
+{
+    function BeginState()
+    {
+        GroundSpeed = chaseSpeed;
+        LoopAnim(walkAnim, GetWalkSpeed());
+        SetTimer(1.0,true);
+    }
+
+    function EndState()
+    {
+        GroundSpeed = Default.GroundSpeed;
+    }
+
+    function Timer()
+    {
+        if(!SeesHarry())
         {
-            Log("first check for harry");
-            tempNavP = NavigationPoint(FindPathToward(navP));
-            SleepForTick();
-            MoveToward(tempNavP);
+            attemptsMade++;
+            Log("Attempts made: " $ string(attemptsMade) $ " out of " $ string(attemptsToFindHarry));
+            if (attemptsMade >= attemptsToFindHarry)
+            {
+                GotoState('stateIdle');
+            }
         }
-        goto 'begin';
+    }
+
+    event AlterDestination()
+    {
+        Super.AlterDestination();
+        if (SeesHarry())
+        {
+            attemptsMade = 0;
+            GotoState('stateDerailed');
+        }
+    }
+
+    begin:
+        while(true)
+        {
+            if (attemptsMade > round(attemptsToFindHarry / 1.63))
+            {
+                Log("Guessing where player went");
+                navP = NavigationPoint(FindPathTo(GetNearbyNavPointInView()));
+            }
+            else
+            {
+                Log("Following where playing went");
+                navP = NavigationPoint(FindPathToward(PlayerHarry));
+            }
+            if (navP != None)
+            {
+                MoveToward(navP);
+            }
+            else
+            {
+                GotoState('stateIdle');
+            }
+            
+            SleepForTick();
+        }       
+}
+
+state stateDerailed
+{
+    function EndState()
+    {
+        GroundSpeed = Default.GroundSpeed;
+    }
+
+    begin:
+        GroundSpeed = chaseSpeed;
+        while (SeesHarry())
+        {
+            MoveToward(PlayerHarry);
+            SleepForTick();
+        }
+
+        GotoState('stateChase');
+}
+
+state stateCatch
+{
+  begin:
+    Acceleration = vect(0.00,0.00,0.00);
+    Velocity = vect(0.00,0.00,0.00);
+    TurnTo(PlayerHarry.Location);
+    Log("CAUGHT HARRY!!!!!!!!!!!!!!!!!");
+    PlaySound(caughtSound);
+    if (caughtTransAnim != None)
+    {
+        PlayAnim(caughtTransAnim, 4.0);
+        FinishAnim();
+    }
+    LoopAnim(caughtAnim);
+    sleep(3.0);
+    SetLocation(vHome);
+    GotoState('stateIdle');
 }
 
 state stateAction
@@ -160,16 +288,22 @@ state stateDead
 
 defaultproperties
 {
-     attemptsToFindHarry=10
-     DebugErrMessage="WARNING: Requires path nodes."
-     hitsToKill=3
-     GroundSpeed=100
-     SightRadius=2500
-     BaseEyeHeight=20.75
-     EyeHeight=20.75
-     eVulnerableToSpell=SPELL_None
-     DrawScale=1.0
-     CollisionHeight=65
-     CollisionRadius=15
-     bAdvancedTactics=True
+    attemptsToFindHarry=10
+    BaseEyeHeight=20.75
+    bAdvancedTactics=True
+    chaseSpeed=230
+    CollisionHeight=65
+    CollisionRadius=15
+    DebugErrMessage="WARNING: Requires path nodes."
+    DrawScale=1.0
+    eVulnerableToSpell=SPELL_None
+    EyeHeight=20.75
+    GroundSpeed=100
+    hitsToKill=3
+    RotationRate=(Pitch=4096,Yaw=100000,Roll=3072)
+    ShadowScale=0.5
+    SightRadius=2500
+    tiltOnMovement=False
+    travelFromHome=1000
+    wakeUpDistance=400
 }
