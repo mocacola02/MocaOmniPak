@@ -8,10 +8,18 @@ class MOCASetRespawnTrigger extends Trigger;
 var MOCAharry PlayerHarry;
 var() Vector respawnLocation;
 var() Rotator respawnRotation;
+var() bool useOwnTransform; //If true, use the location and rotation of this trigger. Def: True
 
 event PreBeginPlay()
 {
 	Super.PreBeginPlay();
+
+    if (useOwnTransform)
+    {
+        respawnLocation = Location;
+        respawnRotation = Rotation;
+    }
+
 	PlayerHarry = MOCAharry(Level.PlayerHarryActor);
 }
 
@@ -28,4 +36,5 @@ function ProcessTrigger()
 
 defaultproperties {
     bTriggerOnceOnly=True
+    useOwnTransform=True
 }

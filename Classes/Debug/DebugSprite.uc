@@ -41,5 +41,5 @@ defaultproperties
     bBlockPlayers=false
     bCollideActors=false
     bCollideWorld=false
-    DespawnDelay=3.0 // Default despawn delay of 3 seconds
+    DespawnDelay=10.0 // Default despawn delay of 3 seconds
 }
