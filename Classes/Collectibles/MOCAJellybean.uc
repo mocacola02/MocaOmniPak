@@ -6,7 +6,6 @@ class MOCAJellybean extends Jellybean;
 
 var float CurrentYawF; // Float version of yaw
 var() float RotationSpeed; // Default: 160 | How fast should bean spin? (in degrees per second)
-var() Sound soundPickup;
 
 auto state BounceIntoPlace
 {

@@ -2,13 +2,12 @@ class MOCAChar extends HChar;
 
 var() bool affectAmbience;
 var() bool bypassErrorMode;
-var() int hitsToKill;
-var() float maxTravelDistance;
-var() bool tiltOnMovement;
-var() float travelFromHome;
+var(MOCACharHealth) int hitsToKill;             //How many hits does it take to die? If 0, cannot die. Def: 0
+var(MOCACharMovement) float maxTravelDistance;  //How far can the actor travel from its initial location? Def: 150
+var(MOCACharMovement) bool tiltOnMovement;      //Should this actor lean into its movement direction (like Harry)? Def: true
 
 var bool inErrorMode;
-var int HitsLeft;
+var int hitsTaken;
 var name PreviousState;
 var NavigationPoint prevNavP;
 var string DebugErrMessage;
@@ -75,6 +74,7 @@ function EnterErrorMode()
 
 function EnableTurnTo(actor TurnTarget)
 {
+    bTurnTo_FollowActor = true;
     TurnTo_TargetActor = TurnTarget;
     MakeTurnToPermanentController();
 }
@@ -155,18 +155,18 @@ function bool isHarryNear(optional float requiredDistance)
     Size = VSize(PlayerHarry.Location - Location);
     PlayerHarry.ClientMessage("Distance" @ string(Size));
 
-    if (requiredDistance != None)
+    if (requiredDistance != 0)
     {
         distToCheck = requiredDistance;
     }
 
     if (VSize(PlayerHarry.Location - Location) < distToCheck)
     {
-        Log("is close: " $ string(VSize(PlayerHarry.Location - Location) < distToCheck));
+        //Log("is close: " $ string(VSize(PlayerHarry.Location - Location) < distToCheck));
         lastHarryPos = PlayerHarry.Location;
         return True;
     }
-    Log("not close");
+    //Log("not close");
     return False;
 }
 
@@ -222,6 +222,13 @@ function bool SeesHarry()
     return false;
 }
 
+function screenFade (float fadeOpacity, float fadeOutTime)
+{
+  local FadeViewController mcCamFade;
+  mcCamFade = Spawn(Class'FadeViewController');
+  mcCamFade.Init (fadeOpacity, 0, 0, 0, fadeOutTime);
+}
+
 state stateError
 {
     begin:
@@ -234,9 +241,27 @@ state stateError
         goto 'loop';
 }
 
+function FaceActor(Actor Target)
+{
+	if (Target == None)
+		return;
+
+	local vector Dir;
+	Dir = Target.Location - Location;
+
+	local rotator NewRotation;
+	NewRotation = Rotator(Dir);
+
+	NewRotation.Pitch = Rotation.Pitch;
+	NewRotation.Roll = Rotation.Roll;
+
+	// Apply the new rotation
+	SetRotation(NewRotation);
+}
+
+
 defaultproperties
 {
-     maxTravelDistance=2000
-     travelFromHome=150
+     maxTravelDistance=150
      tiltOnMovement=True
 }

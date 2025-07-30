@@ -8,12 +8,12 @@ var() bool neverSleep;                          //Should the actor never sleep? 
 var() float chaseSpeed;                         //How fast to chase after harry Def: 230
 var() float wakeUpDistance;                     //The distance at which Harry will wake up the actor Def: 400
 var() int attemptsToFindHarry;                  //How many seconds should the actor attempt to find Harry after losing him? Def: 10
-var() name awakenAnim;                          //Name of the wake up animation
-var() name caughtAnim;                          //Name of the catch animation
-var() name caughtTransAnim;                     //Name of the transition to catch animation (skipped if blank)
-var() name idleAnim;                            //Name of the idle animation
-var() name sleepAnim;                           //Name of the sleeping animation
-var() name walkAnim;                            //Name of the walking animation
+var(MOCAHunterAnims) name awakenAnim;                          //Name of the wake up animation
+var(MOCAHunterAnims) name caughtAnim;                          //Name of the catch animation
+var(MOCAHunterAnims) name caughtTransAnim;                     //Name of the transition to catch animation (skipped if blank)
+var(MOCAHunterAnims) name idleAnim;                            //Name of the idle animation
+var(MOCAHunterAnims) name sleepAnim;                           //Name of the sleeping animation
+var(MOCAHunterAnims) name walkAnim;                            //Name of the walking animation
 var() Sound caughtSound;                        //Sound to play when catching Harry
 
 var bool correctingPath;
@@ -25,7 +25,7 @@ event PreBeginPlay()
 {
 	Super.PreBeginPlay();
     vHome = Location;
-    HitsLeft = hitsToKill;
+    //HitsLeft = hitsToKill;
 
     if (NeverSleep)
     {
@@ -36,13 +36,13 @@ event PreBeginPlay()
 event PostBeginPlay()
 {
     Super.PostBeginPlay();
-    if (!ActorExistenceCheck(Class'PathNode') || !ActorExistenceCheck(Class'MOCAharry'))
+    if (!ActorExistenceCheck(Class'MOCAStalkerNode') || !ActorExistenceCheck(Class'MOCAharry'))
     {
         EnterErrorMode();
     }
 }
 
-function HitWall (Vector HitNormal, Actor HitWall)
+event HitWall (Vector HitNormal, Actor HitWall)
 {
     Super.HitWall(HitNormal,HitWall);
     if (!correctingPath)
@@ -128,7 +128,7 @@ state stateIdle
         }
         Sleep(RandRange(0.75,2.0));
 
-        if (  !CloseToHome(travelFromHome) )
+        if (  !CloseToHome(maxTravelDistance) )
         {
             Log("Go home");
             goto 'gohome';
@@ -160,6 +160,7 @@ state stateIdle
             if (navP != None)
             {
                 MoveToward(navP);
+                SleepForTick();
             }
             else
             {
@@ -263,7 +264,7 @@ state stateCatch
     TurnTo(PlayerHarry.Location);
     Log("CAUGHT HARRY!!!!!!!!!!!!!!!!!");
     PlaySound(caughtSound);
-    if (caughtTransAnim != None)
+    if (caughtTransAnim != '')
     {
         PlayAnim(caughtTransAnim, 4.0);
         FinishAnim();
@@ -304,6 +305,6 @@ defaultproperties
     ShadowScale=0.5
     SightRadius=2500
     tiltOnMovement=False
-    travelFromHome=1000
+    maxTravelDistance=1000
     wakeUpDistance=400
 }

@@ -268,7 +268,7 @@ state stateIdle
         }
         Sleep(RandRange(0.75,2.0));
 
-        if (  !CloseToHome(travelFromHome) )
+        if (  !CloseToHome(maxTravelDistance) )
         {
             Log("Go home");
             goto 'gohome';
@@ -523,11 +523,11 @@ state stateDead
         sleep(4.0);
         isDying = True;
 }
-
+*/
 defaultproperties
 {
      WakeUpRadius=250
-     travelFromHome=100
+     maxTravelDistance=100
      Damage=10
      ThrowTime=1
      thrownObject=Class'MocaOmniPak.MOCASkellyBone'

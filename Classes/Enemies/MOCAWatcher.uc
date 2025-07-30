@@ -22,7 +22,6 @@ var() bool asleepOnSpawn;
 function PreBeginPlay()
 {
   Super.PreBeginPlay();
-
 }
 
 event PostBeginPlay()
