@@ -58,7 +58,7 @@ struct AccuracyParams
 };
 
 var() AccuracyParams Accuracy;
-
+/*
 event PreBeginPlay()
 {
     Super.PreBeginPlay();

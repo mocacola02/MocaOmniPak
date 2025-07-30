@@ -23,7 +23,7 @@ var NavigationPoint randNavP;
 
 event PreBeginPlay()
 {
-    Super.PreBeginPlay();
+	Super.PreBeginPlay();
     vHome = Location;
     HitsLeft = hitsToKill;
 
@@ -36,7 +36,7 @@ event PreBeginPlay()
 event PostBeginPlay()
 {
     Super.PostBeginPlay();
-    if (!ActorExistenceCheck(Class'PathNode'))
+    if (!ActorExistenceCheck(Class'PathNode') || !ActorExistenceCheck(Class'MOCAharry'))
     {
         EnterErrorMode();
     }
@@ -64,7 +64,7 @@ function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector 
 
 function float GetWalkSpeed()
 {
-    return GroundSpeed / Default.GroundSpeed;
+    return GroundSpeed / default.GroundSpeed;
 }
 
 event Bump( Actor Other )
@@ -294,7 +294,7 @@ defaultproperties
     chaseSpeed=230
     CollisionHeight=65
     CollisionRadius=15
-    DebugErrMessage="WARNING: Requires path nodes."
+    DebugErrMessage="WARNING: Requires path nodes and MOCAharry."
     DrawScale=1.0
     eVulnerableToSpell=SPELL_None
     EyeHeight=20.75

@@ -25,7 +25,6 @@ defaultproperties
 {
     DrawType=DT_Sprite
     Texture=Texture'HPParticle.hp_fx.Particles.Sparkle_BW'
-    bFallsToGround=False
     soundPickup=Sound'HPSounds.menu_sfx.gui_rollover2'
     bPickupOnTouch=True
     EventToSendOnPickup=JellyBeanPickupEvent

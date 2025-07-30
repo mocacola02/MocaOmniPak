@@ -2,18 +2,16 @@
 // MOCABabbler.
 //================================================================================
 
-//This class could definitely use some cleanup
-
 class MOCABabbler extends HChar;
 
-var () float timeBetweenBabble; //How many seconds in between the connected babble sounds. Def: 0.1
-var () float delayBeforeEnding; //How many seconds to hold on the subtitles after done talking. Def: 2.0
-var () float voiceVolume; //How loud should the voice be. Def: 1.4
-var () float babbleVoicePitch; //How high or deep should the voice. Def: 128
-var () float voiceRadius; //How far should the voice reach? Def: 100000.0
-var () name babbleAnim; //What animation to use for babbling. Def: Idle
-var () string customMessage; //Type a message here to skip setting up a bumpline. Def: empty
-var () bool turnToHarry; //Should actor turn towards Harry while talking. Def: false
+var () float timeBetweenBabble; 	//How many seconds in between the connected babble sounds. Def: 0.1
+var () float delayBeforeEnding; 	//How many seconds to hold on the subtitles after done talking. Def: 2.0
+var () float voiceVolume; 			//How loud should the voice be. Def: 1.4
+var () float babbleVoicePitch; 		//How high or deep should the voice. Def: 128
+var () float voiceRadius; 			//How far should the voice reach? Def: 100000.0
+var () name babbleAnim; 			//What animation to use for babbling. Def: Idle
+var () string customMessage; 		//Type a message here to skip setting up a bumpline. Def: empty
+var () bool turnToHarry; 			//Should actor turn towards Harry while talking. Def: false
 
 var int currentLetter;
 var array<sound> lettersToBabble;
@@ -31,65 +29,17 @@ event PostBeginPlay()
 	}
 }
 
+// ripped from KW code, don't blame me
 function DoBumpLine (optional bool bJustTalk, optional string AlternateBumpLineSet)
 {
 	local string sSetID;
 	local string sSayTextID;
 	local string sSayText;
-	local Sound dlgSound;
 	local float sndLen;
 	local TimedCue tcue;
 	local int ri;
 	local int rm;
 	local int numSpaces;
-
-	Log("Checking for bumplines now!");
-
-	if (customMessage != "")
-	{
-		Log("DOING CUSTOM MESSAGE INSTEAD!!!!!!!!!!!!!!!!!");
-		sSayText = customMessage;
-		SavedPreBumpState = GetStateName();
-		SavedPreBumpRot = Rotation;
-		if ( bBumpCaptureHarry && (Level.PlayerHarryActor.CutNotifyActor != None) )
-		{
-			Level.PlayerHarryActor.CutNotifyActor = self;
-			Level.PlayerHarryActor.CutCommand("capture");
-		}
-		CutNotifyActor = self;
-		
-		BabbleString(sSayText);
-		numSpaces = CountSpaces();
-		Log("Number of Spaces: " $ string(numSpaces));
-		sndLen = (Len(sSayText) * timeBetweenBabble) + (numSpaces * timeBetweenBabble) + delayBeforeEnding;
-		
-		Log("sndLen: " $ string(sndLen));
-
-		// Metallicafan212:	This wasn't here for some reason
-		sSayText = HandleFacialExpression( sSayText, sndLen );
-		
-		if( !bJustTalk )
-		{
-			//create a TimedCue to cue object after sndLen seconds.
-			tcue=spawn(class 'TimedCue');
-			tcue.CutNotifyActor=Self;		//Tell me when done. This is auto passed back to the CutNotifyActor if any.
-											//Or it can be used by the talk to find out when the talk is finished.
-			tcue.SetupTimer(sndLen+0.5,"_BumpLineCue"); //little extra time for slop
-		}
-
-		//show text
-		level.playerHarryActor.MyHud.SetSubtitleText(sSayText, sndLen);
-		BabbleString(sSayText);
-		
-		if( !bJustTalk )
-		{
-			GotoState('DoingBumpLine');
-		}
-		
-		return;
-	}
-
-
 
 	if (  !bUseBumpLine &&  !bJustTalk )
 	{
@@ -182,7 +132,10 @@ function DoBumpLine (optional bool bJustTalk, optional string AlternateBumpLineS
 		Level.PlayerHarryActor.CutCommand("capture");
 	}
 	CutNotifyActor = self;
-	
+	if (customMessage != "")
+	{
+		sSayText = customMessage;
+	}
 	BabbleString(sSayText);
     numSpaces = CountSpaces();
 	Log("Number of Spaces: " $ string(numSpaces));
@@ -341,5 +294,4 @@ defaultproperties
 	babbleVoicePitch=1.5
 	voiceRadius=100000.0
 	voiceVolume=1.4
-	turnToHarry=false
 }

@@ -11,7 +11,8 @@ struct BumpSetMapping
     var string Prefix;    // The prefix to prepend
 };
 
-var BumpSetMapping BumpSetMappings[286]; // Array to hold bumpset and prefix mappings
+//Is this a good idea? Dunno, probably not. I made this pretty early on to learning UnrealScript
+var BumpSetMapping BumpSetMappings[286]; // Array to hold bumpset and prefix mappings.
 
 var() bool randomLinePerTrigger; //Moca: Should lines be random, if false use user-set bumplines
 

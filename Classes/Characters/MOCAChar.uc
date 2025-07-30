@@ -172,10 +172,10 @@ function bool isHarryNear(optional float requiredDistance)
 
 function bool IsFacing(Actor Other, float MinDot)  //Courtesy of Omega
 {
-    local float Dot;
-    Dot = Vector(Rotation) Dot Normal(Other.Location - Location);
+    local float DotProduct;
+    DotProduct = Vector(Rotation) Dot Normal(Other.Location - Location);
 
-    if (Dot > MinDot)
+    if (DotProduct > MinDot)
     {
         return true;
     }
@@ -184,13 +184,13 @@ function bool IsFacing(Actor Other, float MinDot)  //Courtesy of Omega
 
 function bool IsOtherFacing(Actor Other, float MinDot)
 {
-    local float Dot;
+    local float DotProduct;
 
     // Calculate the direction the 'Other' actor is facing
-    Dot = Vector(Other.Rotation) Dot Normal(Location - Other.Location);
+    DotProduct = Vector(Other.Rotation) Dot Normal(Location - Other.Location);
 
     // Check if the current actor is within 'Other's view range based on the MinDot threshold
-    if (Dot > MinDot)
+    if (DotProduct > MinDot)
     {
         return true;
     }

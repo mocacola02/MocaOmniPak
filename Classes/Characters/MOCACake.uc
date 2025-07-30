@@ -2,7 +2,6 @@
 // MOCACake.
 //================================================================================
 
-
 class MOCACake extends MOCABabbler;
 
 var (MOCABabbler) int hitsUntilDeath; //How many Flipendo hits until cake dies :(  If 0, never die.  Def: 0
@@ -123,6 +122,5 @@ defaultproperties
 	randomTalkAnim=true
 	dieColor=(R=255,G=26,B=26,A=255)
 	Mesh=SkeletalMesh'MocaCakePak.skCake'
-	currentHits=0
 	eVulnerableToSpell=SPELL_Flipendo
 }

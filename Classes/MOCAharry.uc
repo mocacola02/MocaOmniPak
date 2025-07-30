@@ -195,5 +195,4 @@ defaultproperties
     DefaultWeapon=class'HGame.baseWand'
     Mesh=SkeletalMesh'MocaModelPak.MOCAHarry'
     Cutname="harry"
-    DebugWeaponToggleCooldown=False
 }

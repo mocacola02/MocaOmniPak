@@ -233,7 +233,3 @@ function Close (optional bool bByParent)
 		OwnerWindow.WindowDone(self);
 	}
 }
-
-defaultproperties
-{
-}

@@ -4,8 +4,6 @@
 
 class MOCADementor extends Characters;
 
-
-
 defaultproperties
 {
     ShadowClass=None

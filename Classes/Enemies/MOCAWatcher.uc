@@ -22,8 +22,7 @@ var() bool asleepOnSpawn;
 function PreBeginPlay()
 {
   Super.PreBeginPlay();
-  PlayerHarry = Harry(Level.PlayerHarryActor);
-  GotoState('stateIdle');
+
 }
 
 event PostBeginPlay()
@@ -31,7 +30,12 @@ event PostBeginPlay()
     Super.PostBeginPlay();
     if (!ActorExistenceCheck(Class'MOCAharry'))
     {
-        EnterErrorMode();
+      EnterErrorMode();
+    }
+    else
+    {
+      PlayerHarry = Harry(Level.PlayerHarryActor);
+      GotoState('stateIdle');
     }
 }
 
@@ -45,7 +49,7 @@ event Bump( Actor Other )
     }
   }
 
-simulated event Tick(float DeltaTime)
+function Tick(float DeltaTime)
 {
     Super.Tick(DeltaTime);
     local Vector LocationForTrigger1;

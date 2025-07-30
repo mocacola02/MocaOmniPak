@@ -40,6 +40,8 @@ function ProcessTrigger()
     GotoState('Cooldown');
 }
 
+//Note: I made this a while back. Wtf am i doing here? Fix this asap.
+
 auto state On {
     begin:
         inactive = False;
