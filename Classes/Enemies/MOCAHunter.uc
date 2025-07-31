@@ -8,12 +8,12 @@ var() bool neverSleep;                          //Should the actor never sleep? 
 var() float chaseSpeed;                         //How fast to chase after harry Def: 230
 var() float wakeUpDistance;                     //The distance at which Harry will wake up the actor Def: 400
 var() int attemptsToFindHarry;                  //How many seconds should the actor attempt to find Harry after losing him? Def: 10
-var(MOCAHunterAnims) name awakenAnim;                          //Name of the wake up animation
-var(MOCAHunterAnims) name caughtAnim;                          //Name of the catch animation
-var(MOCAHunterAnims) name caughtTransAnim;                     //Name of the transition to catch animation (skipped if blank)
-var(MOCAHunterAnims) name idleAnim;                            //Name of the idle animation
-var(MOCAHunterAnims) name sleepAnim;                           //Name of the sleeping animation
-var(MOCAHunterAnims) name walkAnim;                            //Name of the walking animation
+var(MOCAHunterAnims) name awakenAnim;           //Name of the wake up animation
+var(MOCAHunterAnims) name caughtAnim;           //Name of the catch animation
+var(MOCAHunterAnims) name caughtTransAnim;      //Name of the transition to catch animation (skipped if blank)
+var(MOCAHunterAnims) name idleAnim;             //Name of the idle animation
+var(MOCAHunterAnims) name sleepAnim;            //Name of the sleeping animation
+var(MOCAHunterAnims) name walkAnim;             //Name of the walking animation
 var() Sound caughtSound;                        //Sound to play when catching Harry
 
 var bool correctingPath;

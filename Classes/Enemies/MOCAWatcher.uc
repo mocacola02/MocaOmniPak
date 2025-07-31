@@ -10,12 +10,11 @@ var MOCAStealthTrigger stealthTrig1;
 var int randLook;
 var bool isAwake;
 
-var() float timeToLook;
-var() bool randomTimeToLook;
-var() float minTime;
-var() float maxTime;
-var() int randLookProbability;
-var() bool asleepOnSpawn;
+var() float timeToLook;         //How long to look in a direction. Ignored if randomTimeToLook is true. Def: 1.0
+var() bool randomTimeToLook;    //Whether or not to randomize TTL. Def: True
+var() float minTime;            //Minimum time to look when determining a random TTL value. Def: 1.5
+var() float maxTime;            //Maximum time to look when determining a random TTL value. Def: 4.5
+var() bool asleepOnSpawn;       //Should the watcher be inactive on spawn (requires a trigger to be enabled). Def: false
 
 
 
@@ -178,7 +177,6 @@ defaultproperties
   randomTimeToLook=True
   DrawScale=1.2
   CollisionHeight=58
-  randLookProbability=3
   minTime=1.5
   maxTime=4.5
   ShadowScale=0.5

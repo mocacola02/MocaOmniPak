@@ -2,6 +2,8 @@
 // MOCAStalker.
 //================================================================================
 
+// CLEAN ME
+
 class MOCAStalker extends MOCAChar;
 
 var() float activationDistance;             //How close Harry needs to be to begin stalking Def: 5000
