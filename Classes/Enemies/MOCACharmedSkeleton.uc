@@ -58,6 +58,12 @@ struct AccuracyParams
 };
 
 var() AccuracyParams Accuracy;
+
+event PostBeginPlay()
+{
+    Super.PostBeginPlay();
+    EnterErrorMode();
+}
 /*
 event PreBeginPlay()
 {
@@ -68,15 +74,6 @@ event PreBeginPlay()
     if (NeverSleep)
     {
         GotoState('stateIdle');
-    }
-}
-
-event PostBeginPlay()
-{
-    Super.PostBeginPlay();
-    if (!ActorExistenceCheck(Class'PathNode'))
-    {
-        EnterErrorMode();
     }
 }
 
@@ -537,7 +534,7 @@ defaultproperties
      hasArm=True
      attemptsToFindHarry=3
      Accuracy=(Far=0.7,Close=0.9)
-     DebugErrMessage="WARNING: Charmed Skeletons require path nodes to be placed in the level so they can move around. Please add path nodes to areas with skeletons in them. See the Slytherin Common Room map for an example of path nodes in use."
+     DebugErrMessage="WARNING: Charmed Skeleton is temporarily disabled. Please wait for an update."
      hitsToKill=2
      ShadowClass=None
      GroundSpeed=50
