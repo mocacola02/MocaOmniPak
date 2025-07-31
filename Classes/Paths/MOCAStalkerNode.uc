@@ -15,6 +15,15 @@ event PostBeginPlay()
     SetTimer(timerRate, true);
 }
 
+function setViewDistance(float newDistance)
+{
+    if (newDistance == 0)
+    {
+        newDistance = Default.requiredDistance;
+    }
+    requiredDistance = newDistance;
+}
+
 function Timer()
 {
     local float distToPlayer;
@@ -73,5 +82,5 @@ defaultproperties
     Texture=Texture'MocaTexturePak.ICO_BrackenPathGreen'
     bStatic=False
     dotMin=0.25
-    requiredDistance=1000
+    requiredDistance=2000
 }

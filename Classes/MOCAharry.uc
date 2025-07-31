@@ -4,6 +4,7 @@
 
 class MOCAharry extends harry;
 var() class<Weapon> DefaultWeapon;
+var() bool saveOnLoad;
 var int DefaultWeaponSlot;
 var Weapon weap;
 var Vector respawnLoc;
@@ -30,6 +31,16 @@ event PreBeginPlay()
   }
   SetHarryWeapon(DefaultWeapon, DefaultWeaponSlot);
 }
+
+event PostBeginPlay()
+{
+  super.PostBeginPlay();
+  if (saveOnLoad)
+  {
+    SaveGame();
+  }
+}
+
 
 event BaseChanged(Actor OldBase, Actor NewBase)
 {
