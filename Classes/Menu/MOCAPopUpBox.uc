@@ -159,7 +159,7 @@ function Setup (string set_message, string set_button1, optional string set_butt
 	Resized();
 }
 
-function ScaleAndDraw (Canvas Canvas, float X, float Y, Texture Tex)
+function ScaleAndDraw (Canvas PopCanvas, float X, float Y, Texture Tex)
 {
 	local float FX;
 	local float fy;
@@ -168,12 +168,12 @@ function ScaleAndDraw (Canvas Canvas, float X, float Y, Texture Tex)
 	//fy = Canvas.SizeY / 480.0;
 	FX = 1.0;//(4.0 / 3.0) / (Root.RealWidth / Root.RealHeight);//1.0;
 	fy = Class'M212HScale'.Static.UWindowGetHeightScale(Root);//1.0;
-	DrawStretchedTexture(Canvas,X * FX, Y * FY, Tex.USize * FX, Tex.VSize * fy, Tex);
+	DrawStretchedTexture(PopCanvas,X * FX, Y * FY, Tex.USize * FX, Tex.VSize * fy, Tex);
 }
 
-function Paint (Canvas Canvas, float X, float Y)
+function Paint (Canvas PaintCanvas, float X, float Y)
 {
-	ScaleAndDraw(Canvas,0.0, 0.0, FEMessageBoxBg);
+	ScaleAndDraw(PaintCanvas,0.0, 0.0, FEMessageBoxBg);
 }
 
 function AfterPaint (Canvas C, float X, float Y)
@@ -232,8 +232,4 @@ function Close (optional bool bByParent)
 		Super.Close(bByParent);
 		OwnerWindow.WindowDone(self);
 	}
-}
-
-defaultproperties
-{
 }

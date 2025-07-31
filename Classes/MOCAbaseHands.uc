@@ -14,10 +14,12 @@ function actor TraceForInteracts (vector TraceEnd, vector TraceStart, optional v
 
 	PlayerHarry = Harry(Level.PlayerHarryActor);
 
-
-    //SpawnSprite(TraceStart);
-    //SpawnSprite(TraceEnd);
-
+    if (HPConsole(PlayerHarry.Player.Console).bDebugMode)
+    {
+        SpawnSprite(TraceStart);
+        SpawnSprite(TraceEnd);
+    }
+ 
     //TraceActors(class<actor> BaseClass, out actor Actor, out vector HitLoc, out vector HitNorm, vector End, optional vector Start, optional vector Extent);
 	foreach TraceActors(Class'Actor', aHitActor, HitLoc, HitNorm, TraceEnd, TraceStart, Extent)
 	{
@@ -60,12 +62,6 @@ function actor TraceForInteracts (vector TraceEnd, vector TraceStart, optional v
             Log("Already been activated");
         }
     }
-    /*else if (aHitActor != None && ( aHitActor.IsA('MOCAInteractTrigger')) )
-    {
-        Log("Successfully hit interactable!");
-        MOCAInteractTrigger(aHitActor).LineTraceHit();
-        PlayerHarry.GotoState('stateInteract');
-    }*/
 }
 
 function SpawnSprite(Vector Location)

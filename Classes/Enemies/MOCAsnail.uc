@@ -4,6 +4,8 @@
 
 class MOCAsnail extends orangesnail;
 
+var() class<SnailTrail> trailToSpawn; //What SnailTrail class to spawn
+
 function DoTrailUpdates (float fDeltaTime)
 {
   local int nTrailRadius;
@@ -11,16 +13,16 @@ function DoTrailUpdates (float fDeltaTime)
   local Rotator rTrailRotation;
   local Vector vTrailLocation;
 
-  nTrailRadius = class'MOCASnailTrail'.Default.CollisionRadius;
-  // if ( (bLeaveTrail == True) && (bool(Physics) != bool(2)) && (VSize(Location - vLastTrailSpawnLoc) > byte(nTrailRadius) * 0.81) );
+  nTrailRadius = trailToSpawn.Default.CollisionRadius;
+  
   if ( (bLeaveTrail == True && Physics != PHYS_Falling) && (VSize(Location - vLastTrailSpawnLoc) > (nTrailRadius * 0.8)) )
   {
-    rTrailRotation = class'MOCASnailTrail'.Default.Rotation;
+    rTrailRotation = trailToSpawn.Default.Rotation;
     vTrailLocation = Location;
     vTrailLocation.Z -= CollisionHeight;
     if ( arrayTrail[nCurrTrailSlot] == None )
     {
-      arrayTrail[nCurrTrailSlot] = Spawn(class'MOCASnailTrail',,,vTrailLocation,rTrailRotation);
+      arrayTrail[nCurrTrailSlot] = Spawn(trailToSpawn,,,vTrailLocation,rTrailRotation);
       arrayTrail[nCurrTrailSlot].SetSpawnProps(self,fTrailDuration,fTrailShrinkAfter);
     }
     arrayTrail[nCurrTrailSlot].StartUsing(vTrailLocation);
@@ -40,4 +42,9 @@ function DoTrailUpdates (float fDeltaTime)
       fTimeSinceSnailDamage = 0.0;
     }
   }
+}
+
+defaultproperties
+{
+  trailToSpawn=class'MOCASnailTrail'
 }

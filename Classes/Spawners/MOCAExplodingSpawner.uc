@@ -7,38 +7,30 @@
 class MOCAExplodingSpawner extends MOCAPawn;
 
 var Rotator explodeRot;
-var() float AmountToFloat; //Moca: How high should the particle rise before exploding, Default: 15
-var() bool shakeCamera; //Moca: Should the camera shake upon explosion
-var() float fShakeTime; //Moca: How long should camera shake
-var() float fRollMagnitude; //Moca: Shake roll intensity
-var() float fVertMagnitude; //Moca: Shake vertical intensity
-var() class<Actor> classToSpawn; //Moca: What goodie should spawn when exploding
-//var() ParticleFX buildUpParticle;
-var() Class<ParticleFX> explodeParticle; //Moca: What particle effect to use when exploding
-var() Sound explodeSound; //Moca: What sound to play when exploding
-var() int SpawnMin; //Moca: Minimum amount of items to spawn
-var() int SpawnMax; //Moca: Maximum amount of items to spawn
+var() float AmountToFloat;                  //Moca: How high should the particle rise before exploding, Default: 15
+var() bool shakeCamera;                     //Moca: Should the camera shake upon explosion
+var() float fShakeTime;                     //Moca: How long should camera shake
+var() float fRollMagnitude;                 //Moca: Shake roll intensity
+var() float fVertMagnitude;                 //Moca: Shake vertical intensity
+var() class<Actor> classToSpawn;            //Moca: What goodie should spawn when exploding
+var() Class<ParticleFX> explodeParticle;    //Moca: What particle effect to use when exploding
+var() Sound explodeSound;                   //Moca: What sound to play when exploding
+var() int SpawnMin;                         //Moca: Minimum amount of items to spawn
+var() int SpawnMax;                         //Moca: Maximum amount of items to spawn
 
-var Godric_41_B BuildUpParticle;
-var harry harry;
-
-var bool doOnce;
+var() class<ParticleFX> BuildUpParticle;
 
 event PostBeginPlay()
 {
     Super.PostBeginPlay();
     harry = Harry(Level.PlayerHarryActor);
-    explodeRot.Pitch = 16464;
-    explodeRot.Yaw = 0;
-    explodeRot.Roll = 0;
 }
 
 function Touch (Actor Other)
 {
   Super.Touch(Other);
-  if ( Other.IsA('harry') && !doOnce )
+  if ( Other.IsA('harry') && !IsInState('Burst') )
   {
-    doOnce = True;
     GotoState('Burst');
   }
 }
@@ -113,6 +105,7 @@ defaultproperties
      fVertMagnitude=100
      classToSpawn=Class'HGame.Jellybean'
      explodeParticle=Class'HPParticle.BronzePickup'
+     BuildUpParticle=Class'HPParticle.Godric_41_B'
      explodeSound=Sound'HPSounds.Magic_sfx.pickup_wizardcard'
      SpawnMin=4
      SpawnMax=16
@@ -131,4 +124,5 @@ defaultproperties
      bBlockActors=False
      bBlockPlayers=False
      bProjTarget=False
+     explodeRot=(Pitch=16464,Roll=0,Yaw=0)
 }

@@ -1,7 +1,7 @@
 //=============================================================================
-// BrackenPathNode.
+// MOCAStalkerNode.
 //=============================================================================
-class BrackenPathNode extends PathNode;
+class MOCAStalkerNode extends PathNode;
 
 var() float dotMin;
 var() float requiredDistance;
@@ -10,7 +10,18 @@ var harry PlayerHarry;
 event PostBeginPlay()
 {
     PlayerHarry = harry(Level.PlayerHarryActor);
-    SetTimer(1.0, true);  // Set timer to 1 second for performance optimization
+    local float timerRate;
+    timerRate = RandRange(0.1, 0.3);
+    SetTimer(timerRate, true);
+}
+
+function setViewDistance(float newDistance)
+{
+    if (newDistance == 0)
+    {
+        newDistance = Default.requiredDistance;
+    }
+    requiredDistance = newDistance;
 }
 
 function Timer()
@@ -22,24 +33,24 @@ function Timer()
     {
         if (IsOtherLookingAt(PlayerHarry, dotMin))
         {
-            if (cost != 999999)  // Reduced from 99999999999 to a more manageable value
+            if (!bBlocked)
             {
-                cost = 999999 - (distToPlayer * 5000);  // Adjusted for new cost scale
+                bBlocked = true;
                 Texture = Texture'MocaTexturePak.ICO_BrackenPath';
             }
         }
         else 
         {
-            if (cost != -999999)
+            if (bBlocked)
             {
-                cost = -999999;
+                bBlocked = false;
                 Texture = Texture'MocaTexturePak.ICO_BrackenPathGreen';
             }
         }
     }
-    else if (cost != -999999)
+    else if (bBlocked)
     {
-        cost = -999999;
+        bBlocked = false;
         Texture = Texture'MocaTexturePak.ICO_BrackenPathGreen';
     }
 }
@@ -71,5 +82,5 @@ defaultproperties
     Texture=Texture'MocaTexturePak.ICO_BrackenPathGreen'
     bStatic=False
     dotMin=0.25
-    requiredDistance=1000
+    requiredDistance=2000
 }
