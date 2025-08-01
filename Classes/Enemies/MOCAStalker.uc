@@ -390,8 +390,8 @@ state stateKill
         PlayerHarry.bKeepStationary = true;
         MoveTo(Location - Vector(Rotation) * 20);
         PlayAnim(killAnim, killRate);
-        sleep(0.8);
         PlaySound(killSound, SLOT_None, 1.0,,noiseRadius);
+        sleep(0.8);
         screenFade(1.0,0.02);
         sleep(2.0);
         PlayerHarry.ConsoleCommand("LoadGame 0");
