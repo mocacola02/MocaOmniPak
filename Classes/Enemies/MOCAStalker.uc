@@ -388,7 +388,7 @@ state stateKill
         Acceleration = vect(0.00,0.00,0.00);
         Velocity = vect(0.00,0.00,0.00);
         PlayerHarry.bKeepStationary = true;
-        MoveTo(Location - Vector(Rotation) * 20);
+        StrafeTo(Location - Vector(Rotation) * 20, PlayerHarry.Location);
         PlayAnim(killAnim, killRate);
         PlaySound(killSound, SLOT_None, 1.0,,noiseRadius);
         sleep(0.8);
