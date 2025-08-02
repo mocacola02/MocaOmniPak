@@ -11,7 +11,7 @@ defaultproperties
 {
     bEmit=false
 
-    ParticlesPerSec=(Base=120.00,Rand=10.00)
+    ParticlesPerSec=(Base=100.00,Rand=10.00)
 
     SourceWidth=(Base=2.00,Rand=0.00)
 

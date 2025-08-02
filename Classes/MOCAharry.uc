@@ -79,90 +79,6 @@ function screenFade (float fadeOpacity, float fadeOutTime)
   mcCamFade.Init (fadeOpacity, 0, 0, 0, fadeOutTime);
 }
 
-event TravelPostAccept()
-{
-  local SmartStart StartPoint;
-  local Characters Ch;
-  local bool bFoundSmartStart;
-
-	if ( Health <= 0 )
-		Health = Default.Health;
-	
-	iGamestate = ConvertGameStateToNumber();
-	
-	Log("weapon is" $ string(Weapon));
-	if ( Inventory == None )
-	{
-		weap = Spawn(DefaultWeapon,self);
-		weap.BecomeItem();
-		AddInventory(weap);
-		weap.WeaponSet(self);
-		weap.GiveAmmo(self);
-		Log(string(self) $ " spawning weap " $ string(weap));
-	} 
-	else 
-	{
-		Log("not spawning weap");
-	}
-	CopyAllStatusFromHarryToManager();
-	StatusGroupWizardCards(managerStatus.GetStatusGroup(Class'StatusGroupWizardCards')).RemoveHarryOwnedCardsFromLevel(None);
-	if ( Director != None )
-	{
-		Director.OnPlayerTravelPostAccept();
-	}
-	foreach AllActors(Class'Characters',Ch)
-	{
-		Ch.SetEverythingForTheDuel();
-	}
-	if ( PreviousLevelName != "" )
-	{
-		bFoundSmartStart = False;
-		foreach AllActors(Class'SmartStart',StartPoint)
-		{
-			if ( (StartPoint.PreviousLevelName != "") && (StartPoint.PreviousLevelName ~= PreviousLevelName) )
-			{
-				SetLocation(StartPoint.Location);
-				SetRotation(StartPoint.Rotation);
-				if ( StartPoint.bDoLevelSave )
-				{
-					harry(Level.PlayerHarryActor).SaveGame();
-				}
-				cm("***Found SmartStart from:" $ PreviousLevelName);
-				Log("***Found SmartStart from:" $ PreviousLevelName);
-				bFoundSmartStart = True;
-				break;
-			} 
-		}
-	}
-	if (  !bFoundSmartStart )
-	{
-		cm("***Failed to find SmartStart from:" $ PreviousLevelName);
-		Log("***Failed to find SmartStart from:" $ PreviousLevelName);
-	}
-	if ( bQueuedToSaveGame )
-	{
-		cm(" *-*-* Keep the loading screen ON because we *ARE* QueuedToSaveGame. At least until we are done saving.");
-		Log(" *-*-* Keep the loading screen ON because we *ARE* QueuedToSaveGame. At least until we are done saving.");
-		bShowLoadingScreen = True;
-	} 
-	else 
-	{
-		cm(" *-*-* Turn OFF the loading screen because we are *NOT* QueuedToSaveGame.");
-		Log(" *-*-* Turn OFF the loading screen because we are *NOT* QueuedToSaveGame.");
-		bShowLoadingScreen = False;
-		
-		// Omega: Fix the cutscene skip state desyncing when loading into a save that was skipping
-		Log("Loading into save with cutscene skip state: " $HPHud(MyHud).managerCutScene.bShowFF);
-		if(HPHud(MyHud).managerCutScene.bShowFF)
-		{
-			HPConsole(Player.Console).StartFastForward();
-		}
-	}
-	
-	// Omega: FOV CHANGES
-	Cam.FOVChanged();
-}
-
 state stateInteract
 {
   begin:
@@ -170,8 +86,6 @@ state stateInteract
     sleep(0.6);
     GotoState('PlayerWalking');
 }
-
-
 
 state caught
 {
