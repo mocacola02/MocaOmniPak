@@ -28,7 +28,7 @@ event PostBeginPlay()
 event AlterDestination()
 {
     Super.AlterDestination();
-    Spawn(Class'DebugSprite');
+    //Spawn(Class'DebugSprite');
     if (!tiltOnMovement)
     {
         DesiredRotation.Pitch = 0.0;

@@ -1,29 +1,5 @@
 class MOCACauldronCake extends MOCACollectible;
 
-function Touch (Actor Other)
-{
-  Super.Touch(Other);
-  if ( Other.IsA('Tut1Gnome') )
-  {
-    return;
-  }
-}
-
-auto state BounceIntoPlace
-{
-  function BeginState()
-  {
-    if ( bFallsToGround )
-    {
-      // SetPhysics(2);
-	  SetPhysics(PHYS_Falling);
-    } else {
-      // SetPhysics(0);
-	  SetPhysics(PHYS_None);
-    }
-  }
-}
-
 defaultproperties
 {
      bFallsToGround=True
