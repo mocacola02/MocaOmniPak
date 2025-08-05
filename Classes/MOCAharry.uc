@@ -15,6 +15,8 @@ var bool bWallJumped;
 var vector HitNormal;
 var Actor LastStoredBase;
 var bool DebugWeaponToggleCooldown;
+var array<class<baseSpell>> defaultSpells;
+var class<SpellCursor> desiredSpellCursor;
 
 
 event PreBeginPlay()
@@ -30,6 +32,15 @@ event PreBeginPlay()
     DefaultWeaponSlot = 1;
   }
   SetHarryWeapon(DefaultWeapon, DefaultWeaponSlot);
+
+  if (SpellCursor != None)
+  {
+    SpellCursor.Destroy();
+  }
+  SpellCursor = Spawn(desiredSpellCursor);
+
+  ClearSpellBook();
+  AddSpellsToSpellbook(defaultSpells);
 }
 
 event PostBeginPlay()
@@ -39,6 +50,9 @@ event PostBeginPlay()
   {
     SaveGame();
   }
+
+  Log("Calling all spells");
+  AddAllSpellsToSpellBook();
 }
 
 event BaseChanged(Actor OldBase, Actor NewBase)
@@ -50,6 +64,15 @@ event BaseChanged(Actor OldBase, Actor NewBase)
   {
     Bundi = MOCABundimun(NewBase);
     Bundi.ProcessStomp();
+  }
+}
+
+function AddSpellsToSpellbook(array<class<baseSpell>> spellsToAdd)
+{
+  local int	i;
+  for (i = 0; i < spellsToAdd.Length; i++)
+  {
+    AddToSpellBook(spellsToAdd[i]);
   }
 }
 
@@ -282,4 +305,5 @@ defaultproperties
     DefaultWeapon=class'MocaOmniPak.MOCAWand'
     Mesh=SkeletalMesh'MocaModelPak.MOCAHarry'
     Cutname="harry"
+    desiredSpellCursor=class'SpellCursor'
 }
