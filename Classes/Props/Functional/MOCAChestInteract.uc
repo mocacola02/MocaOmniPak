@@ -12,6 +12,9 @@ var() Vector ObjectStartVelocity[8];
 var() bool bRandomDrops;
 var() bool bMakeSpawnPersistent;
 var() Class<Actor> RandomObjects[8];
+var() Sound openSound;
+var() name openAnimation;
+var() float openAnimationRate;
 var bool bOpened;
 var int iBean;
 
@@ -238,8 +241,8 @@ function generateobject()
 
 
  begin:
-  PlaySound(Sound'wood_chest_open');
-  PlayAnim('Open');
+  PlaySound(openSound);
+  PlayAnim(openAnimation,openAnimationRate);
   FinishAnim();
   if ( bRandomDrops )
   {
@@ -365,4 +368,10 @@ defaultproperties
     bProjTarget=False;
 
     bCollideWorld=True
+
+    openSound=Sound'wood_chest_open'
+
+    openAnimationRate=1.0
+
+    openAnimation=Open
 }
