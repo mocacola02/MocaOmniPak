@@ -24,7 +24,6 @@ Go into the game's System folder, and make a copy of the 'Default.ini' file. Ren
     EditPackages=MocaTexturePak
     EditPackages=MocaSoundPak
     EditPackages=MocaModelPak
-    EditPackages=MocaCakePak
     EditPackages=MocaOmniPak
     
 Save the .ini file and close it. Open a terminal/cmd window in the System folder, and type the following:
