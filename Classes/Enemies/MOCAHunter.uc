@@ -36,7 +36,7 @@ event PreBeginPlay()
 event PostBeginPlay()
 {
     Super.PostBeginPlay();
-    if (!ActorExistenceCheck(Class'MOCAStalkerNode') || !ActorExistenceCheck(Class'MOCAharry'))
+    if (!ActorExistenceCheck(Class'PathNode') || !ActorExistenceCheck(Class'MOCAharry'))
     {
         EnterErrorMode();
     }
@@ -120,6 +120,10 @@ state stateIdle
         eVulnerableToSpell=default.eVulnerableToSpell;
         log("beginning idle");
         LoopAnim(idleAnim);
+        if (inErrorMode)
+        {
+            GotoState('stateError');
+        }
         if (PreviousState == 'stateSleep')
         {
             Log("lookin at harry");
@@ -170,7 +174,7 @@ state stateIdle
         goto 'begin';
     
     awaken:
-        PlayAnim(awakenAnim);
+        PlayAnim(awakenAnim,,,,[RootBone] 'Move');
         FinishAnim();
         Goto('begin');
 }

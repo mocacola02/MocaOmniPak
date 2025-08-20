@@ -317,8 +317,15 @@ state stateAttack
 
     function Timer ()
     {
-        angerValue -= relaxRate;
-        Log("Anger reduced to " $ string(angerValue));
+        if(angerValue > 0)
+        {
+            angerValue -= relaxRate;
+            Log("Anger reduced to " $ string(angerValue));
+        }
+        else
+        {
+            Log("Already at 0 anger");
+        }
     }
 
     begin:

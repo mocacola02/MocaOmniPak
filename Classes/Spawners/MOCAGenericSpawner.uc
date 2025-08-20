@@ -100,6 +100,7 @@ begin:
 state stateEndIdle
 {
   begin:
+      eVulnerableToSpell = SPELL_None;
       LoopAnim(Anims.DoneIdle);
 }
 
