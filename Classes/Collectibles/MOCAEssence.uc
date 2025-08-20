@@ -2,24 +2,7 @@
 // MOCAEssence. alternate bean essentially, but cooler :sunglasses:
 //================================================================================
 
-class MOCAEssence extends HProp;
-
-var() bool bFallsToGround;
-
-auto state BounceIntoPlace
-{
-  function BeginState()
-  {
-    if ( bFallsToGround )
-    {
-      // SetPhysics(2);
-	  SetPhysics(PHYS_Falling);
-    } else {
-      // SetPhysics(0);
-	  SetPhysics(PHYS_None);
-    }
-  }
-}
+class MOCAEssence extends MOCACollectible;
 
 defaultproperties
 {
@@ -27,7 +10,7 @@ defaultproperties
     Texture=Texture'HPParticle.hp_fx.Particles.Sparkle_BW'
     soundPickup=Sound'HPSounds.menu_sfx.gui_rollover2'
     bPickupOnTouch=True
-    EventToSendOnPickup=JellyBeanPickupEvent
+    EventToSendOnPickup=EssencePickupEvent
     PickupFlyTo=FT_HudPosition
     classStatusGroup=Class'MOCAStatusGroupEssence'
     classStatusItem=Class'MOCAStatusItemEssence'
@@ -35,7 +18,7 @@ defaultproperties
     soundBounce=Sound'HPSounds.menu_sfx.gui_rollover3'
     Physics=PHYS_Walking
     bPersistent=True
-    AmbientGlow=200
+    AmbientGlow=220
     CollisionRadius=16.00
     CollisionHeight=24.00
     bBlockActors=False
@@ -49,4 +32,5 @@ defaultproperties
     SoundPitch=128
     SoundRadius=4
     SoundVolume=255
+    attractedToHarry=True
 }

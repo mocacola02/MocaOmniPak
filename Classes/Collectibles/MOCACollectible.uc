@@ -10,6 +10,8 @@ var() Sound pickUpSound;
 var float fPickupFlyTime;
 var() bool bFallsToGround;
 var bool bInitialized;
+var() bool attractedToHarry;
+var() float attractionSpeed;
 
 event PreBeginPlay()
 {
@@ -61,6 +63,31 @@ auto state BounceIntoPlace
 
         if (bBounceIntoPlaceTiming)
             fBounceIntoPlaceTimeout -= DeltaTime;
+        
+        if (attractedToHarry)
+        {
+            FlyToHarry(DeltaTime);
+        }
+    }
+}
+
+function FlyToHarry(float DeltaTime)
+{
+    local vector TargetLoc;
+    local vector Dir;
+    local vector DistanceFromHarry;
+
+    // Make sure the player exists
+    if (PlayerHarry != None)
+    {
+        // Get target position
+        TargetLoc = PlayerHarry.Location;
+
+        // Direction from this actor to the target
+        Dir = Normal(TargetLoc - Location);
+
+        // Move this actor toward the target
+        SetLocation(Location + Dir * attractionSpeed * DeltaTime);
     }
 }
 
@@ -88,4 +115,6 @@ defaultproperties
      bBounce=True
      RotationSpeed=160
      bAlignBottom=False
+     attractionSpeed=300.0
+     bCanFly=True
 }

@@ -35,7 +35,7 @@ function RandomizeColor()
         B = Rand(256);
 
         // Check if the color is too dark (you can adjust the threshold as needed)
-        if ((R + G + B) / 3 < 100)
+        if ((R + G + B) / 3 < 200)
         {
             // If too dark, regenerate color values
             continue;
@@ -58,7 +58,7 @@ function RandomizeColor()
 
 defaultproperties
 {
-    ParticlesPerSec=(Base=1.00,Rand=2.00)
+    ParticlesPerSec=(Base=32.00,Rand=46.00)
 
     SourceWidth=(Base=2.00,Rand=0.00)
 
@@ -76,9 +76,9 @@ defaultproperties
 
     Lifetime=(Base=0.50,Rand=1.00)
 
-    ColorStart=(Base=(R=MyRandomColor.R,G=MyRandomColor.G,B=MyRandomColor.B,A=MyRandomColor.A),Rand=(R=0,G=0,B=0,A=0))
+    ColorStart=(Base=(R=MyRandomColor.R,G=MyRandomColor.G,B=MyRandomColor.B,A=255),Rand=(R=0,G=0,B=0,A=0))
 
-    ColorEnd=(Base=(R=MyRandomColor.R,G=MyRandomColor.G,B=MyRandomColor.B,A=MyRandomColor.A),Rand=(R=0,G=0,B=0,A=0))
+    ColorEnd=(Base=(R=MyRandomColor.R,G=MyRandomColor.G,B=MyRandomColor.B,A=255),Rand=(R=0,G=0,B=0,A=0))
 
     SizeWidth=(Base=16.00,Rand=24.00)
 

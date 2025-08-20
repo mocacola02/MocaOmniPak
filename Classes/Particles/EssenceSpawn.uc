@@ -11,7 +11,7 @@ defaultproperties
     SizeLength=(Base=2,Rand=3)
     SizeWidth=(Base=2,Rand=3)
     bSteadyState=False
-    ParticlesMax=1000
+    ParticlesMax=2000
     SourceDepth=(Base=0,Rand=0)
     SourceHeight=(Base=0,Rand=0)
     SourceWidth=(Base=0,Rand=0)
