@@ -24,7 +24,6 @@ Go into the game's System folder, and make a copy of the 'Default.ini' file. Ren
     EditPackages=MocaTexturePak
     EditPackages=MocaSoundPak
     EditPackages=MocaModelPak
-    EditPackages=MocaCakePak
     EditPackages=MocaOmniPak
     
 Save the .ini file and close it. Open a terminal/cmd window in the System folder, and type the following:
@@ -44,8 +43,8 @@ By using any portion of my content in any way (including non-Unreal projects), y
 
  - You must include credit in some form. A credit in a readme file is fine, as long as it is easily available to other users. I appreciate in-game credit, but it is not required.
  - You cannot use this content in any commercial product or mod. This includes redistributing the assets directly or using them in another project commercially.
- - Do not ping or message the HP2 New Engine (M212 Engine) developers regarding bugs in my content. Direct ALL bug or feature requests to this repo, or ping me in the HP Modding Discord (@moca). You can open a ticket in [Issues](https://github.com/mocacola02/MocaOmniPak/issues).
+ - Please do not ping or message the HP2 New Engine (M212 Engine) developers regarding bugs in my content. Direct ALL bug or feature requests to this repo, or ping me in the HP Modding Discord (@moca). You can open a ticket in [Issues](https://github.com/mocacola02/MocaOmniPak/issues).
  - Any feature requests made will be publicly available -- there will be no exclusive content additions.
  - I reserve the right to implement any bug fixes or other changes/additions introduced in forks. I will give full credit to any contributors via this page. **If you are interested in making changes or additions, feel free to reach out to me about contributing.**
 
-The original content created by me in this repo, including both code and asset packages, is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). Any content derived from another source, including but not limited to KnowWonder, Zeekerss, and members of the modding community who helped with certain code snippets, belong to their respective owners.
+Any content derived from another source, including but not limited to KnowWonder, Zeekerss, and members of the modding community who helped with certain code snippets, belong to their respective owners.
