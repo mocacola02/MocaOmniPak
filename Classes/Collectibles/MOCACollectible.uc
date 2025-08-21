@@ -12,6 +12,7 @@ var() bool bFallsToGround;
 var bool bInitialized;
 var() bool attractedToHarry;
 var() float attractionSpeed;
+var() vector attractionOffset;
 
 event PreBeginPlay()
 {
@@ -77,11 +78,13 @@ function FlyToHarry(float DeltaTime)
     local vector Dir;
     local vector DistanceFromHarry;
 
+    SetPhysics(PHYS_Flying);
+
     // Make sure the player exists
     if (PlayerHarry != None)
     {
         // Get target position
-        TargetLoc = PlayerHarry.Location;
+        TargetLoc = PlayerHarry.Location + AttractionOffset;
 
         // Direction from this actor to the target
         Dir = Normal(TargetLoc - Location);

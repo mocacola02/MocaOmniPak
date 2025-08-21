@@ -8,7 +8,7 @@ defaultproperties
 {
     DrawType=DT_Sprite
     Texture=Texture'HPParticle.hp_fx.Particles.Sparkle_BW'
-    soundPickup=Sound'HPSounds.menu_sfx.gui_rollover2'
+    pickUpSound=Sound'HPSounds.menu_sfx.gui_rollover2'
     bPickupOnTouch=True
     EventToSendOnPickup=EssencePickupEvent
     PickupFlyTo=FT_HudPosition
