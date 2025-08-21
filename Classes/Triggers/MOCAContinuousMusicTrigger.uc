@@ -39,6 +39,7 @@ function ProcessTrigger()
             if (A.isPlaying && A != self)
             {
                 Log("Destroying other trigger: " $ string(A));
+                A.StopMusic(A.SongHandle, A.FadeOutTime);
                 A.Destroy();
             }
         }
