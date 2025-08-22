@@ -2,20 +2,12 @@
 // MOCASkullSpawner.
 //================================================================================
 
-class MOCASkullSpawner extends MOCAGenericSpawner;
+class MOCASkullSpawner extends MOCAVisibleSpawner;
 
 defaultproperties
 {
-     GoodieToSpawn(0)=Class'HGame.Jellybean'
-     GoodieToSpawn(1)=Class'HGame.Jellybean'
-     GoodiesProbability(0)=32
-     GoodiesProbability(1)=1
-     Anims=(Spawning=Hit1,EndSpawning=None,Idle=Idle,DoneIdle=IdleEnd,FinalSpawnEnd=HitEnd)
-     Snds=(Opening=Sound'MocaSoundPak.Spawners.skull_hit',Ending=Sound'MocaSoundPak.Spawners.skull_hitend')
-     BaseDelay=0.15
-     GoodieDelay=0.5
-     Lives=2
-     ProbabilityBasedSpawns=True
+     spawnAnims=(Spawning=Hit1,EndSpawning=None,Idle=Idle,DoneIdle=IdleEnd,FinalSpawnEnd=HitEnd)
+     visibleSpawnSounds=(Opening=Sound'MocaSoundPak.Spawners.skull_hit',Ending=Sound'MocaSoundPak.Spawners.skull_hitend')
      Physics=PHYS_None
      Mesh=SkeletalMesh'MocaModelPak.skCacklingSkull'
      DrawScale=1.3

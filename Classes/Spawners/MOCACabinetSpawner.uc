@@ -2,20 +2,12 @@
 // MOCACabinetSpawner.
 //================================================================================
 
-class MOCACabinetSpawner extends MOCAGenericSpawner;
+class MOCACabinetSpawner extends MOCAVisibleSpawner;
 
 defaultproperties
 {
-     GoodieToSpawn(0)=Class'HGame.Jellybean'
-     GoodieToSpawn(1)=Class'HGame.Jellybean'
-     GoodiesProbability(0)=32
-     GoodiesProbability(1)=1
-     Anims=(Spawning=Hit2,EndSpawning=Close2,Idle=IdleClosed,DoneIdle=IdleEnd,FinalSpawnEnd=HitEnd)
-     Snds=(Opening=Sound'MocaSoundPak.Spawners.spawner_armoire',Closing=Sound'MocaSoundPak.Spawners.spawner_armoire_close01')
-     GoodieDelay=0.5
-     Lives=2
-     ProbabilityBasedSpawns=True
-     EndOnFinalSpawn=True
+     spawnAnims=(Spawning=Hit2,EndSpawning=Close2,Idle=IdleClosed,DoneIdle=IdleEnd,FinalSpawnEnd=HitEnd)
+     visibleSpawnSounds=(Opening=Sound'MocaSoundPak.Spawners.spawner_armoire',Closing=Sound'MocaSoundPak.Spawners.spawner_armoire_close01')
      Physics=PHYS_None
      Mesh=SkeletalMesh'MocaModelPak.skBeanDispenser'
      DrawScale=1.3

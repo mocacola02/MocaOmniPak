@@ -2,9 +2,7 @@
 // MOCAExplodingSpawner.
 //================================================================================
 
-//Quick repurposing of another actor I had, made to be more dynamic.
-
-class MOCAExplodingSpawner extends MOCAPawn;
+class MOCAExplodingSpawner extends MOCASpawner;
 
 var Rotator explodeRot;
 var() float AmountToFloat;                  //Moca: How high should the particle rise before exploding, Default: 15
@@ -12,19 +10,10 @@ var() bool shakeCamera;                     //Moca: Should the camera shake upon
 var() float fShakeTime;                     //Moca: How long should camera shake
 var() float fRollMagnitude;                 //Moca: Shake roll intensity
 var() float fVertMagnitude;                 //Moca: Shake vertical intensity
-var() class<Actor> classToSpawn;            //Moca: What goodie should spawn when exploding
 var() Class<ParticleFX> explodeParticle;    //Moca: What particle effect to use when exploding
 var() Sound explodeSound;                   //Moca: What sound to play when exploding
-var() int SpawnMin;                         //Moca: Minimum amount of items to spawn
-var() int SpawnMax;                         //Moca: Maximum amount of items to spawn
 
 var() class<ParticleFX> BuildUpParticle;
-
-event PostBeginPlay()
-{
-    Super.PostBeginPlay();
-    harry = Harry(Level.PlayerHarryActor);
-}
 
 function Touch (Actor Other)
 {
@@ -42,39 +31,6 @@ auto state stateIdle
 
 state Burst
 {
-
-    function SpawnEssence()
-    {
-        local int TotalToSpawn;
-        local Vector Dir;
-        local Vector Vel;
-        local Actor newEssence;
-        local Rotator SpawnRotation;
-
-        TotalToSpawn = Clamp(Rand(SpawnMax), SpawnMin, SpawnMax);
-
-        while (TotalToSpawn > 0)
-        {
-            SpawnRotation.Yaw = Rand(65536);
-            SpawnRotation.Pitch = Rand(32768) - 16384;
-            Dir = vector(SpawnRotation);
-
-            Vel = Dir * RandRange(200, 400);
-
-            newEssence = Spawn(classToSpawn,,,Location + Dir * 50, SpawnRotation);
-            if (newEssence != None)
-            {
-                newEssence.Velocity = Vel;
-                newEssence.SetPhysics(PHYS_Falling);
-            }
-
-            TotalToSpawn--;
-        }
-
-        Destroy();
-    }
-
-
     event Tick(float DeltaTime)
     {
         local Vector DesiredLocation;
@@ -90,10 +46,11 @@ state Burst
         Spawn(explodeParticle,,,,explodeRot);
         if (shakeCamera)
         {
-            harry(Level.PlayerHarryActor).ShakeView(fShakeTime,fRollMagnitude,fVertMagnitude);
+            PlayerHarry.ShakeView(fShakeTime,fRollMagnitude,fVertMagnitude);
         } 
         sleep(0.25);
-        SpawnEssence();
+        killAttachedParticleFX(0.0);
+        GotoState('stateSpawn');
 }
 
 defaultproperties
@@ -103,12 +60,9 @@ defaultproperties
      fShakeTime=2
      fRollMagnitude=100
      fVertMagnitude=100
-     classToSpawn=Class'HGame.Jellybean'
      explodeParticle=Class'HPParticle.BronzePickup'
      BuildUpParticle=Class'HPParticle.Godric_41_B'
      explodeSound=Sound'HPSounds.Magic_sfx.pickup_wizardcard'
-     SpawnMin=4
-     SpawnMax=16
      attachedParticleClass(0)=Class'HPParticle.SpellTarget_Lock'
      attachedParticleClass(1)=Class'HPParticle.TargetGlow'
      bHidden=True
@@ -125,4 +79,10 @@ defaultproperties
      bBlockPlayers=False
      bProjTarget=False
      explodeRot=(Pitch=16464,Roll=0,Yaw=0)
-}
+     minAmountToSpawn=5
+     maxAmountToSpawn=20
+     eVulnerableToSpell=SPELL_None
+     listOfSpawns(0)=(actorToSpawn=Class'Jellybean',spawnChance=255,spawnDelay=0.0,spawnSound=Sound'spawn_bean01',spawnParticle=Class'Spawn_flash_1',velocityMult=1.0)
+     maxVelocityVariance=32
+     Rotation=(Pitch=16384,Yaw=0,Roll=0)
+    }
