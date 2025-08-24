@@ -2,7 +2,7 @@
 // MOCABabbler.
 //================================================================================
 
-class MOCABabbler extends HChar;
+class MOCABabbler extends MOCAChar;
 
 var () float timeBetweenBabble; 	//How many seconds in between the connected babble sounds. Def: 0.1
 var () float delayBeforeEnding; 	//How many seconds to hold on the subtitles after done talking. Def: 2.0

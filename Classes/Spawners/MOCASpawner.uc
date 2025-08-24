@@ -201,7 +201,7 @@ state stateSpawn
     begin:
         SpawnItem();
         sleep(listOfSpawns[currentSpawnIndex].spawnDelay);
-        if (numOfSpawns > maxSpawns)
+        if (numOfSpawns >= maxSpawns)
         {
             GotoState('stateDone');
         }

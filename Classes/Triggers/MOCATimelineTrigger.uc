@@ -11,6 +11,7 @@ struct TimedEvent
 
 var() array<TimedEvent> listOfEvents;
 var() bool destroyWhenDone; // Should the trigger destroy when timeline is done? Def: True
+var() bool loopWhenDone;    // Should the timeline loop on finish?
 
 var float waitTime;
 
@@ -20,11 +21,46 @@ var int nextIndex;
 event PostBeginPlay()
 {
     super.PostBeginPlay();
+
     if (listOfEvents.Length <= 0)
     {
         Log("No events set, destroying: " $ string(self));
         Destroy();
     }
+
+    if (loopWhenDone && destroyWhenDone)
+    {
+        Log("Timeline shouldn't loop AND destroy, deactivating destroyWhenDone on: " $ string(self));
+        destroyWhenDone = false;
+    }
+
+    SortEvents();
+}
+
+function SortEvents()
+{
+    local int i, j;
+    local TimedEvent temp;
+
+    Log("Timeline index length sanity check before: " $ string(listOfEvents.Length));
+
+    // Bubble sort: compare pairs and swap if out of order
+    for (i = 0; i < listOfEvents.Length; i++)
+    {
+        for (j = 0; j < listOfEvents.Length - 1; j++)
+        {
+            if (listOfEvents[j].timeToSendEvent > listOfEvents[j + 1].timeToSendEvent)
+            {
+                // Swap
+                temp = listOfEvents[j];
+                listOfEvents[j] = listOfEvents[j + 1];
+                listOfEvents[j + 1] = temp;
+                Log("Reordering " $ string(listOfEvents[j].timedEventName));
+            }
+        }
+    }
+
+    Log("Timeline index length sanity check after: " $ string(listOfEvents.Length));
 }
 
 
@@ -69,6 +105,11 @@ state stateCount
                 Destroy();
             }
             
+            if (loopWhenDone)
+            {
+                Goto('begin');
+            }
+
             GotoState('stateDormant');
         }
 

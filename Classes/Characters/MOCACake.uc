@@ -91,12 +91,12 @@ function name GetBabbleAnim()
 
 function MakeAngry()
 {
-	Skins[0] = Texture'MocaCakePak.Angry_Top';
-	Skins[1] = Texture'MocaCakePak.Angry_Side';
-	Skins[2] = Texture'MocaCakePak.Angry_InSide';
-	Skins[3] = Texture'MocaCakePak.Angry_crown_shine';
-	Skins[4] = Texture'MocaCakePak.Angry_eyes';
-	Skins[5] = Texture'MocaCakePak.Angry_jewel';
+	Skins[0] = Texture'MocaTexturePak.AngryCake.Angry_Top';
+	Skins[1] = Texture'MocaTexturePak.AngryCake.Angry_Side';
+	Skins[2] = Texture'MocaTexturePak.AngryCake.Angry_InSide';
+	Skins[3] = Texture'MocaTexturePak.AngryCake.Angry_crown_shine';
+	Skins[4] = Texture'MocaTexturePak.AngryCake.Angry_eyes';
+	Skins[5] = Texture'MocaTexturePak.AngryCake.Angry_jewel';
 }
 
 function SpawnFire()
@@ -121,6 +121,6 @@ defaultproperties
 	hitsUntilDeath=5
 	randomTalkAnim=true
 	dieColor=(R=255,G=26,B=26,A=255)
-	Mesh=SkeletalMesh'MocaCakePak.skCake'
+	Mesh=SkeletalMesh'MocaModelPak.skCake'
 	eVulnerableToSpell=SPELL_Flipendo
 }

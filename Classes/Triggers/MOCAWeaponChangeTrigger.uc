@@ -56,5 +56,5 @@ state Cooldown {
 }
 
 defaultproperties {
-    WeaponToSpawn=class'HGame.baseWand'
+    WeaponToSpawn=class'MocaOmniPak.MOCAWand'
 }
