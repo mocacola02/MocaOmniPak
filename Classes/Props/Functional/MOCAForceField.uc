@@ -2,36 +2,77 @@ class MOCAForceField extends HProp;
 
 var() float AttractionRange;          // Maximum AttractionRange of effect
 var() float Attraction;     // Positive = pull, Negative = push, 0 = no force
+var vector lastHarryPos;
 
-function Tick(float DeltaTime)
+auto state stateDormant
 {
-    local vector ToPlayer;
-    local vector Dir;
-    local float DistSquared;
-    local float Strength;
+    begin:
+        if (isHarryNear(AttractionRange))
+        {
+            GotoState('statePull');
+        }
+        sleep(0.25);
+        goto('begin');
+}
 
-    if (Attraction == 0)
-        Destroy();
-        return;
+state statePull
+{
+    function Tick(float DeltaTime)
+    {
+        if (!isHarryNear(AttractionRange))
+        {
+            GotoState('stateDormant');
+        }
 
-    // Vector from player to this actor
-    ToPlayer = Location - PlayerHarry.Location;
+        local vector ToPlayer;
+        local vector Dir;
+        local float DistSquared;
+        local float Strength;
+        local vector FinalVelocity;
 
-    // Check squared distance first
-    DistSquared = ToPlayer Dot ToPlayer; 
+        Super.Tick(DeltaTime);
 
-    if (DistSquared > AttractionRange * AttractionRange)
-        return; // too far, skip all math
+        // Vector from player to this actor
+        ToPlayer = Location - PlayerHarry.Location;
 
-    Dir = Normal(ToPlayer);
-    Strength = (1.0 - (Sqrt(DistSquared) / AttractionRange)) * Attraction;
+        // Check squared distance first
+        DistSquared = ToPlayer Dot ToPlayer; 
 
-    PlayerHarry.Velocity += Dir * Strength * DeltaTime;
+        Dir = Normal(ToPlayer);
+        Strength = (1.0 - (Sqrt(DistSquared) / AttractionRange)) * Attraction;
+
+        FinalVelocity = Dir * Strength * DeltaTime;
+
+        PlayerHarry.Velocity += FinalVelocity;
+    }
+}
+
+function bool isHarryNear(optional float requiredDistance)
+{
+    local float Size;
+    local float distToCheck;
+    distToCheck = SightRadius;
+    Size = VSize(PlayerHarry.Location - Location);
+    PlayerHarry.ClientMessage("Distance" @ string(Size));
+
+    if (requiredDistance != 0)
+    {
+        distToCheck = requiredDistance;
+    }
+
+    if (VSize(PlayerHarry.Location - Location) < distToCheck)
+    {
+        //Log("is close: " $ string(VSize(PlayerHarry.Location - Location) < distToCheck));
+        lastHarryPos = PlayerHarry.Location;
+        return True;
+    }
+    //Log("not close");
+    return False;
 }
 
 defaultproperties
 {
     AttractionRange=512.0
-    Attraction=32.0
+    Attraction=256.0
     bHidden=True
 }
