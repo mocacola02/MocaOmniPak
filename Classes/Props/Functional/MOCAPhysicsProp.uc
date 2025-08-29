@@ -1,4 +1,4 @@
-class HPhysProp extends HProp;
+class MOCAPhysicsProp extends MOCAExperimentalProps;
 
 var rotator AngularVelocity;
 var bool bOnGround;

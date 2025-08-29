@@ -1,0 +1,1 @@
+class MOCAExperimentalProps extends HProp;
