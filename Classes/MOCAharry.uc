@@ -57,6 +57,7 @@ event BaseChanged(Actor OldBase, Actor NewBase)
   {
     Bundi = MOCABundimun(NewBase);
     Bundi.ProcessStomp();
+    GotoState('stateStomping');
   }
 }
 
@@ -184,6 +185,26 @@ function SetHarryWeapon (class<Weapon> WeaponToSpawn, int WeaponSlot)
 ////////////////
 // STATES
 ////////////////
+
+state stateStomping
+{
+	begin:
+		bStationary = True;
+		LoopAnim('bundi_stomp');
+		Sleep(1.5);
+		bStationary = False;
+		DoJump();
+		GotoState('PlayerWalking');
+}
+
+state stateBroomFlying
+{
+	event BeginState()
+	{
+		local BroomQudditch broomstickHandle; //OBJECTS I'VE SHOVED UP MY ARSE
+		SetPhysics(PHYS_Flying);
+	}
+}
 
 state stateInteract
 {
@@ -646,6 +667,7 @@ state PlayerSwimming
     bIsTurning = False;
     bPressedJump = False;
     SetPhysics(PHYS_Swimming);
+	LoopAnim(CurrIdleAnimName,,[TweenTime]0.40,,[Type]HarryAnimType);
     if (  !IsAnimating() )
     {
       PlayWaiting();

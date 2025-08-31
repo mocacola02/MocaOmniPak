@@ -10,19 +10,11 @@ var() int StunDuration; //Moca: How long should it stay stunned from Rictu?
 var() float PukeDistance; //Moca: How far should the poison reach?
 var() float TriggerDistance; //Moca: How far can the bundi detect Harry?
 var Rotator NewRot;
-//var harry PlayerHarry;
 var bool isStunned;
 var float Forward;
 var bool CanHit;
 var bool isDying;
 var BundimunDeath KillEmit;
-
-function PreBeginPlay()
-{
-    Super.PreBeginPlay();
-    PlayerHarry = Harry(Level.PlayerHarryActor);
-    ShadowScale = 0;
-}
 
 event PostBeginPlay()
 {
@@ -41,22 +33,6 @@ function ProcessStomp()
         isDying = True;
         GotoState('squished');
     }
-}
-
-function Tick (float fTimeDelta)
-{
-    if (IsInState('onground'))
-    {
-        Speen(fTimeDelta);
-    }
-}
-
-function Speen(float fTimeDelta)
-{
-    DesiredRotation = Rotation;
-    DesiredRotation.Yaw += (5500 * fTimeDelta);
-    SetRotation(DesiredRotation);
-    SetLocation(Location);
 }
 
 function DoBumpDamage (Vector vDamageLoc, name nameDamage)
@@ -128,17 +104,6 @@ auto state determineState
         }
 }
 
-state tounder
-{
-    begin:
-        AmbientSound = None;
-        PlaySound(Sound'MocaSoundPak.Creatures.bundimun_sink');
-        PlayAnim('Sink');
-        FinishAnim();
-        SetCollision(false, false, false);
-        GotoState('underground');
-}
-
 state underground
 {
     begin:
@@ -155,6 +120,19 @@ state underground
         }
 }
 
+// do these really need to be separate states
+state tounder
+{
+    begin:
+        AmbientSound = None;
+        PlaySound(Sound'MocaSoundPak.Creatures.bundimun_sink');
+        PlayAnim('Sink');
+        FinishAnim();
+        SetCollision(false, false, false);
+        GotoState('underground');
+}
+
+
 state toabove
 {
     begin:
@@ -167,12 +145,23 @@ state toabove
 
 state onground
 {
-    begin:
+    event BeginState()
+    {
         AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_shoot';
         isStunned = False;
         LoopAnim('Attack');
-        ShadowScale = 1;
-    loop:
+    }
+
+    function Tick (float DeltaTime)
+    {
+        //SPEEN
+        DesiredRotation = Rotation;
+        DesiredRotation.Yaw += (5500 * DeltaTime);
+        SetRotation(DesiredRotation);
+        SetLocation(Location);
+    }
+
+    begin:
         if (!DetermineHPDistance() && !StayAboveGround)
         {
             GotoState('tounder');
@@ -182,24 +171,34 @@ state onground
             Puke();
             ResetHit();
             Sleep(1.25);
-            goto ('Loop');
+            goto ('begin');
         }
 }
 
 state stunned
 {
-    begin:
+    event BeginState()
+    {
         bCantStandOnMe=False;
         PlaySound(Sound'MocaSoundPak.Creatures.bundimun_hit');
         AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_dazed';
         isStunned = True;
         LoopAnim('Dazed');
+    }
+
+    begin:
         sleep(StunDuration);
         GotoState('onground');
 }
 
 state squished
 {
+    event BeginState()
+    {
+        PlaySound(Sound'MocaSoundPak.Creatures.bundimun_smash');
+        PlayAnim('Bounce',,,,'Move');
+        SpawnKillParticles();
+    }
 
     function SpawnKillParticles()
     {
@@ -212,9 +211,6 @@ state squished
     }
 
     begin:
-        PlaySound(Sound'MocaSoundPak.Creatures.bundimun_smash');
-        PlayAnim('Bounce');
-        SpawnKillParticles();
         Sleep(2.0);
         bCantStandOnMe=True;
         KillEmit.Destroy();
