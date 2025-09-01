@@ -1,89 +1,65 @@
-class MOCAFireBall extends spellFireSmall;
+//============================================================
+// MOCAFireBall.
+//============================================================
+
+class MOCAFireBall extends MOCAProjectile;
 
 var MOCAFireseedPlant Plant;
 
 event PostBeginPlay()
 {
     Super.PostBeginPlay();
+
     Plant = MOCAFireseedPlant(Owner);
-    GlobalSpeed = RandRange(Plant.FireballDistMin,Plant.FireballDistMax);
-}
 
-function Touch(Actor Other)
-{
-    local actor HitActor;
-	local vector HitLocation, HitNormal, TestLocation;
-	
-    Super.Touch(Other);
-    Log(string(HitLocation) @ "  " @ string(HitNormal) @ "  " @ string(TestLocation));
-}
-
-function bool OnSpellHitHPawn (Actor aHit, Vector HitLocation)
-{
-    Log("Hit HPawn  " @ string(aHit));
-    if (aHit.IsA('MOCAFireBall') || aHit.IsA('MOCAFireSpot'))
+    if (Plant == None)
     {
-        return False;
+		return;
     }
-    Spawn(Class'FireballOnHarry',,,Location);
-    return True;
+
+    LaunchSpeed = RandRange(Plant.FireballDistMin, Plant.FireballDistMax);
 }
 
-function bool OnSpellHitWall (Actor aWall, Vector HitNormal)
+function vector GetShotTarget()
 {
-    local Rotator AlignedRotation;
-    local MOCAFireSpot FS;
-
-    if (HitNormal.Z > 0.7)  // Adjust this threshold based on acceptable slope
-    {
-        // Calculate the rotation to align with the slope
-        AlignedRotation = Rotator(HitNormal);  // Convert hit normal to rotator
-
-        Log(string(AlignedRotation));
-
-        // Spawn MOCAFireSpot at the hit location with the aligned rotation
-        FS = Spawn(class'MOCAFireSpot',,, Location, AlignedRotation);
-        FS.SetOwner(self);
-
-        // Destroy the projectile on ground impact
-        Destroy();  
-    }
-}
-
-state StateFlying
-{
-  function BeginState()
-  {
-    if (!Plant.alwaysAttack)
-    {
-      CurrentDir = Normal(PlayerHarry.Location - Location);
-    }
+    if (Plant != None && !Plant.alwaysAttack && PlayerHarry != None)
+        return PlayerHarry.Location;
     else
-    {
-      CurrentDir = VRand();
-    }
-    
-    Velocity = CurrentDir * GlobalSpeed;
-    Velocity.Z += Plant.FireballLaunchHeight;
-  }
-  
-  event Tick (float fTimeDelta)
-  {
-    Super.Tick(fTimeDelta);
+        return Super.GetShotTarget();
+}
 
-    Velocity.Z -= fGravityEffect * fTimeDelta;
+function LaunchProjectile()
+{
+    local vector ToTarget;
+	local vector HorizDir;
 
-    if (fxFlyParticleEffect != None)
+    ShotTarget = GetShotTarget();
+
+    ToTarget = ShotTarget - Location;
+	HorizDir.Z = Plant.FireballLaunchHeight;
+	HorizDir = Normal(ToTarget);
+
+    // Set velocity based on LaunchSpeed
+    Velocity = HorizDir * LaunchSpeed;
+
+    // Spawn particle if any
+    if (ParticleClass != None && ParticleActor == None)
     {
-      fxFlyParticleEffect.SetLocation(Location);
+        ParticleActor = Spawn(ParticleClass, self);
+        if (ParticleActor != None)
+            ParticleActor.SetBase(self);
     }
-  }
 }
 
 defaultproperties
 {
-     fGravityEffect=500
-     LightBrightness=192
-     LightHue=18
-     LightSaturation=0
+	LaunchSpeed=350
+    Damage=30
+    LifeSpan=6.0
+    LightType=LT_Steady
+    bReallyDynamicLight=True
+    LightBrightness=192
+    LightHue=18
+    LightSaturation=0
+    ParticleClass=Class'HPParticle.Crabfire'
 }

@@ -190,8 +190,8 @@ state stateStomping
 {
 	begin:
 		bStationary = True;
-		LoopAnim('bundi_stomp');
-		Sleep(1.5);
+		LoopAnim('Land');
+		Sleep(0.5);
 		bStationary = False;
 		DoJump();
 		GotoState('PlayerWalking');

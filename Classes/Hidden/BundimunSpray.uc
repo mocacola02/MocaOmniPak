@@ -6,11 +6,18 @@ class BundimunSpray extends HiddenHPawn;
 
 var bool bTouch;
 var float fLifetime;
+var float DamageToDeal;
 var Vector CurrentDir;
 
 function PostBeginPlay()
 {
+	local vector EmitLocation;
+
 	SetTimer(fLifetime,False);
+
+	EmitLocation = Location;
+	EmitLocation.Z -= 16;
+	Spawn(Class'MocaOmniPak.BundimunMist',self,,EmitLocation,,true);
 }
 
 function Timer()
@@ -26,10 +33,10 @@ function Touch (Actor Other)
 	}
 	if ( (Other == PlayerHarry) && (bTouch) )
 	{
-		Other.TakeDamage(5,None,vect(0.00,0.00,0.00),vect(0.00,0.00,0.00),'None');
+		Other.TakeDamage(DamageToDeal,None,vect(0.00,0.00,0.00),vect(0.00,0.00,0.00),'None');
+		PlaySound(Sound'spell_hit',SLOT_Interact,1.0,False,2000.0,1.0);
 		bTouch = False;
 	}
-	PlaySound(Sound'spell_hit',SLOT_Interact,1.0,False,2000.0,1.0);
 }
 
 function Bump (Actor Other)
@@ -42,10 +49,6 @@ defaultproperties
     bTouch=True
 
     fLifetime=3.00
-
-    attachedParticleClass(0)=Class'MocaOmniPak.BundimunMist'
-
-    attachedParticleOffset(0)=(X=0.00,Y=0.00,Z=-16.00)
 
     DrawType=DT_None
 
