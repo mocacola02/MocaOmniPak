@@ -7,8 +7,9 @@ class MOCAharry extends harry;
 
 struct SpellMap
 {
-  var() ESpellType SpellSlot;
-  var() class<baseSpell> SpellToAssign;
+  var() const editconst ESpellType SpellSlot; // What spell slot to assign the spell to?
+  var() class<baseSpell> SpellToAssign; // What custom spell class to assign to the slot?
+  var() ESpellType SpellToActAs;  // What spell to act as? For example, if you set this as SPELL_Rictusempra, it will activate actors designed for Rictusempra. By default, it will act as the assigned spell slot if blank.
 };
 
 var() class<Weapon> DefaultWeapon;
@@ -79,7 +80,7 @@ function AddToModdedSpellBook (Class<baseSpell> spellClass)
 
   local ESpellType typeToAdd;
 
-  typeToAdd = DetermineSpellType(spellClass,self);
+  typeToAdd = DetermineSpellType(spellClass);
 
   if ( (typeToAdd < MAX_NUM_SPELLS) && (SpellBook[typeToAdd] == None) )
   {
@@ -87,16 +88,33 @@ function AddToModdedSpellBook (Class<baseSpell> spellClass)
   }
 }
 
-function ESpellType DetermineSpellType (class<baseSpell> TestSpell, MOCAharry MocaPlayerHarry)
+function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
 {
     local int i;
 
-    for (i = 0; i < ArrayCount(MocaPlayerHarry.SpellMapping); i++)
+    for (i = 0; i < ArrayCount(SpellMapping); i++)
     {
-        if (MocaPlayerHarry.SpellMapping[i].SpellToAssign == TestSpell)
+        if (SpellMapping[i].SpellToAssign == TestSpell)
         {
-            Log("Found mapping at index " $ i $ " with slot " $ MocaPlayerHarry.SpellMapping[i].SpellSlot);
-            return MocaPlayerHarry.SpellMapping[i].SpellSlot;
+            Log("Found mapping at index " $ i $ " with slot " $ SpellMapping[i].SpellSlot);
+            return SpellMapping[i].SpellSlot;
+        }
+    }
+
+    Log("No mapping found for " $ string(TestSpell));
+    return SPELL_None;
+}
+
+function ESpellType DetermineSpellToActAs (class<baseSpell> TestSpell)
+{
+    local int i;
+
+    for (i = 0; i < ArrayCount(SpellMapping); i++)
+    {
+        if (SpellMapping[i].SpellToAssign == TestSpell)
+        {
+            Log("Found mapping at index " $ i $ " with slot " $ SpellMapping[i].SpellToActAs);
+            return SpellMapping[i].SpellToActAs;
         }
     }
 
