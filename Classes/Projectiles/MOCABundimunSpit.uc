@@ -8,11 +8,11 @@ var float DamageToDeal;
 
 function OnLand(vector HitNormal)
 {
-    local BundimunSpray BS;
+    local MOCABundimunSpray BS;
 
     if (HitNormal.Z > 0.7)  // Hitting floor or a flat-enough slope
     {
-        BS = Spawn(class'BundimunSpray',,, Location);
+        BS = Spawn(class'MOCABundimunSpray',,, Location);
         if (BS != None)
         {
             BS.SetOwner(Owner);

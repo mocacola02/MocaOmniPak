@@ -6,7 +6,7 @@ class MOCAWatcher extends MOCAChar;
 
 var bool lastWasRight;
 var bool firstLook;
-var MOCAStealthTrigger stealthTrig1;
+var MOCAStealthTrigger stealthTrigger;
 var int randLook;
 var bool isAwake;
 
@@ -32,7 +32,6 @@ event PostBeginPlay()
     }
     else
     {
-      PlayerHarry = Harry(Level.PlayerHarryActor);
       GotoState('stateIdle');
     }
 }
@@ -40,7 +39,7 @@ event PostBeginPlay()
 event Bump( Actor Other )
   {
     Log("Touched by" $ Other);
-    if (!IsInState('asleep') && !PlayerHarry.IsInState('caught') && (Other.IsA('MOCAharry') || Other.IsA('harry')))
+    if (!IsInState('asleep') && !PlayerHarry.IsInState('caught') && Other.IsA('MOCAharry'))
     {
       PlayerHarry.GotoState('caught');
       GotoState('catch');
@@ -50,9 +49,9 @@ event Bump( Actor Other )
 function Tick(float DeltaTime)
 {
     Super.Tick(DeltaTime);
-    local Vector LocationForTrigger1;
-    LocationForTrigger1 = BonePos('TriggerPoint');
-    stealthTrig1.SetLocation(LocationForTrigger1);
+    local Vector LocationForTrigger;
+    LocationForTrigger = BonePos('TriggerPoint');
+    stealthTrigger.SetLocation(LocationForTrigger);
 }
 
 function determineTTL (bool lookBack)
@@ -90,9 +89,9 @@ auto state asleep
 {
   begin:
   Log("KNIGHT IS SLEEPING!!!!!!!!!!!");
-    if (stealthTrig1 != None)
+    if (stealthTrigger != None)
     {
-      stealthTrig1.Destroy();
+      stealthTrigger.Destroy();
     }
     if (!asleepOnSpawn)
     {
@@ -106,10 +105,10 @@ state stateIdle
 {
   begin:
     Log("KNIGHT IS IDLE!!!!!!!!!!!!!!!!!");
-    if (stealthTrig1 == None)
+    if (stealthTrigger == None)
     {
-      stealthTrig1 = Spawn(Class'MOCAStealthTrigger',self);
-      stealthTrig1.attachedToKnight = True;
+      stealthTrigger = Spawn(Class'MOCAStealthTrigger',self);
+      stealthTrigger.attachedToKnight = True;
     }
     determineTTL(False);
     randLook = RandRange(0, 1);

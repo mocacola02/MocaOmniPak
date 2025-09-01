@@ -214,6 +214,7 @@ state squished
         bCantStandOnMe=True;
         KillEmit.bEmit = False;
         FinishAnim();
+        KillEmit.Destroy();
         Destroy();
 }
 

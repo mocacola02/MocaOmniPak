@@ -5,20 +5,52 @@
 class MOCAWand extends baseWand;
 
 var bool isAiming;
+var MOCAharry MocaPlayerHarry;
 
-function PostBeginPlay()
+event PostBeginPlay()
 {
     super.PostBeginPlay();
+    if (Owner.IsA('MOCAharry'))
+    {
+        MocaPlayerHarry = MOCAharry(Owner);
+    }
+    else
+    {
+        Destroy();
+    }
 }
+
 
 event Tick (float fTimeDelta)
 {
     Super.Tick(fTimeDelta);
     if (isAiming)
     {
-        fxChargeParticles.Textures[0] = GetParticleTexture(CurrentSpell);
-        GetParticleColor(CurrentSpell);
-        GetLightColor(CurrentSpell);
+        if (!ClassIsChildOf(CurrentSpell,class'MOCAbaseSpell'))
+        {
+            fxChargeParticles.Textures[0] = GetParticleTexture(CurrentSpell);
+            GetParticleColor(CurrentSpell);
+            GetLightColor(CurrentSpell);
+        }
+        else
+        {
+            local class<MOCAbaseSpell> MocaSpell;
+
+            MocaSpell = class<MOCAbaseSpell>( CurrentSpell );
+
+            fxChargeParticles.Textures[0] = MocaSpell.Default.AimParticleTexture;
+
+            fxChargeParticles.ColorStart.Base = MocaSpell.Default.AimParticleStartColor;
+            fxChargeParticles.ColorStart.Rand = MocaSpell.Default.AimParticleStartColor;
+
+            fxChargeParticles.ColorEnd.Base = MocaSpell.Default.AimParticleEndColor;
+            fxChargeParticles.ColorEnd.Rand = MocaSpell.Default.AimParticleEndColor;
+
+            LightBrightness = MocaSpell.Default.AimLightBrightness;
+            LightHue = MocaSpell.Default.AimLightHue;
+            LightSaturation = MocaSpell.Default.AimLightSaturation;
+        }
+
         if (PlayerHarry.SpellCursor.aCurrentTarget == None)
         {
             LightBrightness = 128;
@@ -184,6 +216,104 @@ function GetLightColor (Class<baseSpell> spellClass)
             break;
     }
     return;
+}
+
+function Class<baseSpell> GetClassFromSpellType (ESpellType SpellType)
+{
+    local Class<baseSpell> ClassFromType;
+    ClassFromType = GetMocaClassFromType(SpellType);
+    Log("We found the spell class " $ string(ClassFromType));
+    return ClassFromType;
+}
+
+function ChooseSpell (ESpellType SpellType, optional bool bForceSelection)
+{
+    SetCurrentSpell(GetMocaClassFromType(SpellType));
+}
+
+function SetCurrentSpell (Class<baseSpell> spellClass, optional bool bForceSelection)
+{
+    Log("Attempting to set spell");
+
+    if ( Owner.IsA('MOCAharry'))
+    {
+        local ESpellType MatchingType;
+        Log("We're MOCAharry");
+        MatchingType = GetTypeFromMocaClass(spellClass);
+
+        if ( MocaPlayerHarry.IsInSpellBook(MatchingType) || bForceSelection )
+        {
+            Log("Found spell in list, setting to " $ string(spellClass));
+            CurrentSpell = spellClass;
+        }
+
+        else
+        {
+            Log("Could not find spell in list");
+            if ( bUseDebugMode )
+            {
+                PlayerHarry.ClientMessage("HARRY CAN NOT USE THIS SPELL YET!!!! -> " $ string(spellClass));
+            }
+        }
+    }
+
+    else if ( Owner.IsA('harry') )
+    {
+        if ( harry(Owner).IsInSpellBook(spellClass.Default.SpellType) || bForceSelection )
+        {
+            Log("Setting current spell to " $ string(spellClass));
+            CurrentSpell = spellClass;
+        } 
+    
+        else
+        {
+            Log("Can't set spell. Not in spellbook?");
+            if ( bUseDebugMode )
+            {
+                PlayerHarry.ClientMessage("HARRY CAN NOT USE THIS SPELL YET!!!! -> " $ string(spellClass));
+            }
+        }
+    }
+
+    else
+    {
+        Log("not sure what harry we are, set spell anyway");
+        CurrentSpell = spellClass;
+    }
+}
+
+function ESpellType GetTypeFromMocaClass (class<baseSpell> TestSpell)
+{
+    local int i;
+
+    for (i = 0; i < ArrayCount(MocaPlayerHarry.SpellMapping); i++)
+    {
+        if (MocaPlayerHarry.SpellMapping[i].SpellToAssign == TestSpell)
+        {
+            Log("Found mapping at index " $ i $ " with slot " $ MocaPlayerHarry.SpellMapping[i].SpellSlot);
+            return MocaPlayerHarry.SpellMapping[i].SpellSlot;
+        }
+    }
+
+    Log("No mapping found for " $ string(TestSpell));
+    return SPELL_None;
+}
+
+function class<baseSpell> GetMocaClassFromType(ESpellType SpellType)
+{
+    local int i;
+
+    for (i = 0; i < ArrayCount(MocaPlayerHarry.SpellMapping); i++)
+    {
+        if (MocaPlayerHarry.SpellMapping[i].SpellSlot == SpellType)
+        {
+            Log("Found mapping at index " $ i $ " with class " $ string(MocaPlayerHarry.SpellMapping[i].SpellToAssign));
+            return MocaPlayerHarry.SpellMapping[i].SpellToAssign;
+        }
+    }
+
+    Log("No mapping found for " $ GetEnum(enum'ESpellType', SpellType));
+    return None;
 }
 
 defaultproperties

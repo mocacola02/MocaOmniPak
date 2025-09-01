@@ -50,7 +50,7 @@ function bool ActorExistenceCheck(Class<Actor> ActorToCheck)
         Log("Actor is real!!!!!");
         return true;
     }
-    Log("actor is not real");
+    Log("actor is not real :(");
     return false;
 }
 

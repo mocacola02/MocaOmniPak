@@ -5,8 +5,18 @@
 // NOTE: yes this code is a mess yes i am aware
 class MOCAharry extends harry;
 
+struct SpellMap
+{
+  var() ESpellType SpellSlot;
+  var() class<baseSpell> SpellToAssign;
+};
+
 var() class<Weapon> DefaultWeapon;
 var() bool saveOnLoad;
+
+var(MOCASpellbook) Array<Class<baseSpell>> DefaultSpellbook;
+
+var(MOCASpellbook) SpellMap SpellMapping[28];
 var int DefaultWeaponSlot;
 var Weapon weap;
 var Vector respawnLoc;
@@ -37,6 +47,14 @@ event PreBeginPlay()
     DefaultWeaponSlot = 1;
   }
   SetHarryWeapon(DefaultWeapon, DefaultWeaponSlot);
+
+  if (Weapon.IsA('MOCAWand'))
+  {
+    SpellCursor.Destroy();
+    SpellCursor = Spawn(class'MOCASpellCursor');
+  }
+
+  Log("We are using weapon " $ string(Weapon) $ " with the cursor " $ string(SpellCursor));
 }
 
 event PostBeginPlay()
@@ -46,6 +64,44 @@ event PostBeginPlay()
   {
     SaveGame();
   }
+
+
+  local int i;
+
+  for (i=0; i < DefaultSpellbook.Length; i++)
+  {
+    AddToModdedSpellBook(DefaultSpellbook[i]);
+  }
+}
+
+function AddToModdedSpellBook (Class<baseSpell> spellClass)
+{
+
+  local ESpellType typeToAdd;
+
+  typeToAdd = DetermineSpellType(spellClass,self);
+
+  if ( (typeToAdd < MAX_NUM_SPELLS) && (SpellBook[typeToAdd] == None) )
+  {
+    SpellBook[typeToAdd] = spellClass;
+  }
+}
+
+function ESpellType DetermineSpellType (class<baseSpell> TestSpell, MOCAharry MocaPlayerHarry)
+{
+    local int i;
+
+    for (i = 0; i < ArrayCount(MocaPlayerHarry.SpellMapping); i++)
+    {
+        if (MocaPlayerHarry.SpellMapping[i].SpellToAssign == TestSpell)
+        {
+            Log("Found mapping at index " $ i $ " with slot " $ MocaPlayerHarry.SpellMapping[i].SpellSlot);
+            return MocaPlayerHarry.SpellMapping[i].SpellSlot;
+        }
+    }
+
+    Log("No mapping found for " $ string(TestSpell));
+    return SPELL_None;
 }
 
 event BaseChanged(Actor OldBase, Actor NewBase)
@@ -180,6 +236,7 @@ function SetHarryWeapon (class<Weapon> WeaponToSpawn, int WeaponSlot)
     weap.GiveAmmo(self); // Give ammo to the weapon if needed
     SwitchWeapon(WeaponSlot);
     currentWeapon = WeaponSlot;
+    Log("Current weapon is " $ string(Weapon) $ " with owner " $ string(Weapon.Owner));
 }
 
 ////////////////
@@ -711,4 +768,38 @@ defaultproperties
     Mesh=SkeletalMesh'MocaModelPak.MOCAHarry'
     Cutname="harry"
     AirControl=0.35
+
+    SpellMapping(0)=(SpellSlot=SPELL_None,SpellToAssign=None)
+    SpellMapping(1)=(SpellSlot=SPELL_Alohomora,SpellToAssign=class'spellAlohomora')
+    SpellMapping(2)=(SpellSlot=SPELL_Incendio,SpellToAssign=None)
+    SpellMapping(3)=(SpellSlot=SPELL_LocomotorWibbly,SpellToAssign=class'MOCAspellGlacius')
+    SpellMapping(4)=(SpellSlot=SPELL_Lumos,SpellToAssign=class'spellLumos')
+    SpellMapping(5)=(SpellSlot=SPELL_Nox,SpellToAssign=None)
+    SpellMapping(6)=(SpellSlot=SPELL_PetrificusTotalus,SpellToAssign=None)
+    SpellMapping(7)=(SpellSlot=SPELL_WingardiumLeviosa,SpellToAssign=None)
+    SpellMapping(8)=(SpellSlot=SPELL_Verdimillious,SpellToAssign=None)
+    SpellMapping(9)=(SpellSlot=SPELL_Vermillious,SpellToAssign=None)
+    SpellMapping(10)=(SpellSlot=SPELL_Flintifores,SpellToAssign=None)
+    SpellMapping(11)=(SpellSlot=SPELL_Reparo,SpellToAssign=None)
+    SpellMapping(12)=(SpellSlot=SPELL_MucorAdNauseum,SpellToAssign=None)
+    SpellMapping(13)=(SpellSlot=SPELL_Flipendo,SpellToAssign=class'spellFlipendo')
+    SpellMapping(14)=(SpellSlot=SPELL_Ectomatic,SpellToAssign=None)
+    SpellMapping(15)=(SpellSlot=SPELL_Avifores,SpellToAssign=None)
+    SpellMapping(16)=(SpellSlot=SPELL_FireCracker,SpellToAssign=None)
+    SpellMapping(17)=(SpellSlot=SPELL_Transfiguration,SpellToAssign=None)
+    SpellMapping(18)=(SpellSlot=SPELL_WingSustain,SpellToAssign=None)
+    SpellMapping(19)=(SpellSlot=SPELL_Diffindo,SpellToAssign=class'spellDiffindo')
+    SpellMapping(20)=(SpellSlot=SPELL_Skurge,SpellToAssign=class'spellSkurge')
+    SpellMapping(21)=(SpellSlot=SPELL_Spongify,SpellToAssign=class'spellSpongify')
+    SpellMapping(22)=(SpellSlot=SPELL_Rictusempra,SpellToAssign=class'spellRictusempra')
+    SpellMapping(23)=(SpellSlot=SPELL_Ecto,SpellToAssign=None)
+    SpellMapping(24)=(SpellSlot=SPELL_Fire,SpellToAssign=None)
+    SpellMapping(25)=(SpellSlot=SPELL_DuelRictusempra,SpellToAssign=class'spellDuelRictusempra')
+    SpellMapping(26)=(SpellSlot=SPELL_DuelMimblewimble,SpellToAssign=class'spellDuelMimblewimble')
+    SpellMapping(27)=(SpellSlot=SPELL_DuelExpelliarmus,SpellToAssign=class'spellDuelExpelliarmus')
+    
+    DefaultSpellbook(0)=class'spellFlipendo'
+    DefaultSpellbook(1)=class'spellAlohomora'
+    DefaultSpellbook(2)=class'spellLumos'
+    DefaultSpellbook(3)=class'MOCAspellGlacius'
 }

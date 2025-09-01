@@ -1,8 +1,8 @@
 //================================================================================
-// BundimunSpray.
+// MOCABundimunSpray.
 //================================================================================
 
-class BundimunSpray extends HiddenHPawn;
+class MOCABundimunSpray extends HiddenHPawn;
 
 var bool bTouch;
 var float fLifetime;

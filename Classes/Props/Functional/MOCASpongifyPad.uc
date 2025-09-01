@@ -1,25 +1,35 @@
 class MOCASpongifyPad extends SpongifyPad;
 
-var() float PadSize;
+var() float PadSize;     // Custom size for the pad, only works if UseDrawScale is false. Def: 1.0
+var() bool UseCollisionRadius; // Use this SpongifyPad's collision radius as the PadSize? Def: True
+
+event PostBeginPlay()
+{
+	Super.PostBeginPlay();
+	if (UseCollisionRadius)
+	{
+		PadSize = (CollisionRadius / 48);
+	}
+}
 
 function UpdateSpecialFX (float fTimeDelta)
 {
-  fxSparkles.SetRotation(Rotation);
-  fxSparkles.SetLocation(Location);
-  fxSheet.DesiredRotation = Rotation;
-  fxSheet.DesiredRotation.Yaw += 16383;
-  fxSheet.SetRotation(fxSheet.DesiredRotation);
-  fxSheet.SetLocation(Location);
-  if ( bBouncing )
-  {
-    if ( fxSheet.DrawScale > PadSize )
-    {
-      fxSheet.DrawScale -= 4 * fTimeDelta;
-    } else {
-      fxSheet.DrawScale = PadSize;
-      bBouncing = False;
-    }
-  }
+	fxSparkles.SetRotation(Rotation);
+	fxSparkles.SetLocation(Location);
+	fxSheet.DesiredRotation = Rotation;
+	fxSheet.DesiredRotation.Yaw += 16383;
+	fxSheet.SetRotation(fxSheet.DesiredRotation);
+	fxSheet.SetLocation(Location);
+	if ( bBouncing )
+	{
+		if ( fxSheet.DrawScale > PadSize )
+		{
+		fxSheet.DrawScale -= 4 * fTimeDelta;
+		} else {
+		fxSheet.DrawScale = PadSize;
+		bBouncing = False;
+		}
+	}
 }
 
 function TurnOnSpecialFX()
@@ -74,4 +84,5 @@ function OnBounce (Actor Other)
 defaultproperties
 {
      PadSize=1
+	 UseCollisionRadius=True
 }
