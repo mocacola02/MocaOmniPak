@@ -11,21 +11,37 @@ var MOCAharry MocaPlayerHarry;
 
 var ESpellType SpellToActAsRef;
 
-
 function bool OnSpellHitHPawn (Actor aHit, Vector vHitLocation)
 {
-	Log("Hit HPawn");
-	switch (SpellToActAsRef)
+	Log("Hit HPawn " $ string(aHit));
+
+	if (aHit.IsA('MOCAPawn'))
 	{
-		case SPELL_None:			return false;
-		case SPELL_Flipendo:		return HPawn(aHit).HandleSpellFlipendo(self,vHitLocation);
-		case SPELL_Lumos:			return HPawn(aHit).HandleSpellLumos(self,vHitLocation);
-		case SPELL_Alohomora:		return HPawn(aHit).HandleSpellAlohomora(self,vHitLocation);
-		case SPELL_Skurge:			return HPawn(aHit).HandleSpellSkurge(self,vHitLocation);
-		case SPELL_Rictusempra:		return HPawn(aHit).HandleSpellRictusempra(self,vHitLocation);
-		case SPELL_Diffindo:		return HPawn(aHit).HandleSpellDiffindo(self,vHitLocation);
-		case SPELL_Spongify:		return HPawn(aHit).HandleSpellSpongify(self,vHitLocation);
-		default:					return HPawn(aHit).HandleSpellFlipendo(self,vHitLocation);
+		Log("Spell " $ string(self) $ " hit a MOCAPawn " $ string(aHit));
+		return MOCAPawn(aHit).HandleSpell(self,vHitLocation);
+	}
+
+	else if (aHit.IsA('MOCAChar'))
+	{
+		Log("Spell " $ string(self) $ " hit a MOCAChar " $ string(aHit));
+		return MOCAChar(aHit).HandleSpell(self,vHitLocation);
+	}
+
+	else
+	{
+		Log("Spell " $ string(self) $ " did not hit MOCAPawn or MOCAChar, probably hit a stock actor");
+		switch (SpellToActAsRef)
+		{
+			case SPELL_None:			return false;
+			case SPELL_Flipendo:		return HPawn(aHit).HandleSpellFlipendo(self,vHitLocation);
+			case SPELL_Lumos:			return HPawn(aHit).HandleSpellLumos(self,vHitLocation);
+			case SPELL_Alohomora:		return HPawn(aHit).HandleSpellAlohomora(self,vHitLocation);
+			case SPELL_Skurge:			return HPawn(aHit).HandleSpellSkurge(self,vHitLocation);
+			case SPELL_Rictusempra:		return HPawn(aHit).HandleSpellRictusempra(self,vHitLocation);
+			case SPELL_Diffindo:		return HPawn(aHit).HandleSpellDiffindo(self,vHitLocation);
+			case SPELL_Spongify:		return HPawn(aHit).HandleSpellSpongify(self,vHitLocation);
+			default:					return HPawn(aHit).HandleSpellFlipendo(self,vHitLocation);
+		}
 	}
 }
 

@@ -2,7 +2,7 @@ class MOCAspellGlacius extends MOCAbaseSpell;
 
 defaultproperties
 {
-    fxFlyParticleEffectClass=Class'HPParticle.Petri_fly'
+    fxFlyParticleEffectClass=Class'MocaOmniPak.Glacius_fly'
 
     fxHitParticleEffectClass=Class'HPParticle.PixieHit'
 
