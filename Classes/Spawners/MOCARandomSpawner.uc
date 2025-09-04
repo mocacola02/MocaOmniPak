@@ -18,7 +18,7 @@ var() bool bUseCustomSpawnClasses; // Boolean to use custom array defined in-edi
 // Preset array of actors defined in the code
 var Class<Actor> PresetSpawnClasses[118]; 
 
-function Trigger (Actor Other, Pawn Instigator)
+event Trigger (Actor Other, Pawn Instigator)
 {
     local Actor SpawnedObject;
     local Vector Vel;

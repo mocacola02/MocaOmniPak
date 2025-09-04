@@ -96,7 +96,7 @@ begin:
 
 auto state waitforspell
 {
-  function BeginState()
+  event BeginState()
   {
     if ( bOpened )
     {
@@ -113,7 +113,7 @@ auto state waitforspell
 
 state turnover
 {
-  function BeginState()
+  event BeginState()
   {
     bOpened = True;
     eVulnerableToSpell = SPELL_None;

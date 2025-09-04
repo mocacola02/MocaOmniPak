@@ -16,9 +16,7 @@ var() float minTime;            //Minimum time to look when determining a random
 var() float maxTime;            //Maximum time to look when determining a random TTL value. Def: 4.5
 var() bool asleepOnSpawn;       //Should the watcher be inactive on spawn (requires a trigger to be enabled). Def: false
 
-
-
-function PreBeginPlay()
+event PreBeginPlay()
 {
   Super.PreBeginPlay();
 }
@@ -46,7 +44,7 @@ event Bump( Actor Other )
     }
   }
 
-function Tick(float DeltaTime)
+event Tick(float DeltaTime)
 {
     Super.Tick(DeltaTime);
     local Vector LocationForTrigger;
@@ -69,7 +67,7 @@ function playSqueak ()
   PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024, squeakPitch);
 }
 
-function Trigger (Actor Other, Pawn EventInstigator)
+event Trigger (Actor Other, Pawn EventInstigator)
   {
     if (isAwake)
     {
@@ -122,7 +120,6 @@ state stateIdle
       GotoState('lookRight');
     }
 }
-
 
 state lookLeft
 {

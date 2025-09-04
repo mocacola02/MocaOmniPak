@@ -1,6 +1,6 @@
 class MOCASpellCursor extends SpellCursor;
 
-function Tick (float DeltaTime)
+event Tick (float DeltaTime)
 {
     Super.Tick(DeltaTime);
     Log(aPossibleTarget);

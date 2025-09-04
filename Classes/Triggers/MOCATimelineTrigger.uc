@@ -64,7 +64,7 @@ function SortEvents()
 }
 
 
-function Trigger(Actor Other, Pawn Instigator)
+event Trigger(Actor Other, Pawn Instigator)
 {
     if (IsInState('stateDormant'))
     {

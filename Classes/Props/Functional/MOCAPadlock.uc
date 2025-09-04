@@ -9,7 +9,7 @@ var() Class<ParticleFX> fxExplodeClass;
 var() bool fastOpen; //Moca: If true, use faster opening animation
 var() Sound UnlockSounds[3]; //Moca: Sounds to use for unlock animation
 
-function PreBeginPlay()
+event PreBeginPlay()
 {
   PlayerHarry = harry(Level.PlayerHarryActor);
 }

@@ -73,7 +73,7 @@ event PostBeginPlay()
     }
 }
 
-function Trigger(Actor Other, Pawn Instigator)
+event Trigger(Actor Other, Pawn Instigator)
 {
     if (IsInState('stateDormant'))
     {
@@ -225,117 +225,11 @@ state stateDone
         }
 }
 
-function bool HandleSpellFlipendo (optional baseSpell spell, optional Vector vHitLocation)
+function ProcessSpell()
 {
-    Super.HandleSpellFlipendo(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Flipendo)
-    {
-        GotoState('stateSpawn');
-        return True;
-    }
-    else
-    {
-        return False;
-    }
+    GotoState('stateSpawn');
 }
 
-function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
-{
-    Super.HandleSpellAlohomora(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Alohomora)
-    {
-        GotoState('stateSpawn');
-        return True;
-    }
-    else
-    {
-        return False;
-    }
-}
-
-function bool HandleSpellDiffindo (optional baseSpell spell, optional Vector vHitLocation)
-{
-    Super.HandleSpellDiffindo(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Diffindo)
-    {
-        GotoState('stateSpawn');
-        return True;
-    }
-    else
-    {
-        return False;
-    }
-}
-
-function bool HandleSpellEcto (optional baseSpell spell, optional Vector vHitLocation)
-{
-    Super.HandleSpellEcto(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Ecto)
-    {
-        GotoState('stateSpawn');
-        return True;
-    }
-    else
-    {
-        return False;
-    }
-}
-
-function bool HandleSpellLumos (optional baseSpell spell, optional Vector vHitLocation)
-{
-    Super.HandleSpellLumos(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Lumos)
-    {
-        GotoState('stateSpawn');
-        return True;
-    }
-    else
-    {
-        return False;
-    }
-}
-
-function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
-{
-    Super.HandleSpellRictusempra(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Rictusempra)
-    {
-        GotoState('stateSpawn');
-        return True;
-    }
-    else
-    {
-        return False;
-    }
-}
-
-function bool HandleSpellSkurge (optional baseSpell spell, optional Vector vHitLocation)
-{
-    Super.HandleSpellSkurge(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Skurge)
-    {
-        GotoState('stateSpawn');
-        return True;
-    }
-    else
-    {
-        return False;
-    }
-}
-
-function bool HandleSpellSpongify (optional baseSpell spell, optional Vector vHitLocation)
-{
-    Super.HandleSpellSpongify(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Spongify)
-    {
-        GotoState('stateSpawn');
-        return True;
-    }
-    else
-    {
-        return False;
-    }
-}
 
 defaultproperties
 {

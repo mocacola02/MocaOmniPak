@@ -11,7 +11,7 @@ var int currPause;
 
 var bool touchCooldown;
 
-function PostBeginPlay()
+event PostBeginPlay()
 {
     patrolAnimCount = PatrolAnimList.Length;
     pauseAnimCount = PauseAnimList.Length;
@@ -32,7 +32,7 @@ function PostBeginPlay()
     }
 }
 
-function Touch (Actor Other)
+event Touch (Actor Other)
 {
     if (touchCooldown)
     {
@@ -78,7 +78,7 @@ function Touch (Actor Other)
     }
 }
 
-function Timer()
+event Timer()
 {
     touchCooldown = false;
 }

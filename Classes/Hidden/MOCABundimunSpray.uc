@@ -9,7 +9,7 @@ var float fLifetime;
 var float DamageToDeal;
 var Vector CurrentDir;
 
-function PostBeginPlay()
+event PostBeginPlay()
 {
 	local vector EmitLocation;
 
@@ -20,12 +20,12 @@ function PostBeginPlay()
 	Spawn(Class'MocaOmniPak.BundimunMist',self,,EmitLocation,,true);
 }
 
-function Timer()
+event Timer()
 {
 	Destroy();
 }
 
-function Touch (Actor Other)
+event Touch (Actor Other)
 {
 	if ( Pawn(Other) == Instigator )
 	{
@@ -39,7 +39,7 @@ function Touch (Actor Other)
 	}
 }
 
-function Bump (Actor Other)
+event Bump (Actor Other)
 {
 	Touch(Other);
 }

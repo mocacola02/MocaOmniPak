@@ -59,7 +59,7 @@ begin:
 
 state StateFlying
 {
-	function BeginState()
+	event BeginState()
 	{
 		Velocity = vector(Rotation) * Speed;
 	}

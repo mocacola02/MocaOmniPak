@@ -29,7 +29,7 @@ function SpawnFire()
 
 auto state stateIdle
 {
-    function BeginState()
+    event BeginState()
     {
         if(alwaysAttack)
         {
@@ -39,7 +39,7 @@ auto state stateIdle
         SetTimer(0.5,true);
     }
 
-    function Timer()
+    event Timer()
     {
         if (GetDistanceFromHarry() < DistanceToAttack)
         {
@@ -66,7 +66,7 @@ state statePuff
 
 state stateFire
 {
-    function Timer()
+    event Timer()
     {
         Log(string(cooldown));
         if (cooldown < 0)

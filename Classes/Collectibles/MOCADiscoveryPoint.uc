@@ -27,7 +27,7 @@ event FellOutOfWorld()
 {
 }
 
-function Touch (Actor Other)
+event Touch (Actor Other)
 {
     if (Other.IsA('harry') && !IsInState('stateCircle'))
     {
@@ -38,7 +38,7 @@ function Touch (Actor Other)
 
 state stateCircle
 {
-    function Tick(float DeltaTime)
+    event Tick(float DeltaTime)
     {
         local vector DesiredLocation;
         local vector Direction;

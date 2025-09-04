@@ -18,6 +18,8 @@ var bool isDying;
 var BundimunDeath KillEmit;
 var BundimunDig DigEmit;
 
+function SpawnKillParticles();
+
 event PostBeginPlay()
 {
     local vector DigLocation;
@@ -68,7 +70,7 @@ function DoBumpDamage (Vector vDamageLoc, name nameDamage)
     }
 }
 
-function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
+function ProcessSpell()
 {
   GotoState('stunned');
   return True;
@@ -150,7 +152,7 @@ state onground
         LoopAnim('Attack');
     }
 
-    function Tick (float DeltaTime)
+    event Tick (float DeltaTime)
     {
         //SPEEN
         DesiredRotation = Rotation;

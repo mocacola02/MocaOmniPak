@@ -106,7 +106,7 @@ state stateIdle
         PreviousState = GetStateName();
     }
 
-    function Tick( float DeltaTime )
+    event Tick( float DeltaTime )
     {
         if(SeesHarry())
         {
@@ -181,19 +181,19 @@ state stateIdle
 
 state stateChase
 {
-    function BeginState()
+    event BeginState()
     {
         GroundSpeed = chaseSpeed;
         LoopAnim(walkAnim, GetWalkSpeed());
         SetTimer(1.0,true);
     }
 
-    function EndState()
+    event EndState()
     {
         GroundSpeed = Default.GroundSpeed;
     }
 
-    function Timer()
+    event Timer()
     {
         if(!SeesHarry())
         {
@@ -244,7 +244,7 @@ state stateChase
 
 state stateDerailed
 {
-    function EndState()
+    event EndState()
     {
         GroundSpeed = Default.GroundSpeed;
     }

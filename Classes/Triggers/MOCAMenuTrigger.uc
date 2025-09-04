@@ -13,7 +13,13 @@ event PreBeginPlay()
 	PlayerHarry = harry(Level.PlayerHarryActor);
 }
 
-function Activate ( actor Other, pawn Instigator ) {
+event Trigger (Actor Other, Pawn EventInstigator)
+{
+    ProcessTrigger();
+}
+
+function Activate ( actor Other, pawn Instigator )
+{
     ProcessTrigger();
 }
 

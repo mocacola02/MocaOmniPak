@@ -21,7 +21,7 @@ function ProcessSpell()
     ProcessBumpline();
 }
 
-function Trigger(Actor Other, Pawn Instigator)
+event Trigger(Actor Other, Pawn Instigator)
 {
     ProcessBumpline();
 }

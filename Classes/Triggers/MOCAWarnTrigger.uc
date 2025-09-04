@@ -1,6 +1,6 @@
 class MOCAWarnTrigger extends WarnTrigger;
 
-function Touch (Actor Other)
+event Touch (Actor Other)
 {
   local Actor A;
   local harry H;

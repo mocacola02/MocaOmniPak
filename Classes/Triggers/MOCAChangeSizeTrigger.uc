@@ -4,6 +4,8 @@
 
 class MOCAChangeSizeTrigger extends Trigger;
 
+//TODO: this all feels really inefficient
+
 var harry PlayerHarry;
 var bool hasBeenActivated;
 var() float sizeMultiplier;   //What size to make Harry Def: 2.0
@@ -50,7 +52,7 @@ var float CurrentJumpZ;
 var bool isExternalTrigger;
 var vector preGrowthLocation;
 
-function PostBeginPlay()
+event PostBeginPlay()
 {
   super.PostBeginPlay();
   PlayerHarry = harry(Level.PlayerHarryActor);
@@ -75,7 +77,7 @@ event Trigger (Actor Other, Pawn EventInstigator)
   }
 }
 
-function Touch (Actor Other)
+event Activate (Actor Other)
 {
   if ((Other.IsA('harry') || isExternalTrigger) && !hasBeenActivated)
   {
@@ -90,7 +92,7 @@ function Touch (Actor Other)
 
 state stateChangeSize
 {
-  function Tick (float DeltaTime)
+  event Tick (float DeltaTime)
   {
     if (freezeHarryDuringGrowth)
     {

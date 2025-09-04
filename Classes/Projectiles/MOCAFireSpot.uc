@@ -25,12 +25,12 @@ event Destroyed()
     //GF.Destroy();
 }
 
-function Timer()
+event Timer()
 {
 	Destroy();
 }
 
-function Touch (Actor Other)
+event Touch (Actor Other)
 {
     if (Other.IsA('harry'))
     {
@@ -38,7 +38,7 @@ function Touch (Actor Other)
     }
 }
 
-function Bump (Actor Other)
+event Bump (Actor Other)
 {
 	Touch(Other);
 }

@@ -12,6 +12,8 @@ var() float CooldownLength;
 var bool CoolingDown;
 var float TimeLeft;
 
+function bool CheckCooldown();
+
 function LineTraceHit() {
     Log("Hit! doOnceFulfilled = " $doOnceFulfilled);
     if (doOnce && !doOnceFulfilled) {

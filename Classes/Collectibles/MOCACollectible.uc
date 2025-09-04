@@ -43,7 +43,7 @@ auto state BounceIntoPlace
         }
     }
 
-    function Tick(float DeltaTime)
+    event Tick(float DeltaTime)
     {
         local Rotator NewRotation;
 

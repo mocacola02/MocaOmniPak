@@ -10,7 +10,7 @@ var float BumpCooldownTime;        // Time in seconds before allowing a new log 
 const VELOCITY_STOP_THRESHOLD = 2.0;
 const ANGULAR_STOP_THRESHOLD = 5;
 
-function PreBeginPlay()
+event PreBeginPlay()
 {
     Super.PreBeginPlay();
     SetPhysics(PHYS_None); // Manual physics
@@ -21,7 +21,7 @@ event HitWall (Vector HitNormal, Actor Wall)
     // Keeping this function empty, as per your request
 }
 
-simulated function Tick(float DeltaTime)
+event Tick(float DeltaTime)
 {
     // Apply gravity
     Velocity.Z += Gravity * DeltaTime;

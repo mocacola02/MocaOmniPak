@@ -2,6 +2,11 @@ class MOCADamageTrigger extends Trigger;
 
 var() int Damage; //Moca: How much to damage Harry
 
+function Activate( actor Other, pawn Instigator )
+{
+    TriggerEvent('',Other,Instigator);
+}
+
 function TriggerEvent (name EventName, Actor Other, Pawn EventInstigator)
 {
     local harry PlayerHarry;

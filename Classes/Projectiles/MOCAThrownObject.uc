@@ -2,6 +2,8 @@
 // MOCAThrownObject. aka totally not a copy and paste of the bowtruckle projectile (i would've just extended from it but im dumb and i decided to just make a copy so i can easiy reference it from here instead of hgame because im lazy. Cope and Seethe)
 //================================================================================
 
+//DELETEME
+
 class MOCAThrownObject extends HProp;
 
 var Class<ParticleFX> DestroyParticle;
@@ -9,7 +11,7 @@ var int Damage;
 var float MaxLiveTime;
 var Sound destroySounds[3];
 
-function Touch (Actor Other)
+event Touch (Actor Other)
 {
   Super.Touch(Other);
   if ( Other == PlayerHarry )
@@ -55,7 +57,7 @@ function float PlaySoundMiss (Actor p)
 
 auto state twigno
 {
-  function Tick (float DeltaTime)
+  event Tick (float DeltaTime)
   {
     MaxLiveTime -= DeltaTime;
     if ( MaxLiveTime < 0 )
@@ -64,7 +66,7 @@ auto state twigno
     }
   }
   
-  function HitWall (Vector HitNormal, Actor Wall)
+  event HitWall (Vector HitNormal, Actor Wall)
   {
     DestroyObj();
   }

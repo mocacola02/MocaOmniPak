@@ -24,7 +24,7 @@ function setViewDistance(float newDistance)
     requiredDistance = newDistance;
 }
 
-function Timer()
+event Timer()
 {
     local float distToPlayer;
     distToPlayer = Abs(VSize(Location - PlayerHarry.Location));

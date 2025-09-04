@@ -97,7 +97,7 @@ function ChangeNodeView(float newDistance)
     }
 }
 
-function Tick (float DeltaTime)
+event Tick (float DeltaTime)
 {
     Super.Tick(DeltaTime);
     //FaceActor(PlayerHarry);
@@ -125,7 +125,7 @@ auto state stateWait
         LoopAnim(waitAnim, waitRate);
     }
 
-    function Tick (float DeltaTime)
+    event Tick (float DeltaTime)
     {
         navP = NavigationPoint(FindPathToward(PlayerHarry));
         if (isHarryNear(activationDistance) && navP != None)
@@ -217,7 +217,7 @@ state stateRetreat
         GroundSpeed = Default.GroundSpeed;
     }
     
-    function Timer()
+    event Timer()
     {
         local int randStop;
         randStop = rand(16);
@@ -315,7 +315,7 @@ state stateAttack
         
     }
 
-    function Timer ()
+    event Timer ()
     {
         if(angerValue > 0)
         {
@@ -368,7 +368,7 @@ state stateAttackDerailed
         GroundSpeed = Default.GroundSpeed;
     }
 
-    function Timer ()
+    event Timer ()
     {
         angerValue -= relaxRate;
         Log("Anger reduced to " $ string(angerValue));
@@ -419,7 +419,7 @@ state stateDie
 
 state stateCooldown
 {
-    function Timer ()
+    event Timer ()
     {
         angerValue -= relaxRate;
     }

@@ -15,7 +15,7 @@ var() Sound explodeSound;                   //Moca: What sound to play when expl
 
 var() class<ParticleFX> BuildUpParticle;
 
-function Touch (Actor Other)
+event Touch (Actor Other)
 {
   Super.Touch(Other);
   if ( Other.IsA('harry') && !IsInState('Burst') )

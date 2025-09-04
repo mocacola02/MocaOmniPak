@@ -17,7 +17,7 @@ auto state stateDormant
 
 state statePull
 {
-    function Tick(float DeltaTime)
+    event Tick(float DeltaTime)
     {
         if (!isHarryNear(AttractionRange))
         {

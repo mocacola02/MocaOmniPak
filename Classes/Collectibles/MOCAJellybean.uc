@@ -9,7 +9,7 @@ var() float RotationSpeed; // Default: 160 | How fast should bean spin? (in degr
 
 auto state BounceIntoPlace
 {
-    function BeginState()
+    event BeginState()
     {
         if ( bFallsToGround )
         {
@@ -21,7 +21,7 @@ auto state BounceIntoPlace
         }
     }
 
-    function Tick(float DeltaTime)
+    event Tick(float DeltaTime)
     {
         local Rotator NewRotation;
 

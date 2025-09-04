@@ -11,9 +11,15 @@ enum enumHarryAnimSet {
 
 var() enumHarryAnimSet newAnimSet; //Moca: What set to change to?
 
-event Touch( Actor Other )
+event Activate( Actor Other, pawn Instigator )
 {
-    TriggerEvent('',Other,None);
+    TriggerEvent('',Other,Instigator);
+}
+
+event Trigger(Actor Other, Pawn EventInstigator)
+{
+    super.Trigger(Other, EventInstigator);
+    TriggerEvent('',Other,EventInstigator);
 }
 
 function TriggerEvent (name EventName, Actor Other, Pawn EventInstigator)

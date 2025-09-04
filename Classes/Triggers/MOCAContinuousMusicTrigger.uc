@@ -17,7 +17,7 @@ var bool coolingDown;
 var bool firstPlay;
 var int previousIndex;
 
-function PostBeginPlay()
+event PostBeginPlay()
 {
     super.PostBeginPlay();
 
