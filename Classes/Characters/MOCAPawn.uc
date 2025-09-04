@@ -4,116 +4,59 @@
 
 class MOCAPawn extends HPawn;
 
-function bool HandleSpellFlipendo (optional baseSpell spell, optional Vector vHitLocation)
-{
-    Super.HandleSpellFlipendo(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Flipendo)
-    {
-        ProcessSpell();
-        return True;
-    }
-    else
-    {
-        return False;
-    }
-}
-
 function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
 {
-    Super.HandleSpellAlohomora(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Alohomora)
-    {
-        ProcessSpell();
-        return True;
-    }
-    else
-    {
-        return False;
-    }
+  return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellDiffindo (optional baseSpell spell, optional Vector vHitLocation)
 {
-    Super.HandleSpellDiffindo(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Diffindo)
-    {
-        ProcessSpell();
-        return True;
-    }
-    else
-    {
-        return False;
-    }
+  return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellEcto (optional baseSpell spell, optional Vector vHitLocation)
 {
-    Super.HandleSpellEcto(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Ecto)
-    {
-        ProcessSpell();
-        return True;
-    }
-    else
-    {
-        return False;
-    }
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellFlipendo (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellLumos (optional baseSpell spell, optional Vector vHitLocation)
 {
-    Super.HandleSpellLumos(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Lumos)
-    {
-        ProcessSpell();
-        return True;
-    }
-    else
-    {
-        return False;
-    }
+  return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
 {
-    Super.HandleSpellRictusempra(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Rictusempra)
-    {
-        ProcessSpell();
-        return True;
-    }
-    else
-    {
-        return False;
-    }
+  return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellSkurge (optional baseSpell spell, optional Vector vHitLocation)
 {
-    Super.HandleSpellSkurge(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Skurge)
-    {
-        ProcessSpell();
-        return True;
-    }
-    else
-    {
-        return False;
-    }
+  return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellSpongify (optional baseSpell spell, optional Vector vHitLocation)
 {
-    Super.HandleSpellSpongify(spell,vHitLocation);
-    if (eVulnerableToSpell == SPELL_Spongify)
-    {
-        ProcessSpell();
-        return True;
-    }
-    else
-    {
-        return False;
-    }
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelRictusempra (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelMimblewimble (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelExpelliarmus (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpell (optional baseSpell spell, optional Vector vHitLocation)

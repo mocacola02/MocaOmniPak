@@ -2,7 +2,7 @@
 // MOCABumplineTrigger.
 //================================================================================
 
-class MOCABumplineTrigger extends HChar;
+class MOCABumplineTrigger extends MOCAChar;
 
 // Struct to hold bumpset and prefix mappings
 struct BumpSetMapping
@@ -16,9 +16,21 @@ var BumpSetMapping BumpSetMappings[286]; // Array to hold bumpset and prefix map
 
 var() bool randomLinePerTrigger; //Moca: Should lines be random, if false use user-set bumplines
 
+function ProcessSpell()
+{
+    ProcessBumpline();
+}
+
 function Trigger(Actor Other, Pawn Instigator)
 {
+    ProcessBumpline();
+}
+
+function ProcessBumpline()
+{
     local int RandomIndex;
+
+    Log("Triggered " $ string(self));
 
     if (randomLinePerTrigger)
     {
@@ -31,6 +43,7 @@ function Trigger(Actor Other, Pawn Instigator)
         Log("Set: " @ BumpLineSet);
         Log("Prefix: " @ BumpLineSetPrefix);
     }
+
     DoBumpLine();
 }
 

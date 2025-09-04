@@ -259,6 +259,61 @@ function FaceActor(Actor Target)
 	SetRotation(NewRotation);
 }
 
+function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDiffindo (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellEcto (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellFlipendo (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellLumos (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellSkurge (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellSpongify (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelRictusempra (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelMimblewimble (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelExpelliarmus (optional baseSpell spell, optional Vector vHitLocation)
+{
+  return HandleSpell(spell,vHitLocation);
+}
+
 function bool HandleSpell (optional baseSpell spell, optional Vector vHitLocation)
 {
     if (PlayerHarry.IsA('MOCAharry'))

@@ -75,6 +75,12 @@ event PostBeginPlay()
   }
 }
 
+event Touch(Actor Other)
+{
+  Super.Touch(Other);
+  PickupActor(Other);
+}
+
 function AddToModdedSpellBook (Class<baseSpell> spellClass)
 {
 
@@ -257,6 +263,24 @@ function SetHarryWeapon (class<Weapon> WeaponToSpawn, int WeaponSlot)
     Log("Current weapon is " $ string(Weapon) $ " with owner " $ string(Weapon.Owner));
 }
 
+function PlaySpellCastSound (ESpellType SpellType)
+{
+  local Sound SpellSound;
+  Super.PlaySpellCastSound(SpellType);
+
+  if ( SpellSound == None )
+  {
+    local class curSpell;
+    curSpell = baseWand(Weapon).CurrentSpell;
+    SpellSound = class<baseSpell>(curSpell).Default.CastSound;
+  }
+
+  if ( SpellSound != None )
+  {
+    PlaySound(SpellSound,SLOT_None);
+  }
+}
+
 ////////////////
 // STATES
 ////////////////
@@ -306,97 +330,6 @@ state caught
     screenFade(0.0, 2.0);
     bKeepStationary = False;
     GotoState('PlayerWalking');
-}
-
-state PlayerWalking
-{
-  ignores SeePlayer, HearNoise;
-  
-  event Touch( Actor Other )
-  {
-    Super.Touch(Other);
-  }
-
-  event UnTouch( Actor Other )
-  {
-    Super.UnTouch(Other);
-  }
-
-  event Bump( Actor Other )
-  {
-    Super.Bump(Other);
-  }
-  
-  event HitWall( vector vHitNormal, Actor Wall )
-  {
-    Super.HitWall(vHitNormal,Wall);
-  }
-  
-  event TakeDamage (int Damage, Pawn InstigatedBy, Vector HitLocation, Vector Momentum, name DamageType)
-  {
-    Super.TakeDamage(Damage,InstigatedBy,HitLocation,Momentum,DamageType);
-  }
-  
-  function ZoneChange (ZoneInfo NewZone)
-  {
-    if (NewZone.bWaterZone)
-    {
-      GotoState('PlayerSwimming');
-    }
-  }
-
-  function AnimEnd()
-  {
-    Super.AnimEnd();
-  }
-  
-  function StartAiming (bool in_bHarryUsingSword)
-  {
-    Super.StartAiming(in_bHarryUsingSword);
-  }
-  
-  function Landed(vector vHitNormal)
-  {
-    Super.Landed(vHitNormal);
-  }
-  
-  event PlayerTick( float DeltaTime )
-  {
-    Super.PlayerTick(DeltaTime);
-  }
-
-  function ProcessFalling( float DeltaTime )
-  {
-    Super.ProcessFalling(DeltaTime);
-  }
-  
-  function JumpOffPawn()
-  {
-    Super.JumpOffPawn();
-  }
-  
-  function PlayerMove (float DeltaTime)
-  {
-    Super.PlayerMove(DeltaTime);
-  }
-  
-  function ProcessMove(float DeltaTime, vector NewAccel, eDodgeDir DodgeMove, rotator DeltaRot)	
-  {
-    Super.ProcessMove(DeltaTime,NewAccel,DodgeMove,DeltaRot);
-  }
-  
-  function BeginState()
-  {
-    Super.BeginState();
-    GroundSpeed = Default.GroundSpeed;
-    AirSpeed = Default.AirSpeed;
-    AirControl = Default.AirControl;
-  }
-  
-  function EndState()
-  {
-    Super.EndState();
-  }
 }
 
 state PlayerSwimming

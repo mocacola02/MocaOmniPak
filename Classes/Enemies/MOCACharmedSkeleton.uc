@@ -21,3 +21,5 @@
 ascii art by GJakaKL*/
 
 class MOCACharmedSkeleton extends MOCAChar;
+
+// To be done

@@ -41,6 +41,45 @@ function DoBumpLine (optional bool bJustTalk, optional string AlternateBumpLineS
 	local int rm;
 	local int numSpaces;
 
+	Log("ATTEMPT BUMPLINE");
+
+	if (customMessage != "")
+	{
+		sSayText = customMessage;
+	
+		BabbleString(sSayText);
+		numSpaces = CountSpaces();
+		Log("Number of Spaces: " $ string(numSpaces));
+		sndLen = (Len(sSayText) * timeBetweenBabble) + (numSpaces * timeBetweenBabble) + delayBeforeEnding;
+
+		// Metallicafan212:	This wasn't here for some reason
+		sSayText = HandleFacialExpression( sSayText, sndLen );
+		
+		if( !bJustTalk )
+		{
+			//create a TimedCue to cue object after sndLen seconds.
+			tcue=spawn(class 'TimedCue');
+			tcue.CutNotifyActor=Self;		//Tell me when done. This is auto passed back to the CutNotifyActor if any.
+											//Or it can be used by the talk to find out when the talk is finished.
+			tcue.SetupTimer(sndLen+0.5,"_BumpLineCue"); //little extra time for slop
+		}
+
+		//show text
+		level.playerHarryActor.MyHud.SetSubtitleText(sSayText, sndLen);
+		
+		if( !bJustTalk )
+		{
+			Log("Time to babble!");
+			GotoState('DoingBumpLine');
+			return;
+		}
+		else
+		{
+			Log("Got to the end and couldn't babble with custom message.");
+			return;
+		}
+	}
+
 	if (  !bUseBumpLine &&  !bJustTalk )
 	{
 		if (!bDoRandomBumpLine)
@@ -132,10 +171,7 @@ function DoBumpLine (optional bool bJustTalk, optional string AlternateBumpLineS
 		Level.PlayerHarryActor.CutCommand("capture");
 	}
 	CutNotifyActor = self;
-	if (customMessage != "")
-	{
-		sSayText = customMessage;
-	}
+
 	BabbleString(sSayText);
     numSpaces = CountSpaces();
 	Log("Number of Spaces: " $ string(numSpaces));
@@ -171,6 +207,7 @@ state DoingBumpLine
 {
 	function BeginState()
 	{
+		Log("ENTERING DoingBumpline");
 		Acceleration = vect(0.00,0.00,0.00);
 		Velocity = vect(0.00,0.00,0.00);
 		PlayAnim(babbleAnim,1.0,0.5);
