@@ -1,19 +1,16 @@
-class MOCADamageTrigger extends Trigger;
+class MOCADamageTrigger extends MOCATrigger;
 
 var() int Damage; //Moca: How much to damage Harry
 
 function Activate( actor Other, pawn Instigator )
 {
-    TriggerEvent('',Other,Instigator);
+    ProcessTrigger();
 }
 
-function TriggerEvent (name EventName, Actor Other, Pawn EventInstigator)
+function ProcessTrigger ()
 {
-    local harry PlayerHarry;
-
     Log("ACTIVATING DAMAGE TRIGGER!!!!!!!!!!!!!!!!");
 
-	PlayerHarry = harry(Level.PlayerHarryActor);
     if (PlayerHarry != None)
     {
         PlayerHarry.TakeDamage(Damage, None, location, vect(0,0,0), 'DamageTrigger');

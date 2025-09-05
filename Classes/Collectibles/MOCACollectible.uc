@@ -4,15 +4,18 @@
 
 class MOCACollectible extends HProp;
 
-var float CurrentYawF; // Float version of yaw
-var() float RotationSpeed; // Default: 160 | How fast should bean spin? (in degrees per second)
-var() Sound pickUpSound;
-var float fPickupFlyTime;
-var() bool bFallsToGround;
+
+var() float RotationSpeed; // Moca: How fast should bean spin? (in degrees per second) Def: 160
+var() Sound pickUpSound;    //Moca: What sound to play on pickup?
+var() bool bFallsToGround; //Moca: Should bean fall to ground? Def: True
+var() bool attractedToHarry; //Moca: Should bean move towards harry? Def: False
+var() float attractionSpeed; //Moca: How fast should bean move towards harry? Def: 300.0
+var() vector attractionOffset; //Moca: Position offset to be attacted to Def: (0,0,0)
+
 var bool bInitialized;
-var() bool attractedToHarry;
-var() float attractionSpeed;
-var() vector attractionOffset;
+
+var float CurrentYawF;
+var float fPickupFlyTime;
 
 event PreBeginPlay()
 {
@@ -20,7 +23,7 @@ event PreBeginPlay()
     soundPickup = pickUpSound;
 }
 
-function Touch (Actor Other)
+event Touch (Actor Other)
 {
   Super.Touch(Other);
   if ( Other.IsA('Tut1Gnome') )
@@ -31,7 +34,7 @@ function Touch (Actor Other)
 
 auto state BounceIntoPlace
 {
-    function BeginState()
+    event BeginState()
     {
         if ( bFallsToGround )
         {

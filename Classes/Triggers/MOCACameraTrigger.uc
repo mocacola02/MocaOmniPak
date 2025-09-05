@@ -2,9 +2,7 @@
 // MOCACameraTrigger.
 //================================================================================
 
-class MOCACameraTrigger extends Trigger;
-
-var harry PlayerHarry;
+class MOCACameraTrigger extends MOCATrigger;
 
 enum ECamMode 
 {
@@ -23,12 +21,6 @@ enum ECamMode
 var() bool OrientHarry;  //Moca: Orient Harry to face CameraTarget?
 var() ECamMode CameraMode; //Moca: CameraMode to switch to
 var() Name CameraTargetTag; //Moca: Tag of the MOCACameraTarget
-
-event PreBeginPlay()
-{
-	Super.PreBeginPlay();
-	PlayerHarry = harry(Level.PlayerHarryActor);
-}
 
 function Activate ( actor Other, pawn Instigator )
 {

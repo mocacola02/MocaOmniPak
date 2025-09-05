@@ -1,15 +1,25 @@
-class MOCAWarnTrigger extends WarnTrigger;
+class MOCAWarnTrigger extends MOCATrigger;
 
-event Touch (Actor Other)
+var() string WarningMessage;
+var() float Duration;
+var() float SizeMultiplier;
+
+event Activate (Actor Other,Pawn Instigator)
 {
-  local Actor A;
-  local harry H;
+  baseHUD(PlayerHarry.myHUD).ShowPopup(Class'MOCAWarning');
+  MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).SizeScale = SizeMultiplier;
+  MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).DisplayText = WarningMessage;
+  MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).LifeSpan = Duration;
 
-  baseHUD(PlayerHarry.myHUD).ShowPopup(Class'baseWarning');
-  baseWarning(baseHUD(PlayerHarry.myHUD).curPopup).DisplayText = WarningMessage;
-  baseWarning(baseHUD(PlayerHarry.myHUD).curPopup).LifeSpan = durration;
   if ( bTriggerOnceOnly )
   {
-    Disable('Touch');
+    Disable('Activate');
   }
+}
+
+defaultproperties
+{
+  WarningMessage="Edit message in the properties."
+  Duration=5.0
+  SizeMultiplier=2.0
 }

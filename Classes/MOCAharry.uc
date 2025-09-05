@@ -135,9 +135,12 @@ event BaseChanged(Actor OldBase, Actor NewBase)
   Super.BaseChanged(OldBase, NewBase);
   if (NewBase.IsA('MOCABundimun'))
   {
-    Bundi = MOCABundimun(NewBase);
-    Bundi.ProcessStomp();
-    GotoState('stateStomping');
+    if (NewBase.IsInState('stunned'))
+    {
+      Bundi = MOCABundimun(NewBase);
+      Bundi.ProcessStomp();
+      GotoState('stateStomping');
+    }
   }
 }
 

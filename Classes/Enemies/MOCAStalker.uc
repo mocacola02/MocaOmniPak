@@ -214,7 +214,7 @@ state stateRetreat
     event EndState()
     {
         super.EndState();
-        GroundSpeed = Default.GroundSpeed;
+        GroundSpeed = MapDefault.GroundSpeed;
     }
     
     event Timer()
@@ -306,7 +306,7 @@ state stateAttack
     event EndState()
     {
         Super.EndState();
-        GroundSpeed = Default.GroundSpeed;
+        GroundSpeed = MapDefault.GroundSpeed;
     }
 
     event AlterDestination()
@@ -365,7 +365,7 @@ state stateAttackDerailed
     event EndState()
     {
         Super.EndState();
-        GroundSpeed = Default.GroundSpeed;
+        GroundSpeed = MapDefault.GroundSpeed;
     }
 
     event Timer ()

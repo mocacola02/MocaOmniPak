@@ -2,18 +2,10 @@
 // MOCAStealthTrigger.
 //================================================================================
 
-class MOCAStealthTrigger extends Trigger;
+class MOCAStealthTrigger extends MOCATrigger;
 
-var MOCAharry PlayerHarry;
 var bool doOnce;
 var bool attachedToKnight;
-
-
-event PreBeginPlay()
-{
-	Super.PreBeginPlay();
-	PlayerHarry = MOCAharry(Level.PlayerHarryActor);
-}
 
 function Activate ( actor Other, pawn Instigator ) {
     if (doOnce && !PlayerHarry.IsInState('caught')) {

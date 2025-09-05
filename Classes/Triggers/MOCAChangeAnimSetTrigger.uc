@@ -1,4 +1,4 @@
-class MOCAChangeAnimSetTrigger extends Trigger;
+class MOCAChangeAnimSetTrigger extends MOCATrigger;
 
 enum enumHarryAnimSet {
   HARRY_ANIM_SET_MAIN,
@@ -13,16 +13,10 @@ var() enumHarryAnimSet newAnimSet; //Moca: What set to change to?
 
 event Activate( Actor Other, pawn Instigator )
 {
-    TriggerEvent('',Other,Instigator);
+    ProcessTrigger(Other);
 }
 
-event Trigger(Actor Other, Pawn EventInstigator)
-{
-    super.Trigger(Other, EventInstigator);
-    TriggerEvent('',Other,EventInstigator);
-}
-
-function TriggerEvent (name EventName, Actor Other, Pawn EventInstigator)
+function ProcessTrigger (Actor Other)
 {
     local int setID;
 

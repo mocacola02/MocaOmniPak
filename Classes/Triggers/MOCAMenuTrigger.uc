@@ -2,21 +2,9 @@
 // MOCAMenuTrigger.
 //================================================================================
 
-class MOCAMenuTrigger extends Trigger;
+class MOCAMenuTrigger extends MOCATrigger;
 
-var harry PlayerHarry;
 var() string MenuName;
-
-event PreBeginPlay()
-{
-	Super.PreBeginPlay();
-	PlayerHarry = harry(Level.PlayerHarryActor);
-}
-
-event Trigger (Actor Other, Pawn EventInstigator)
-{
-    ProcessTrigger();
-}
 
 function Activate ( actor Other, pawn Instigator )
 {

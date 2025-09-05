@@ -1,7 +1,7 @@
 //=============================================================================
 // MOCARandomDispatcher.
 //=============================================================================
-class MOCARandomDispatcher extends Triggers;
+class MOCARandomDispatcher extends MOCATrigger;
 
 //-----------------------------------------------------------------------------
 // Dispatcher variables.
@@ -12,7 +12,7 @@ var() bool dispatchAllAtOnce; //Moca: Should it randomly dispatch all events aft
 var() bool eventsFireOnce; //Moca: Should it be able to trigger events multiple times?
 var int i;                // Internal counter.
 
-event Trigger( actor Other, pawn EventInstigator )
+event Activate( actor Other, pawn EventInstigator )
 {
 	Log("MRD TRIGGERED!!!!!!!!!!!!");
 	if (!IsInState('Dispatch'))

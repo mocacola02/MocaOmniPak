@@ -1,18 +1,12 @@
-class MOCAPopUpTrigger extends Trigger;
+class MOCAPopUpTrigger extends MOCATrigger;
 
-var harry PlayerHarry;
 var() string MessageText;                // Moca: Text to display in the popup
 var() string WebMessageLink;             // Link to web text resource to display. This currently crashes (idk why) so don't use it yet
 var() float TimeOut;                     // Moca: Duration in seconds.
 
-event PreBeginPlay()
-{
-    Super.PreBeginPlay();
-    PlayerHarry = harry(Level.PlayerHarryActor); // Cache the PlayerHarry instance
-}
-
 function Activate(actor Other, pawn Instigator)
 {
+    Log("Activated!");
     ProcessTrigger();
 }
 

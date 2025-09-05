@@ -2,11 +2,10 @@
 // MOCAChangeSizeTrigger.
 //================================================================================
 
-class MOCAChangeSizeTrigger extends Trigger;
+class MOCAChangeSizeTrigger extends MOCATrigger;
 
 //TODO: this all feels really inefficient
 
-var harry PlayerHarry;
 var bool hasBeenActivated;
 var() float sizeMultiplier;   //What size to make Harry Def: 2.0
 var() float growthFrameRate;  //How smooth should the resize be? Def: 60.0
@@ -52,18 +51,7 @@ var float CurrentJumpZ;
 var bool isExternalTrigger;
 var vector preGrowthLocation;
 
-event PostBeginPlay()
-{
-  super.PostBeginPlay();
-  PlayerHarry = harry(Level.PlayerHarryActor);
-}
-
-function GlobalTriggerHandler( actor Other, pawn EventInstigator )
-{
-	Global.Trigger(Other, EventInstigator);
-}
-
-event Trigger (Actor Other, Pawn EventInstigator)
+event Activate (Actor Other, Pawn Instigator)
 {
   if(hasBeenActivated)
   {
@@ -73,20 +61,15 @@ event Trigger (Actor Other, Pawn EventInstigator)
   else
   {
     isExternalTrigger = true;
-    Touch(Other);
-  }
-}
-
-event Activate (Actor Other)
-{
-  if ((Other.IsA('harry') || isExternalTrigger) && !hasBeenActivated)
-  {
-    hasBeenActivated = true;
-    isExternalTrigger = false;
-    Disable('Touch');
-    preGrowthLocation = PlayerHarry.Location;
-    //Log("Hold Harry at: " $ string(preGrowthLocation));
-    GotoState('stateChangeSize');
+    if ((Other.IsA('harry') || isExternalTrigger) && !hasBeenActivated)
+    {
+      hasBeenActivated = true;
+      isExternalTrigger = false;
+      Disable('Touch');
+      preGrowthLocation = PlayerHarry.Location;
+      //Log("Hold Harry at: " $ string(preGrowthLocation));
+      GotoState('stateChangeSize');
+    }
   }
 }
 

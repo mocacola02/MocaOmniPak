@@ -73,7 +73,6 @@ function DoBumpDamage (Vector vDamageLoc, name nameDamage)
 function ProcessSpell()
 {
   GotoState('stunned');
-  return True;
 }
 
 function Puke()

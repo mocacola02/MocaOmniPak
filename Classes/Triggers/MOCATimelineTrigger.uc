@@ -1,7 +1,7 @@
 //=============================================================================
 // MOCATimelineTrigger.
 //=============================================================================
-class MOCATimelineTrigger extends Triggers;
+class MOCATimelineTrigger extends MOCATrigger;
 
 struct TimedEvent
 {
@@ -64,16 +64,17 @@ function SortEvents()
 }
 
 
-event Trigger(Actor Other, Pawn Instigator)
+event Activate(Actor Other, Pawn Instigator)
 {
-    if (IsInState('stateDormant'))
+    Log("Timeline activating from state: " $ string(GetStateName()));
+    if (!IsInState('stateCount'))
     {
         GotoState('stateCount');
     }
-}
-
-auto state stateDormant
-{
+    else
+    {
+        Log("uhh actually nvm (is timeline already running?)");
+    }
 }
 
 state stateCount

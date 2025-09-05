@@ -19,7 +19,7 @@ function setViewDistance(float newDistance)
 {
     if (newDistance == 0)
     {
-        newDistance = Default.requiredDistance;
+        newDistance = MapDefault.requiredDistance;
     }
     requiredDistance = newDistance;
 }

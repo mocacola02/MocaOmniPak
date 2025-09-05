@@ -64,7 +64,7 @@ function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector 
 
 function float GetWalkSpeed()
 {
-    return GroundSpeed / default.GroundSpeed;
+    return GroundSpeed / MapDefault.GroundSpeed;
 }
 
 event Bump( Actor Other )
@@ -116,8 +116,8 @@ state stateIdle
     }
 
     begin:
-        GroundSpeed = Default.GroundSpeed;
-        eVulnerableToSpell=default.eVulnerableToSpell;
+        GroundSpeed = MapDefault.GroundSpeed;
+        eVulnerableToSpell=MapDefault.eVulnerableToSpell;
         log("beginning idle");
         LoopAnim(idleAnim);
         if (inErrorMode)
@@ -190,7 +190,7 @@ state stateChase
 
     event EndState()
     {
-        GroundSpeed = Default.GroundSpeed;
+        GroundSpeed = MapDefault.GroundSpeed;
     }
 
     event Timer()
@@ -246,7 +246,7 @@ state stateDerailed
 {
     event EndState()
     {
-        GroundSpeed = Default.GroundSpeed;
+        GroundSpeed = MapDefault.GroundSpeed;
     }
 
     begin:

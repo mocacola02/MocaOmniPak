@@ -2,10 +2,8 @@
 // MOCASetRespawnTrigger.
 //================================================================================
 
-class MOCASetRespawnTrigger extends Trigger;
+class MOCASetRespawnTrigger extends MOCATrigger;
 
-
-var MOCAharry PlayerHarry;
 var() Vector respawnLocation;
 var() Rotator respawnRotation;
 var() bool useOwnTransform; //If true, use the location and rotation of this trigger. Def: True
@@ -20,18 +18,23 @@ event PreBeginPlay()
         respawnRotation = Rotation;
     }
 
-	PlayerHarry = MOCAharry(Level.PlayerHarryActor);
+    if (!PlayerHarry.IsA('MOCAharry'))
+    {
+        Log("RESPAWN TRIGGERS REQUIRE MOCAHARRY!!!!!!!");
+        Destroy();
+    }
 }
 
-function Activate ( actor Other, pawn Instigator ) {
+function Activate ( actor Other, pawn Instigator )
+{
     ProcessTrigger();
 }
 
 function ProcessTrigger()
 {
     Log("Set respawn to " $ respawnLocation);
-    PlayerHarry.respawnLoc = respawnLocation;
-    PlayerHarry.respawnRot = respawnRotation;
+    MOCAharry(PlayerHarry).respawnLoc = respawnLocation;
+    MOCAharry(PlayerHarry).respawnRot = respawnRotation;
 }
 
 defaultproperties {

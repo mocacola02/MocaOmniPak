@@ -2,16 +2,20 @@
 // MOCAWeaponChangeTrigger.
 //================================================================================
 
-class MOCAWeaponChangeTrigger extends Trigger;
+class MOCAWeaponChangeTrigger extends MOCATrigger;
 
-var MOCAharry PlayerHarry;
 var() class<Weapon> WeaponToSpawn; // Change the type to class<Actor>
 var bool inactive;
 
-event PreBeginPlay()
+function PreBeginPlay()
 {
-	Super.PreBeginPlay();
-	PlayerHarry = MOCAharry(Level.PlayerHarryActor);
+    Super.PreBeginPlay();
+
+    if (!PlayerHarry.IsA('MOCAharry'))
+    {
+        Log("MOCAWEAPONCHANGETRIGGER REQUIRES MOCAHARRY!!!!!");
+        Destroy();
+    }
 }
 
 function Activate ( actor Other, pawn Instigator ) {
@@ -32,27 +36,12 @@ function ProcessTrigger()
     PlayerHarry.SwitchWeapon(1);
     log(string(self) $ " spawning weap " $ string(weap)); // Log the spawning of the weapon
     if (WeaponToSpawn == class'HGame.MOCAbaseHands') {
-        PlayerHarry.CurrentWeapon = 0;
+        MOCAharry(PlayerHarry).CurrentWeapon = 0;
     }
     else {
-        PlayerHarry.CurrentWeapon = 1;
+        MOCAharry(PlayerHarry).CurrentWeapon = 1;
     }
     GotoState('Cooldown');
-}
-
-//Note: I made this a while back. Wtf am i doing here? Fix this asap.
-
-auto state On {
-    begin:
-        inactive = False;
-}
-
-state Cooldown {
-    begin:
-        inactive = True;
-        //sleep(3.0);
-        //GotoState('On');
-        //Causes issues and i dont really need it to reactivate so............ poor coding it is :)
 }
 
 defaultproperties {
