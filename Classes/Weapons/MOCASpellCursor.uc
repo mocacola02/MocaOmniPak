@@ -146,3 +146,15 @@ function UpdateCursor (optional bool bJustStopAtClosestPawnOrWall)
     }
   }
 }
+
+function StartLockedOnSoundLoop()
+{
+  PlaySound(Sound'spell_target_nl3',SLOT_Misc);
+  PlaySound(Sound'spell_targetloop',SLOT_Interact,,,,,,true);
+}
+
+function StopLockedOnSoundLoop()
+{
+  StopSound(Sound'spell_target_nl3',SLOT_Misc,0.5);
+  StopSound(Sound'spell_targetloop',SLOT_Interact,1.0);
+}
