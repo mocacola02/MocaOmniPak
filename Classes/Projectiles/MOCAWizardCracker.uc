@@ -1,11 +1,13 @@
 // cracker without the barrel
-class MOCAWizardCracker extends HPawn;
+class MOCAWizardCracker extends MOCAPawn;
 
 var() float SwellRate; //Moca: How long does it take for the cracker to swell up? 1.0 is regular speed, 2.0 is 2x speed, etc. Def: 1.5
 var() float BurstDelay; //Moca: How long to wait after done swelling to burst? Def: 2.0
 var() float BurstRadius; //Moca: How far does the burst reach?
 var() float BurstDamage; //Moca: How much damage does the burst do? This represents the maximum damage if BurstFalloff=True. Def: 15.0
 var() float DirectHitDamage; //Moca: How much damage should a direct hit on Harry do? Def: 20.0
+var() float CameraShakeIntensity; //Moca: How much should the camera shake from bursts? Def: 100.0
+var() float CameraShakeDuration; //Moca: How long should camera shake. Def: 0.75
 
 var() bool ActAsSpell; //Moca: Should the fire cracker act as a spell? Works similarly to SwordMode activating spell functions. Def: False
 var() bool BurstFalloff; //Moca: Should less damage be done the further away from the burst Harry is? Def: True
@@ -15,9 +17,17 @@ var() bool WaitForSwell; //Moca: Should we wait for the swelling to finish befor
 var bool IsSwelling;
 var bool DirectHit;
 var bool CanHitHarry;
+var vector LastSafeLocation;
 
 function Burst();
 function float DetermineDamage(float Distance);
+
+event FellOutOfWorld()
+{
+    local vector HandPos;
+    HandPos = PlayerHarry.BonePos('bip01 R Hand');
+    SetLocation(HandPos);
+}
 
 function PrepareTimer()
 {
@@ -51,6 +61,11 @@ auto state stateDormant
         }
     }
 
+    event EndEvent()
+    {
+        bObjectCanBePickedUp = False;
+    }
+
     event Touch (Actor Other)
     {
         if (ExplodeOnTouch && (Other.IsA('HChar') || Other.IsA('harry')))
@@ -59,10 +74,6 @@ auto state stateDormant
             DirectHit = Other.IsA('harry');
             GotoState('stateBurst');
         }
-        else
-        {
-            bObjectCanBePickedUp = False;
-        }
     }
 }
 
@@ -70,6 +81,7 @@ state stateBeingThrown
 {
     event BeginState()
     {
+        PlayerHarry.ActorToCarry = None;
         CanHitHarry = false;
         SetCollision(true,false,false);
     }
@@ -114,7 +126,11 @@ state stateBurst
 {
     event BeginState()
     {
-        PlayerHarry.DropCarryingActor(True);
+        if (PlayerHarry.ActorToCarry == Self)
+        {
+            PlayerHarry.DropCarryingActor(True);
+        }
+        
         Burst();
     }
 
@@ -131,7 +147,14 @@ state stateBurst
 
         if (DistanceFromHarry < BurstRadius)
         {
-            PlayerHarry.TakeDamage(DetermineDamage(DistanceFromHarry),self,Location,Velocity,'MOCAWizardCracker');
+            local float DamageToDeal;
+            local float ShakeAmount;
+            DamageToDeal = DetermineDamage(DistanceFromHarry);
+            PlayerHarry.TakeDamage(DamageToDeal,self,Location,Velocity,'MOCAWizardCracker');
+
+            ShakeAmount = DamageToDeal / BurstDamage;
+            ShakeAmount *= CameraShakeIntensity;
+            PlayerHarry.ShakeView(0.2,ShakeAmount,ShakeAmount);
         }
 
         Spawn(class'Firecracker_Burst',,,Location);
@@ -180,6 +203,9 @@ defaultproperties
     BurstRadius=128.0
     BurstDamage=15.0
     DirectHitDamage=20.0
+    CameraShakeIntensity=100.0
+    CameraShakeDuration=0.75
+    
     BurstFalloff=True
     WaitForSwell=True
 }

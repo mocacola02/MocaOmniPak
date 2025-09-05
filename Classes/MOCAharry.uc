@@ -714,14 +714,14 @@ state PlayerSwimming
   }
 }
 
-
-
 defaultproperties
 {
     DefaultWeapon=class'MocaOmniPak.MOCAWand'
     Mesh=SkeletalMesh'MocaModelPak.MOCAHarry'
     Cutname="harry"
     AirControl=0.35
+    RotationRate=(Pitch=20000,Yaw=100000,Roll=3072)
+    Buoyancy=200.0
 
     SpellMapping(0)=(SpellSlot=SPELL_None,SpellToAssign=None)
     SpellMapping(1)=(SpellSlot=SPELL_Alohomora,SpellToAssign=class'spellAlohomora')
