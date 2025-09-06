@@ -55,7 +55,13 @@ event PreBeginPlay()
     SpellCursor = Spawn(class'MOCASpellCursor');
   }
 
+  HarryAnimChannel.Destroy();
+
+  HarryAnimChannel = cHarryAnimChannel( CreateAnimChannel(class'MOCAharryAnimChannel', AT_Replace, 'bip01 spine1') );
+	HarryAnimChannel.SetOwner( self );
+
   Log("We are using weapon " $ string(Weapon) $ " with the cursor " $ string(SpellCursor));
+  Log("MOCAharry anim channel: " $ string(HarryAnimChannel));
 }
 
 event PostBeginPlay()
@@ -137,6 +143,7 @@ event BaseChanged(Actor OldBase, Actor NewBase)
   {
     if (NewBase.IsInState('stunned'))
     {
+      fTimeInAir=0.0;
       Bundi = MOCABundimun(NewBase);
       Bundi.ProcessStomp();
       GotoState('stateStomping');
@@ -182,6 +189,16 @@ event PlayerInput (float DeltaTime)
 ////////////////
 // FUNCTIONS
 ////////////////
+
+function PlayIdle()
+{
+  if ( Mesh == None )
+  {
+    return;
+  }
+  CurrIdleAnimName = GetCurrIdleAnimName();
+  LoopAnim(CurrIdleAnimName,0.8,0.5,,HarryAnimType);
+}
 
 function StartAimSoundFX()
 {
@@ -745,7 +762,7 @@ defaultproperties
     DefaultWeapon=class'MocaOmniPak.MOCAWand'
     Mesh=SkeletalMesh'MocaModelPak.MOCAHarry'
     Cutname="harry"
-    AirControl=0.35
+    AirControl=0.5
     RotationRate=(Pitch=20000,Yaw=100000,Roll=3072)
     Buoyancy=200.0
 

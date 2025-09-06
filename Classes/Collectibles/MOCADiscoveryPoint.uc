@@ -21,6 +21,12 @@ event PostBeginPlay()
     super.PostBeginPlay();
     attractionSpeed += (FRand() * 10.0);
     PlaySound(Sound'MocaSoundPak.Magic.SFX_DiscoveryPointStart',SLOT_None,,,1500);
+
+    if (!attractedToHarry)
+    {
+        bCollideWorld = True;
+        SetPhysics(PHYS_Walking);
+    }
 }
 
 event FellOutOfWorld()
