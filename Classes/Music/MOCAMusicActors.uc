@@ -1,0 +1,1 @@
+class MOCAMusicActors extends Actor;
