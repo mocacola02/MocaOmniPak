@@ -39,4 +39,5 @@ defaultproperties
 {
     SongOverride=-1
     StopFadeTime=1.0
+    bTriggerOnceOnly=True
 }
