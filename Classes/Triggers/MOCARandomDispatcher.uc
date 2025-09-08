@@ -1,7 +1,7 @@
 //=============================================================================
 // MOCARandomDispatcher.
 //=============================================================================
-class MOCARandomDispatcher extends MOCATrigger;
+class MOCARandomDispatcher extends Triggers;
 
 //-----------------------------------------------------------------------------
 // Dispatcher variables.
@@ -11,6 +11,11 @@ var() Array<float> OutDelays; // Relative delays before generating events.
 var() bool dispatchAllAtOnce; //Moca: Should it randomly dispatch all events after a single trigger?
 var() bool eventsFireOnce; //Moca: Should it be able to trigger events multiple times?
 var int i;                // Internal counter.
+
+function Trigger( actor Other, pawn EventInstigator )
+{
+	Activate(Other,EventInstigator);
+}
 
 event Activate( actor Other, pawn EventInstigator )
 {
