@@ -20,10 +20,16 @@ var bool correctingPath;
 var int attemptsMade;
 var NavigationPoint randNavP;
 
+var float DefGroundSpeed;
+var ESpellType DefVulSpell;
 
 event PreBeginPlay()
 {
 	Super.PreBeginPlay();
+
+    DefGroundSpeed = GroundSpeed;
+    DefVulSpell = eVulnerableToSpell;
+
     vHome = Location;
     //HitsLeft = hitsToKill;
 
@@ -64,7 +70,7 @@ function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector 
 
 function float GetWalkSpeed()
 {
-    return GroundSpeed / MapDefault.GroundSpeed;
+    return GroundSpeed / DefGroundSpeed;
 }
 
 event Bump( Actor Other )
@@ -116,8 +122,8 @@ state stateIdle
     }
 
     begin:
-        GroundSpeed = MapDefault.GroundSpeed;
-        eVulnerableToSpell=MapDefault.eVulnerableToSpell;
+        GroundSpeed = DefGroundSpeed;
+        eVulnerableToSpell= DefVulSpell;
         log("beginning idle");
         LoopAnim(idleAnim);
         if (inErrorMode)
@@ -190,7 +196,7 @@ state stateChase
 
     event EndState()
     {
-        GroundSpeed = MapDefault.GroundSpeed;
+        GroundSpeed = DefGroundSpeed;
     }
 
     event Timer()
@@ -246,7 +252,7 @@ state stateDerailed
 {
     event EndState()
     {
-        GroundSpeed = MapDefault.GroundSpeed;
+        GroundSpeed = DefGroundSpeed;
     }
 
     begin:

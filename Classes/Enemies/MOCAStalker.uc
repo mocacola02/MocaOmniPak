@@ -40,6 +40,14 @@ var int angerValue;
 var int randNumber;
 var NavigationPoint retreatPoint;
 
+var float DefGroundSpeed;
+
+event PreBeginPlay()
+{
+    super.PreBeginPlay();
+    DefGroundSpeed = GroundSpeed;
+}
+
 
 event PostBeginPlay()
 {
@@ -214,7 +222,7 @@ state stateRetreat
     event EndState()
     {
         super.EndState();
-        GroundSpeed = MapDefault.GroundSpeed;
+        GroundSpeed = DefGroundSpeed;
     }
     
     event Timer()
@@ -306,7 +314,7 @@ state stateAttack
     event EndState()
     {
         Super.EndState();
-        GroundSpeed = MapDefault.GroundSpeed;
+        GroundSpeed = DefGroundSpeed;
     }
 
     event AlterDestination()
@@ -365,7 +373,7 @@ state stateAttackDerailed
     event EndState()
     {
         Super.EndState();
-        GroundSpeed = MapDefault.GroundSpeed;
+        GroundSpeed = DefGroundSpeed;
     }
 
     event Timer ()

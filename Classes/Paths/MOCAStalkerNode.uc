@@ -7,6 +7,14 @@ var() float dotMin;
 var() float requiredDistance;
 var harry PlayerHarry;
 
+var float DefReqDist;
+
+event PreBeginPlay()
+{
+    super.PreBeginPlay();
+    DefReqDist = requiredDistance;
+}
+
 event PostBeginPlay()
 {
     PlayerHarry = harry(Level.PlayerHarryActor);
@@ -19,7 +27,7 @@ function setViewDistance(float newDistance)
 {
     if (newDistance == 0)
     {
-        newDistance = MapDefault.requiredDistance;
+        newDistance = DefReqDist;
     }
     requiredDistance = newDistance;
 }
