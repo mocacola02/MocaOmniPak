@@ -53,7 +53,7 @@ function bool isHarryNear(optional float requiredDistance)
     local float distToCheck;
     distToCheck = SightRadius;
     Size = VSize(PlayerHarry.Location - Location);
-    PlayerHarry.ClientMessage("Distance" @ string(Size));
+    //PlayerHarry.ClientMessage("Distance" @ string(Size));
 
     if (requiredDistance != 0)
     {

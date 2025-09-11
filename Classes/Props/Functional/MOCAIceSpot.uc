@@ -9,20 +9,9 @@ var float CurrentGrowthTime;
 var Iceberg_Grow FreezeParticles;
 var IceBerg_Spot IdleParticles;
 
-var float DefRadius;
-var float DefWidth;
-var float DefHeight;
-var float DefDrawScale;
-var ESpellType DefVulSpell;
-
 event PreBeginPlay()
 {
     super.PreBeginPlay();
-    DefRadius = CollisionRadius;
-    DefWidth = CollisionWidth;
-    DefHeight = CollisionHeight;
-    DefDrawScale = Drawscale;
-    DefVulSpell = eVulnerableToSpell;
 }
 
 event PostBeginPlay()
@@ -56,23 +45,23 @@ function ChangeBergSize(float DeltaTime, optional bool Reverse)
     local float tempWidth;
     local float tempHeight;
 
-    tempRadius = Lerp(Alpha, 0.0, DefRadius);
-    tempWidth  = Lerp(Alpha,  0.0,  DefWidth);
-    tempHeight = Lerp(Alpha, 0.0, DefHeight);
+    tempRadius = Lerp(Alpha, 0.0, MapDefault.CollisionRadius);
+    tempWidth  = Lerp(Alpha,  0.0,  MapDefault.CollisionWidth);
+    tempHeight = Lerp(Alpha, 0.0, MapDefault.CollisionHeight);
 
     SetCollisionSize(tempRadius,tempHeight,tempWidth);
 
-    DrawScale = Lerp(Alpha, 0.0, DefDrawScale);
+    DrawScale = Lerp(Alpha, 0.0, MapDefault.DrawScale);
 }
 
 auto state stateDormant
 {
     event BeginState()
     {
-        eVulnerableToSpell = DefVulSpell;
+        eVulnerableToSpell = MapDefault.eVulnerableToSpell;
         DrawScale = 0.0;
         SetCollision(true,false,false);
-        SetCollisionSize(DefRadius,DefHeight,DefWidth);
+        SetCollisionSize(MapDefault.CollisionRadius,MapDefault.CollisionHeight,MapDefault.CollisionWidth);
         IdleParticles.bEmit = True;
     }
 
@@ -119,8 +108,8 @@ state stateFrozen
 {
     event BeginState()
     {
-        DrawScale = DefDrawScale;
-        SetCollisionSize(DefRadius,DefHeight,DefWidth);
+        DrawScale = MapDefault.DrawScale;
+        SetCollisionSize(MapDefault.CollisionRadius,MapDefault.CollisionHeight,MapDefault.CollisionWidth);
         eVulnerableToSpell = ShatterSpell;
     }
 
@@ -138,7 +127,7 @@ state stateShatter
         Spawn(class'Ice_Break',self,,Location);
         DrawScale = 0.0;
         SetCollision(true,false,false);
-        SetCollisionSize(DefRadius,DefHeight,DefWidth);
+        SetCollisionSize(MapDefault.CollisionRadius,MapDefault.CollisionHeight,MapDefault.CollisionWidth);
     }
 
     begin:

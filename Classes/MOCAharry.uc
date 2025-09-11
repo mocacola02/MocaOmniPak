@@ -361,21 +361,29 @@ state stateInteract
 
 state caught
 {
-  begin:
-    PlayAnim('webmove',1,1);
+  event BeginState()
+  {
+    PlayAnim('webmove');
     PlaySound(Sound'MocaSoundPak.Music_Cues.stealthCaught_hp3', SLOT_None);
-    PlaySound(Sound'HPSounds.Magic_sfx.Dueling_MIM_self_lucky', SLOT_Misc, 1);
+    PlaySound(Sound'HPSounds.Magic_sfx.Dueling_MIM_self_lucky', SLOT_Misc);
     bKeepStationary = True;
+  }
+
+  begin:
     sleep(1.0);
     screenFade(1.0, 2.0);
     sleep(2.5);
-    SetLocation(respawnLoc);
-    SetRotation(respawnRot);
-    //Cam.SetRotation(respawnRot);   Find actually functioning way to do this
+    TeleportHarry(respawnLoc,respawnRot);
     sleep(0.5);
     screenFade(0.0, 2.0);
     bKeepStationary = False;
     GotoState('PlayerWalking');
+}
+
+function TeleportHarry(Vector TPLocation, Rotator TPRotation)
+{
+  SetLocation(TPLocation);
+  SetRotation(TPRotation);
 }
 
 state PlayerSwimming
