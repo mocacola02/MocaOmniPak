@@ -29,7 +29,7 @@ var vector HitNormal;
 var Actor LastStoredBase;
 var bool DebugWeaponToggleCooldown;
 var bool inWater;
-
+var bool IsInvisible;
 
 ////////////////
 // EVENTS
@@ -66,72 +66,34 @@ event PreBeginPlay()
 
 event PostBeginPlay()
 {
-  super.PostBeginPlay();
-  if (saveOnLoad)
-  {
-    SaveGame();
-  }
+	super.PostBeginPlay();
+	HUDType = class'MOCAHUD';
+	if (saveOnLoad)
+	{
+		SaveGame();
+	}
 
+	local int i;
 
-  local int i;
+	for (i=0; i < DefaultSpellbook.Length; i++)
+	{
+		AddToModdedSpellBook(DefaultSpellbook[i]);
+	}
+}
 
-  for (i=0; i < DefaultSpellbook.Length; i++)
-  {
-    AddToModdedSpellBook(DefaultSpellbook[i]);
-  }
+// icky and gross resets!
+event TravelPostAccept()
+{
+  Super.TravelPostAccept();
+  MOCAHUD(myHUD).isLoading = False;
+  HPConsole(Player.Console).bLockMenus = false;
+  HPConsole(Player.Console).LoadingBackground = Texture'HGame.LoadingScreen.FELoadingScreen';
 }
 
 event Touch(Actor Other)
 {
   Super.Touch(Other);
   PickupActor(Other);
-}
-
-function AddToModdedSpellBook (Class<baseSpell> spellClass)
-{
-
-  local ESpellType typeToAdd;
-
-  typeToAdd = DetermineSpellType(spellClass);
-
-  if ( (typeToAdd < MAX_NUM_SPELLS) && (SpellBook[typeToAdd] == None) )
-  {
-    SpellBook[typeToAdd] = spellClass;
-  }
-}
-
-function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
-{
-    local int i;
-
-    for (i = 0; i < ArrayCount(SpellMapping); i++)
-    {
-        if (SpellMapping[i].SpellToAssign == TestSpell)
-        {
-            Log("Found mapping at index " $ i $ " with slot " $ SpellMapping[i].SpellSlot);
-            return SpellMapping[i].SpellSlot;
-        }
-    }
-
-    Log("No mapping found for " $ string(TestSpell));
-    return SPELL_None;
-}
-
-function ESpellType DetermineSpellToActAs (class<baseSpell> TestSpell)
-{
-    local int i;
-
-    for (i = 0; i < ArrayCount(SpellMapping); i++)
-    {
-        if (SpellMapping[i].SpellToAssign == TestSpell)
-        {
-            Log("Found mapping at index " $ i $ " with slot " $ SpellMapping[i].SpellToActAs);
-            return SpellMapping[i].SpellToActAs;
-        }
-    }
-
-    Log("No mapping found for " $ string(TestSpell));
-    return SPELL_None;
 }
 
 event BaseChanged(Actor OldBase, Actor NewBase)
@@ -189,6 +151,74 @@ event PlayerInput (float DeltaTime)
 ////////////////
 // FUNCTIONS
 ////////////////
+/*
+function ToggleInvisible (bool ShouldBeInvisible)
+{
+    if (ShouldBeInvisible && !IsInvisible)
+    {
+        TurnInvisible();
+    }
+    else if (!ShouldBeInvisible && IsInvisible)
+    {
+        TurnVisible();
+    }
+}*/
+
+
+function MOCAHUD GetMocaHud()
+{
+  if (myHUD.IsA('MOCAHUD'))
+  {
+    return MOCAHUD(myHUD);
+  }
+}
+
+function AddToModdedSpellBook (Class<baseSpell> spellClass)
+{
+
+  local ESpellType typeToAdd;
+
+  typeToAdd = DetermineSpellType(spellClass);
+
+  if ( (typeToAdd < MAX_NUM_SPELLS) && (SpellBook[typeToAdd] == None) )
+  {
+    SpellBook[typeToAdd] = spellClass;
+  }
+}
+
+function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
+{
+    local int i;
+
+    for (i = 0; i < ArrayCount(SpellMapping); i++)
+    {
+        if (SpellMapping[i].SpellToAssign == TestSpell)
+        {
+            Log("Found mapping at index " $ i $ " with slot " $ SpellMapping[i].SpellSlot);
+            return SpellMapping[i].SpellSlot;
+        }
+    }
+
+    Log("No mapping found for " $ string(TestSpell));
+    return SPELL_None;
+}
+
+function ESpellType DetermineSpellToActAs (class<baseSpell> TestSpell)
+{
+    local int i;
+
+    for (i = 0; i < ArrayCount(SpellMapping); i++)
+    {
+        if (SpellMapping[i].SpellToAssign == TestSpell)
+        {
+            Log("Found mapping at index " $ i $ " with slot " $ SpellMapping[i].SpellToActAs);
+            return SpellMapping[i].SpellToActAs;
+        }
+    }
+
+    Log("No mapping found for " $ string(TestSpell));
+    return SPELL_None;
+}
 
 function PlayIdle()
 {

@@ -1,32 +1,53 @@
-class MOCATriggerChangeLevel extends TriggerChangeLevel;
+class MOCATriggerChangeLevel extends MOCATrigger;
 
 var() Texture LoadingScreenImage;
-var() string LoadingText;
+var() float LoadDelay;
+var() string NewMapName;
+
+var HPConsole ConsoleRef;
+
+function Activate ( actor Other, pawn Instigator )
+{
+    ProcessTrigger();
+}
 
 function ProcessTrigger()
 {
-  local harry PlayerHarry;
-  local Canvas C;
+	if (NewMapName != "")
+	{
+		if (PlayerHarry.IsA('MOCAharry') && LoadingScreenImage != Texture'HGame.LoadingScreen.FELoadingScreen')
+		{
+			ConsoleRef = HPConsole(PlayerHarry.Player.Console);
 
-  PlayerHarry = harry(Level.PlayerHarryActor);
-  HPConsole(PlayerHarry.Player.Console).LoadingBackground = LoadingScreenImage;
-  if ( PlayerHarry == None )
-  {
-    Log("TriggerChangeLevel: Couldn't find Harry, and that ain't right!");
-    return;
-  }
-  PlayerHarry.LoadLevel(NewMapName);
-  if ( InStr(Caps(NewMapName),"STARTUP") > -1 )
-  {
-    HPConsole(PlayerHarry.Player.Console).menuBook.bGamePlaying = False;
-    HPConsole(PlayerHarry.Player.Console).DrawLevelAction(C);
-    HPConsole(PlayerHarry.Player.Console).menuBook.OpenBook("Main");
-    HPConsole(PlayerHarry.Player.Console).LaunchUWindow();
-  }
+			if (ConsoleRef == None)
+			{
+				return;
+			}
+
+			local MOCAharry PlayerMoca;
+			local MOCAHUD MocaHudRef;
+
+			PlayerMoca = MOCAharry(PlayerHarry);
+			MocaHudRef = PlayerMoca.GetMocaHud();
+
+			ConsoleRef.LoadingBackground = LoadingScreenImage;
+			MocaHudRef.SetLoading(LoadingScreenImage, NewMapName, LoadDelay);
+		}
+		else
+		{
+			ConsoleRef.LoadingBackground = LoadingScreenImage;
+			PlayerHarry.LoadLevel(NewMapName);
+		}
+	}
+	else
+	{
+		Log("No map name is set! Trigger can't change level, please fix this in your map!");
+	}
 }
 
 defaultproperties
 {
      LoadingScreenImage=Texture'HGame.LoadingScreen.FELoadingScreen'
-     LoadingText="Loading Game"
+     LoadDelay=0.0
+	 NewMapName="Entryhall_hub"
 }
