@@ -40,11 +40,11 @@ Go into the game's System folder, and make a copy of the 'Default.ini' file. Ren
     
 Save the .ini file and close it. Open a terminal/cmd window in the System folder, and type the following:
 
-    ucc make ini=Moca.ini
+    ucc make ini=[ini name]
    
    Note: If that doesn't work, try this:
    
 
-    ./ucc make ini=Moca.ini
+    ./ucc make ini=[ini name]
 
 Allow the UAC pop-up, and then the package should begin compiling. It will auto-close, and the MocaOmniPak.u file should now be present in the System folder. If not, go to your Documents folder for the game (Harry - Coding Evolved by default), and check for errors in the UCC.log file. Please upload it in a bug ticket [here](https://github.com/mocacola02/MocaOmniPak/issues).
