@@ -836,5 +836,9 @@ defaultproperties
     DefaultSpellbook(0)=class'spellFlipendo'
     DefaultSpellbook(1)=class'spellAlohomora'
     DefaultSpellbook(2)=class'spellLumos'
-    DefaultSpellbook(3)=class'MOCAspellGlacius'
+	DefaultSpellbook(3)=class'spellRictusempra'
+	DefaultSpellbook(4)=class'spellSkurge'
+	DefaultSpellbook(5)=class'spellDiffindo'
+	DefaultSpellbook(6)=class'spellSpongify'
+    DefaultSpellbook(7)=class'MOCAspellGlacius'
 }

@@ -14,7 +14,8 @@ function ProcessTrigger()
 {
     if (WebMessageLink != "")
     {
-        MessageText = LoadURL(WebMessageLink);
+        //MessageText = LoadURL(WebMessageLink);
+		MessageText = "Web text is not supported yet due to an engine crash."
         if (MessageText == "")
         {
             MessageText = "Unable to fetch web content.";
