@@ -11,12 +11,12 @@ var() float PukeDistance; //Moca: How far should the poison reach?
 var() float TriggerDistance; //Moca: How far can the bundi detect Harry?
 var() float pukeDamage; //Moca: How much damage should puke do?
 var Rotator NewRot;
-var bool isStunned;
 var float Forward;
+//var float ShadowScaleIncrement;
 var bool CanHit;
-var bool isDying;
 var BundimunDeath KillEmit;
 var BundimunDig DigEmit;
+var BundimunShrink ShrinkEmit;
 
 function SpawnKillParticles();
 
@@ -39,40 +39,36 @@ event PostBeginPlay()
 
 event Bump (Actor Other)
 {
-  if ( PlayerHarry == Other && IsInState('onground'))
-  {
-    DoBumpDamage(Location, 'BundiBody');
-  }
-}
-
-function ResetHit()
-{
-    CanHit = True;
+	if ( PlayerHarry == Other && IsInState('stateSpitting'))
+	{
+		DoBumpDamage(Location, 'BundiBody');
+	}
 }
 
 function ProcessStomp()
 {
     Log('Processing stomp');
-    if (isStunned == True && isDying == False)
-    {
-        isDying = True;
-        GotoState('squished');
-    }
+    GotoState('stateDie');
 }
 
 function DoBumpDamage (Vector vDamageLoc, name nameDamage)
 {
-    Log(string(CanHit));
     if (CanHit)
     {
         PlayerHarry.TakeDamage(BumpDamage,self,vDamageLoc,vect(0.00,0.00,0.00),nameDamage);
         CanHit = False;
+		SetTimer(1.0,false,'ResetBumpHit');
     }
+}
+
+function ResetBumpHit()
+{
+	CanHit = True;
 }
 
 function ProcessSpell()
 {
-  GotoState('stunned');
+  GotoState('stateStunned');
 }
 
 function Puke()
@@ -91,113 +87,138 @@ function Puke()
 auto state determineState
 {
     begin:
-        if (StayAboveGround) {
-            GotoState('onground');
-        }
-        else {
-            GotoState('underground');
-        }
-}
-
-state underground
-{
-    begin:
-        LoopAnim('Underground');
-    loop:
-        if (isHarryNear(triggerDistance))
-        {
-            GotoState('toabove');
+        if (StayAboveGround)
+		{
+            GotoState('stateDig','rise');
         }
         else
-        {
-            sleep(1.0);
-            goto ('loop');
+		{
+            GotoState('stateUnderGround');
         }
 }
 
-// do these really need to be separate states
-state tounder
+state stateUnderground
 {
-    begin:
-        DigEmit.bEmit = True;
-        AmbientSound = None;
-        PlaySound(Sound'MocaSoundPak.Creatures.bundimun_sink');
-        PlayAnim('Sink');
-        FinishAnim();
-        SetCollision(false, false, false);
-        DigEmit.bEmit = False;
-        GotoState('underground');
+	event BeginState()
+	{
+		LoopAnim('Underground');
+		Opacity = 0.0;
+	}
+    
+	event Tick (float DeltaTime)
+	{
+		Global.Tick(DeltaTime);
+        if (isHarryNear(triggerDistance))
+        {
+            GotoState('stateDig','rise');
+        }
+	}
 }
 
-
-state toabove
+state stateDig
 {
-    begin:
-        DigEmit.bEmit = True;
-        PlaySound(Sound'MocaSoundPak.Creatures.bundimun_rise');
-        SetCollision(true, true, true);
+	event BeginState()
+	{
+		DigEmit.bEmit = True;
+		Opacity = 1.0;
+	}
+
+	event EndState()
+	{
+		DigEmit.bEmit = False;
+	}
+
+	event Tick (float DeltaTime)
+	{
+		Global.Tick(DeltaTime);
+		//Shadow.Opacity = FClamp(Shadow.Opacity + ShadowScaleIncrement, 0.0, 1.0);
+		//Log("Bundimun shadow size" $ string(Shadow.Opacity));
+	}
+
+	rise:
+		//ShadowScaleIncrement = 0.008;
+		SetCollision(true,true,true);
+		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_rise');
         PlayAnim('Rise');
-        FinishAnim();
-        DigEmit.bEmit = False;
-        GotoState('onground');
+		FinishAnim();
+		GotoState('stateSpitting');
+
+	sink:
+		//ShadowScaleIncrement = -0.008;
+		SetCollision(false,false,false);
+		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_sink');
+		PlayAnim('Sink');
+		FinishAnim();
+		GotoState('stateUnderground');
 }
 
-state onground
+state stateSpitting
 {
     event BeginState()
     {
         AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_shoot';
-        isStunned = False;
+		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
         LoopAnim('Attack');
     }
 
+	event EndState()
+	{
+		AmbientSound = None;
+		eVulnerableToSpell = SPELL_None;
+	}
+
     event Tick (float DeltaTime)
     {
+		if (!isHarryNear(triggerDistance) && !StayAboveGround)
+        {
+            GotoState('stateDig','sink');
+        }
+
         //SPEEN
         DesiredRotation = Rotation;
         DesiredRotation.Yaw += (5500 * DeltaTime);
         SetRotation(DesiredRotation);
         SetLocation(Location);
     }
-
-    begin:
-        if (!isHarryNear(triggerDistance) && !StayAboveGround)
-        {
-            GotoState('tounder');
-        }
-        else
-        {
-            //Puke();
-            ResetHit();
-            Sleep(1.25);
-            goto ('begin');
-        }
 }
 
-state stunned
+state stateStunned
 {
     event BeginState()
     {
-        bCantStandOnMe=False;
+		DigEmit.bEmit = False;
+        bCantStandOnMe = False;
         PlaySound(Sound'MocaSoundPak.Creatures.bundimun_hit');
         AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_dazed';
-        isStunned = True;
         LoopAnim('Dazed');
     }
 
+	event EndState()
+	{
+		bCantStandOnMe = True;
+	}
+
     begin:
         sleep(StunDuration);
-        GotoState('onground');
+        GotoState('stateSpitting');
 }
 
-state squished
+state stateDie
 {
     event BeginState()
     {
+		Disable('Tick');
+		ShrinkEmit = Spawn(class'BundimunShrink',self,,Location,,true);
         PlaySound(Sound'MocaSoundPak.Creatures.bundimun_smash');
         PlayAnim('Bounce');
         SpawnKillParticles();
     }
+
+	event Tick (float DeltaTime)
+	{
+		Global.Tick(DeltaTime);
+		DrawScale -= (1.0 * DeltaTime);
+	}
 
     function SpawnKillParticles()
     {
@@ -215,12 +236,31 @@ state squished
         bCantStandOnMe=True;
         KillEmit.bEmit = False;
         FinishAnim();
-        KillEmit.Destroy();
+		Goto('shrink');
+
+	shrink:
+		Enable('Tick');
+		if (DrawScale <= 0.0)
+		{
+			Goto('kill');
+		}
+		else if (DrawScale < 0.25)
+		{
+			ShrinkEmit.bEmit = False;
+		}
+		SleepForTick();
+		Goto('shrink');
+
+	kill:
+		ShrinkEmit.Destroy();
+		KillEmit.Destroy();
+		DigEmit.Destroy();
         Destroy();
 }
 
 defaultproperties
 {
+	ShadowScale=0.0
     bCantStandOnMe=True
     pukeDamage=10
     PukeDistance=75

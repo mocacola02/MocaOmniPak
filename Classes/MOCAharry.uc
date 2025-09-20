@@ -55,13 +55,13 @@ event PreBeginPlay()
     SpellCursor = Spawn(class'MOCASpellCursor');
   }
 
-  HarryAnimChannel.Destroy();
+  //HarryAnimChannel.Destroy();
 
-  HarryAnimChannel = cHarryAnimChannel( CreateAnimChannel(class'MOCAharryAnimChannel', AT_Replace, 'bip01 spine1') );
-	HarryAnimChannel.SetOwner( self );
+  //HarryAnimChannel = cHarryAnimChannel( CreateAnimChannel(class'MOCAharryAnimChannel', AT_Replace, 'bip01 spine1') );
+	//HarryAnimChannel.SetOwner( self );
 
   Log("We are using weapon " $ string(Weapon) $ " with the cursor " $ string(SpellCursor));
-  Log("MOCAharry anim channel: " $ string(HarryAnimChannel));
+  //Log("MOCAharry anim channel: " $ string(HarryAnimChannel));
 }
 
 event PostBeginPlay()
@@ -98,19 +98,23 @@ event Touch(Actor Other)
 
 event BaseChanged(Actor OldBase, Actor NewBase)
 {
-  local MOCABundimun Bundi;
+	local MOCABundimun Bundi;
 
-  Super.BaseChanged(OldBase, NewBase);
-  if (NewBase.IsA('MOCABundimun'))
-  {
-    if (NewBase.IsInState('stunned'))
-    {
-      fTimeInAir=0.0;
-      Bundi = MOCABundimun(NewBase);
-      Bundi.ProcessStomp();
-      GotoState('stateStomping');
-    }
-  }
+	Super.BaseChanged(OldBase, NewBase);
+	if (NewBase.IsA('MOCABundimun'))
+	{
+		Bundi = MOCABundimun(NewBase);
+		if (Bundi.IsInState('stateStunned'))
+		{
+			fTimeInAir=0.0;
+			Bundi.ProcessStomp();
+			GotoState('stateStomping');
+		}
+		else if (Bundi.IsInState('stateSpitting'))
+		{
+			Bundi.DoBumpDamage(Location,'BundiJumpDamage');
+		}
+	}
 }
 
 event PlayerInput (float DeltaTime)

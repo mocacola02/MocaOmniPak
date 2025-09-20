@@ -15,13 +15,23 @@ struct BumpSetMapping
 var BumpSetMapping BumpSetMappings[286]; // Array to hold bumpset and prefix mappings.
 
 var() bool randomLinePerTrigger; //Moca: Should lines be random, if false use user-set bumplines
+var() name TouchClass; //Moca: Name of actor that should trigger the bumpline when touched
 
-function ProcessSpell()
+function Trigger (Actor Other, Pawn Instigator)
 {
-    ProcessBumpline();
+	Super.Trigger(Other,Instigator);
+	ProcessBumpline();
 }
 
-event Activate(Actor Other, Pawn Instigator)
+function Touch (Actor Other)
+{
+	if (Other.IsA(TouchClass))
+	{
+		ProcessBumpline();
+	}
+}
+
+function ProcessSpell()
 {
     ProcessBumpline();
 }
@@ -43,8 +53,8 @@ function ProcessBumpline()
         Log("Set: " @ BumpLineSet);
         Log("Prefix: " @ BumpLineSetPrefix);
     }
-
-    DoBumpLine();
+	
+	DoBumpLine();
 }
 
 defaultproperties
@@ -343,4 +353,5 @@ defaultproperties
      Texture=Texture'MocaTexturePak.EditorIco.ICO_RandomBumpline'
      bBlockActors=False
      bBlockPlayers=False
+	 TouchClass=harry
 }

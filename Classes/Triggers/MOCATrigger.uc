@@ -13,4 +13,5 @@ event PostBeginPlay()
 defaultproperties
 {
     bDoActionWhenTriggered=True
+	bSpriteRelativeScale=True
 }

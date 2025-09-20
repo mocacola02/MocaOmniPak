@@ -15,6 +15,6 @@ defaultproperties
     ParticlesPerSec=(Base=500.00,Rand=0.00)
     SourceHeight=(Base=64.00,Rand=0.00)
     SourceWidth=(Base=64.00,Rand=0.00)
-    Lifetime=(Base=0.5,Rand=1.0)
+    Lifetime=(Base=0.34,Rand=0.67)
     Speed=(Base=300.0,Rand=500.0)
 }
