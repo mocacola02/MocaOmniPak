@@ -325,4 +325,5 @@ defaultproperties
     LightRadius=6
     LightType=LT_None
     fxChargeParticleFXClass=Class'MocaOmniPak.MOCAWandParticles'
+	InventoryGroup=2
 }

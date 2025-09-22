@@ -16,58 +16,38 @@ var() class<Weapon> DefaultWeapon;
 var() bool saveOnLoad;
 
 var(MOCASpellbook) Array<Class<baseSpell>> DefaultSpellbook;
-
 var(MOCASpellbook) SpellMap SpellMapping[28];
-var int DefaultWeaponSlot;
-var Weapon weap;
-var Vector respawnLoc;
-var Rotator respawnRot;
-var FadeActorController mcFade;
-var int currentWeapon;
-var bool bWallJumped;
-var vector HitNormal;
+
 var Actor LastStoredBase;
+
+var bool bWallJumped;
 var bool DebugWeaponToggleCooldown;
 var bool inWater;
 var bool IsInvisible;
+
+var vector HitNormal;
+
+var Vector respawnLoc;
+var Rotator respawnRot;
+
+var int DefaultWeaponSlot;
+var int currentWeapon;
+
+var FadeActorController mcFade;
 
 ////////////////
 // EVENTS
 ////////////////
 
-event PreBeginPlay()
-{
-  Super.PreBeginPlay();
-  respawnLoc = Location;
-  respawnRot = Rotation;
-  if (DefaultWeapon == class'MocaOmniPak.MOCAbaseHands')
-  {
-    DefaultWeaponSlot = 0;
-  }
-  else {
-    DefaultWeaponSlot = 1;
-  }
-  SetHarryWeapon(DefaultWeapon, DefaultWeaponSlot);
-
-  if (Weapon.IsA('MOCAWand'))
-  {
-    SpellCursor.Destroy();
-    SpellCursor = Spawn(class'MOCASpellCursor');
-  }
-
-  //HarryAnimChannel.Destroy();
-
-  //HarryAnimChannel = cHarryAnimChannel( CreateAnimChannel(class'MOCAharryAnimChannel', AT_Replace, 'bip01 spine1') );
-	//HarryAnimChannel.SetOwner( self );
-
-  Log("We are using weapon " $ string(Weapon) $ " with the cursor " $ string(SpellCursor));
-  //Log("MOCAharry anim channel: " $ string(HarryAnimChannel));
-}
-
 event PostBeginPlay()
 {
 	super.PostBeginPlay();
+
+	respawnLoc = Location;
+	respawnRot = Rotation;
+
 	HUDType = class'MOCAHUD';
+
 	if (saveOnLoad)
 	{
 		SaveGame();
@@ -81,19 +61,33 @@ event PostBeginPlay()
 	}
 }
 
+event PreClientTravel()
+{
+	super.PreClientTravel();
+
+	SwitchWeapon(4);
+}
+
 // icky and gross resets!
 event TravelPostAccept()
 {
-  Super.TravelPostAccept();
-  MOCAHUD(myHUD).isLoading = False;
-  HPConsole(Player.Console).bLockMenus = false;
-  HPConsole(Player.Console).LoadingBackground = Texture'HGame.LoadingScreen.FELoadingScreen';
+	Super.TravelPostAccept();
+	
+	AddHarryWeapon(class'baseWand');
+	AddHarryWeapon(class'MOCAbaseHands');
+	AddHarryWeapon(class'MOCAWand');
+
+	InitWands();
+
+	MOCAHUD(myHUD).isLoading = False;
+	HPConsole(Player.Console).bLockMenus = false;
+	HPConsole(Player.Console).LoadingBackground = Texture'HGame.LoadingScreen.FELoadingScreen';
 }
 
 event Touch(Actor Other)
 {
-  Super.Touch(Other);
-  PickupActor(Other);
+	Super.Touch(Other);
+	PickupActor(Other);
 }
 
 event BaseChanged(Actor OldBase, Actor NewBase)
@@ -117,57 +111,93 @@ event BaseChanged(Actor OldBase, Actor NewBase)
 	}
 }
 
-event PlayerInput (float DeltaTime)
-{
-  local StatusItem SI;
-  local StatusGroup SG;
-  local string NCountAsString;
-  local int i;
-
-  Super.PlayerInput(DeltaTime);
-  if ( bSkipCutScene == 1 )
-  {
-    if (HPHud(myHUD).bCutSceneMode)
-    {
-      HPConsole(Player.Console).StartFastForward();
-    }
-    else
-    {
-      if (HPConsole(Player.Console).bDebugMode)
-      {
-        if (!DebugWeaponToggleCooldown)
-        {
-          if ( currentWeapon == 0 )
-          {
-            SetHarryWeapon(class'MocaOmniPak.MOCAWand',1);
-          }
-          else
-          {
-            SetHarryWeapon(class'MocaOmniPak.MOCAbaseHands',0);  
-          }
-          DebugWeaponToggleCooldown=True;
-        }
-      }
-    }
-  }
-}
-
 ////////////////
 // FUNCTIONS
 ////////////////
-/*
-function ToggleInvisible (bool ShouldBeInvisible)
-{
-    if (ShouldBeInvisible && !IsInvisible)
-    {
-        TurnInvisible();
-    }
-    else if (!ShouldBeInvisible && IsInvisible)
-    {
-        TurnVisible();
-    }
-}*/
 
+exec function ShowCollectibles()
+{
+	local int nCount;
+	nCount = 0;
+	managerStatus.IncrementCount(Class'StatusGroupJellybeans',Class'StatusItemJellybeans',nCount);
+	managerStatus.IncrementCount(Class'MOCAStatusGroupAir',Class'MOCAStatusItemAir',nCount);
+	managerStatus.IncrementCount(Class'MOCAStatusGroupCake',Class'MOCAStatusItemCake',nCount);
+	managerStatus.IncrementCount(Class'MOCAStatusGroupEarth',Class'MOCAStatusItemEarth',nCount);
+	managerStatus.IncrementCount(Class'MOCAStatusGroupEssence',Class'MOCAStatusItemEssence',nCount);
+	managerStatus.IncrementCount(Class'MOCAStatusGroupFire',Class'MOCAStatusItemFire',nCount);
+	managerStatus.IncrementCount(Class'MOCAStatusGroupPasty',Class'MOCAStatusItemPasty',nCount);
+	managerStatus.IncrementCount(Class'MOCAStatusGroupPotato',Class'MOCAStatusItemPotato',nCount);
+	managerStatus.IncrementCount(Class'MOCAStatusGroupWater',Class'MOCAStatusItemWater',nCount);
+}
+
+function AddHarryWeapon (class<Weapon> WeaponToSpawn)
+{
+	local Weapon WeaponActor;
+
+	WeaponActor = Spawn(WeaponToSpawn, self);
+	WeaponActor.BecomeItem();
+	
+	if (AddInventory(WeaponActor))
+	{
+		Log("Add Weapon " $ string(WeaponToSpawn)  $ " to inventory");
+	}
+	else
+	{
+		Log("Could not add new weapon " $ string(WeaponActor) $"! Is it already in our inventory?");
+	}
+}
+
+exec function ChangeWand(int WeaponSlot)
+{
+	if (WeaponSlot == 3 || WeaponSlot > 4 || WeaponSlot <= 0)
+	{
+		WeaponSlot = 2;
+	}
+
+	// 1 is wandless, 2 is MOCAWand, 4 is baseWand
+	SwitchWeapon(WeaponSlot);
+	Weapon.GiveAmmo(self);
+
+	if (WeaponSlot == 2)
+	{
+		Log("Creating MOCASpellCursor");
+		SpellCursor.Destroy();
+		SpellCursor = Spawn(class'MOCASpellCursor');
+	}
+	else if (WeaponSlot == 4)
+	{
+		Log("Created SpellCursor");
+		SpellCursor.Destroy();
+		SpellCursor = Spawn(class'SpellCursor');
+	}
+	else if (WeaponSlot == 1)
+	{
+		Log("Removing SpellCursor");
+		SpellCursor.Destroy();
+	}
+
+	Log("We are using weapon " $ string(Weapon) $ " with the cursor " $ string(SpellCursor));
+}
+
+function InitWands()
+{
+	if (DefaultWeapon == class'MOCAbaseHands')
+	{
+		DefaultWeaponSlot = 1;
+	}
+	else if (DefaultWeapon == class'MOCAWand')
+	{
+		DefaultWeaponSlot = 2;
+	}
+	else
+	{
+		DefaultWeaponSlot = 4;
+	}
+
+	Log("Default weapon slot is " $ string(DefaultWeaponSlot));
+
+	ChangeWand(DefaultWeaponSlot);
+}
 
 function MOCAHUD GetMocaHud()
 {
@@ -328,19 +358,6 @@ exec function AltFire (optional float f)
     MOCAbaseHands(weapon).TraceForInteracts(TraceEnd, TraceStart);
   }
   }
-}
-
-function SetHarryWeapon (class<Weapon> WeaponToSpawn, int WeaponSlot)
-{
-    weap.Destroy();
-    Log('Switching Weapon');
-    weap = Spawn(WeaponToSpawn, self); // Cast the spawned actor to Weapon
-    AddInventory(weap); // Add the weapon to the player's inventory
-    weap.WeaponSet(self); // Set the weapon       
-    weap.GiveAmmo(self); // Give ammo to the weapon if needed
-    SwitchWeapon(WeaponSlot);
-    currentWeapon = WeaponSlot;
-    Log("Current weapon is " $ string(Weapon) $ " with owner " $ string(Weapon.Owner));
 }
 
 function PlaySpellCastSound (ESpellType SpellType)

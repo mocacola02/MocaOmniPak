@@ -74,4 +74,5 @@ function SpawnSprite(Vector Location)
 defaultproperties
 {
     Mesh=SkeletalMesh'MocaModelPak.MOCAHarry'
+	InventoryGroup=1
 }
