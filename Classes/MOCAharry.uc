@@ -31,7 +31,7 @@ var Vector respawnLoc;
 var Rotator respawnRot;
 
 var int DefaultWeaponSlot;
-var int currentWeapon;
+var int CurrentWeapon;
 
 var FadeActorController mcFade;
 
@@ -157,6 +157,8 @@ exec function ChangeWand(int WeaponSlot)
 	// 1 is wandless, 2 is MOCAWand, 4 is baseWand
 	SwitchWeapon(WeaponSlot);
 	Weapon.GiveAmmo(self);
+
+	CurrentWeapon = WeaponSlot;
 
 	if (WeaponSlot == 2)
 	{
@@ -301,7 +303,7 @@ function name GetCurrIdleAnimName()
   local string AnimName;
   local name nm;
   local int iIndex;
-  if (/*(IsInState('PlayerWalking') || IsInState('stateIdle')) &&*/ currentWeapon == 0)
+  if (CurrentWeapon == 1)
   {
       AnimName = "IdleWandless";
       nm = StringToAnimName(AnimName);
