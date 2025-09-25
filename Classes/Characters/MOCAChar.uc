@@ -80,7 +80,7 @@ function EnterErrorMode()
     inErrorMode = True;
 	*/
 
-	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: " $ DebugErrMessage)
+	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: " $ DebugErrMessage);
 }
 
 function EnableTurnTo(actor TurnTarget)

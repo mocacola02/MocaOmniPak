@@ -1,18 +1,27 @@
 class MOCAFireseedPlant extends MOCAChar;
 
 var() float DistanceToAttack; //Moca: Required distance to attack Harry, Def: 500
-var() float FireballDistMin; //Moca: Minimum distance for shot fireballs to travel, Def: 50
-var() float FireballDistMax; //Moca: Maximum distance for shot fireballs to travel, Def: 100
-var() float FireballLaunchHeight; //Moca: How high should fireballs be shot, Def: 700
+var() float FireballLaunchSpeed; //Moca: How high should fireballs be shot, Def: 700
+//var() float RangeMult;		// Moca: Multiplier for range. Def: 1.0
 var() float FireCooldown; //Moca: Required time between firing, may cause issues if too low, Def: 2
 var() bool alwaysAttack; //Moca: Should plants always spit fire, def: false
-var() vector fireballOffset; //Moca: Spawn location offset for spawning fireballs, def: 0,0,00
+var() vector fireballOffset; //Moca: Spawn location offset for spawning fireballs, def: 0,0,0
 var float cooldown;
+var float RangeIntensity;
 
 event PostBeginPlay()
 {
     Super.PostBeginPlay();
     cooldown = FireCooldown;
+}
+
+event Tick (float DeltaTime)
+{
+	if (isHarryNear(DistanceToAttack))
+	{
+		RangeIntensity = GetDistanceFromHarry() / 200;
+		Log("Range intensity: " $ string(RangeIntensity));
+	}
 }
 
 function SpawnSmoke()
@@ -23,8 +32,16 @@ function SpawnSmoke()
 
 function SpawnFire()
 {
+	local Rotator SpawnRot;
+	local MOCAFireBall SpawnedFireball;
+	SpawnRot = Rotation;
+	SpawnRot.Pitch += 16384;
+
     Spawn(Class'SmokePuff');
-    Spawn(Class'MOCAFireBall',self,,Location + fireballOffset,Rotation);
+    SpawnedFireball = Spawn(Class'MOCAFireBall',self,,Location + fireballOffset,SpawnRot);
+	SpawnedFireball.LaunchSpeed = FireballLaunchSpeed;
+	//SpawnedFireball.HomingStrength *= RangeMult;
+	SpawnedFireball.HomingStrength *= RangeIntensity;
 }
 
 auto state stateIdle
@@ -105,10 +122,9 @@ state stateFireLoop
 defaultproperties
 {
      DistanceToAttack=350
-     FireballDistMin=50
-     FireballDistMax=100
-     FireballLaunchHeight=700
-     FireCooldown=2
+     FireballLaunchSpeed=100
+     FireCooldown=0.25
      fireballOffset=(Z=70)
      Mesh=SkeletalMesh'MocaModelPak.skfireseedplantMesh'
+	 //RangeMult=1.0
 }
