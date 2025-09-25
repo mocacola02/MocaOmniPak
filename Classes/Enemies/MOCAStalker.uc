@@ -76,7 +76,7 @@ event Bump( Actor Other )
 event HitWall (Vector HitNormal, Actor HitWall)
 {
     Super.HitWall(HitNormal,HitWall);
-    if (!IsInState('stateStalkDerailed') || !IsInState('stateAttackDerailed'))
+    if ( (!IsInState('stateStalkDerailed') || !IsInState('stateAttackDerailed')) && !IsInState('stateRetreat'))
     {
         Log("BUMPED A WALL AHHHHHHHH!!!!!!!!!!!!!!!!!");
         GotoState('stateRetreat', 'retreat');
@@ -286,6 +286,8 @@ state stateRetreat
             }
             SleepForTick();
         }
+
+		SleepForTick();
 
         Log("Retreated, time to cool down");
         GotoState('stateCooldown');
