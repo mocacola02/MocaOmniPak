@@ -7,6 +7,7 @@ var(MOCACharMovement) float maxTravelDistance;  //How far can the actor travel f
 var(MOCACharMovement) bool tiltOnMovement;      //Should this actor lean into its movement direction (like Harry)? Def: true
 
 var bool inErrorMode;
+var bool MocaDebugMode;
 var int hitsTaken;
 var name PreviousState;
 var NavigationPoint prevNavP;
@@ -33,6 +34,12 @@ event AlterDestination()
     {
         DesiredRotation.Pitch = 0.0;
     }
+}
+
+exec function MocaMode()
+{
+	MocaDebugMode = !MocaDebugMode;
+	Log("MocaMode = " $ string(MocaDebugMode));
 }
 
 function bool ActorExistenceCheck(Class<Actor> ActorToCheck)
@@ -65,11 +72,15 @@ function bool CloseToHome(float distanceAllowance)
 
 function EnterErrorMode()
 {
+	/*
     DrawType = DT_Sprite;
     DrawScale = 0.25;
     Texture = Texture'MocaTexturePak.ICO_ActorErrorBubble';
     Log("IIIIIIIIIIIIIIIIIIIII start printing error");
     inErrorMode = True;
+	*/
+
+	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: " $ DebugErrMessage)
 }
 
 function EnableTurnTo(actor TurnTarget)

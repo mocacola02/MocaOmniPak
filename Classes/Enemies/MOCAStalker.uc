@@ -6,48 +6,50 @@
 
 class MOCAStalker extends MOCAChar;
 
-var() float activationDistance;             //How close Harry needs to be to begin stalking Def: 5000
-var() float attackSpeed;                    //How fast should the actor get while attacking? Def: 250
-var() float stalkCooldown;                  //How long to wait before stalking after being spotted Def: 10
+var() float activationDistance;             //Moca: How close Harry needs to be to begin stalking Def: 5000
+var() float attackSpeed;                    //Moca: How fast should the actor get while attacking? Def: 250
+var() float stalkCooldown;                  //Moca: How long to wait before stalking after being spotted Def: 10
 
-var() int requiredAnger;                    //How angry does the actor need to be before attacking? Def: 50
-var() int angerRate;                        //How fast does the actor get angry? aka how much to increase anger by when spotted Def: 1
-var() int relaxRate;                        //How fast does the actor lose angriness? aka how much to decrease anger by when still angry Def: 1
+var(MOCAStalkerAnger) float requiredAnger;  //Moca: How angry does the actor need to be before attacking? Def: 50
+var(MOCAStalkerAnger) float angerRate;      //Moca: How fast does the actor get angry? aka how much to increase anger by when spotted Def: 1
+var(MOCAStalkerAnger) float relaxRate;      //Moca: How fast does the actor lose angriness? aka how much to decrease anger by when still angry Def: 1
 
-var(MOCAStalkerAnims) name waitAnim;        //Animation to play while waiting
-var(MOCAStalkerAnims) float waitRate;       //Speed of animation Def: 1.0
-var(MOCAStalkerAnims) name sneakAnim;       //Animation to play while sneaking
-var(MOCAStalkerAnims) float sneakRate;      //Speed of animation Def: 1.0
-var(MOCAStalkerAnims) name retreatAnim;     //Animation to play while retreating
-var(MOCAStalkerAnims) float retreatRate;    //Speed of animation Def: 1.0
-var(MOCAStalkerAnims) name attackAnim;      //Animation to play while attacking
-var(MOCAStalkerAnims) float attackRate;     //Speed of animation Def: 1.0
-var(MOCAStalkerAnims) name stareAnim;       //Animation to play while staring
-var(MOCAStalkerAnims) float stareRate;      //Speed of animation Def: 1.0
-var(MOCAStalkerAnims) name killAnim;        //Animation to play while killing Harry
-var(MOCAStalkerAnims) float killRate;       //Speed of animation Def: 1.0
-var(MOCAStalkerAnims) name dieAnim;         //Animation to play while dying
-var(MOCAStalkerAnims) float dieRate;        //Speed of animation Def: 1.0
+var(MOCAStalkerAnims) name waitAnim;        //Moca: Animation to play while waiting
+var(MOCAStalkerAnims) float waitRate;       //Moca: Speed of animation Def: 1.0
+var(MOCAStalkerAnims) name sneakAnim;       //Moca: Animation to play while sneaking
+var(MOCAStalkerAnims) float sneakRate;      //Moca: Speed of animation Def: 1.0
+var(MOCAStalkerAnims) name retreatAnim;     //Moca: Animation to play while retreating
+var(MOCAStalkerAnims) float retreatRate;    //Moca: Speed of animation Def: 1.0
+var(MOCAStalkerAnims) name attackAnim;      //Moca: Animation to play while attacking
+var(MOCAStalkerAnims) float attackRate;     //Moca: Speed of animation Def: 1.0
+var(MOCAStalkerAnims) name stareAnim;       //Moca: Animation to play while staring
+var(MOCAStalkerAnims) float stareRate;      //Moca: Speed of animation Def: 1.0
+var(MOCAStalkerAnims) name killAnim;        //Moca: Animation to play while killing Harry
+var(MOCAStalkerAnims) float killRate;       //Moca: Speed of animation Def: 1.0
+var(MOCAStalkerAnims) name dieAnim;         //Moca: Animation to play while dying
+var(MOCAStalkerAnims) float dieRate;        //Moca: Speed of animation Def: 1.0
 
-var(MOCAStalkerSounds) Sound retreatSound;  //Sound to play while retreating
-var(MOCAStalkerSounds) Sound attackSound;   //Sound to play while attacking
-var(MOCAStalkerSounds) Sound killSound;     //Sound to play while killing Harry
-var(MOCAStalkerSounds) Sound dieSound;      //Sound to play while dying
-var(MOCAStalkerSounds) float noiseRadius;   //How far noise can reach Def: 1000
+var(MOCAStalkerSounds) Sound retreatSound;  //Moca: Sound to play while retreating
+var(MOCAStalkerSounds) Sound attackSound;   //Moca: Sound to play while attacking
+var(MOCAStalkerSounds) Sound killSound;     //Moca: Sound to play while killing Harry
+var(MOCAStalkerSounds) Sound dieSound;      //Moca: Sound to play while dying
+var(MOCAStalkerSounds) float noiseRadius;   //Moca: How far noise can reach Def: 1000
 
-var float minDot;
-var int angerValue;
-var int randNumber;
-var NavigationPoint retreatPoint;
+var bool IsStaring;
 
 var float DefGroundSpeed;
+var float angerValue;
+var float minDot;
+
+var int randNumber;
+
+var NavigationPoint retreatPoint;
 
 event PreBeginPlay()
 {
     super.PreBeginPlay();
     DefGroundSpeed = GroundSpeed;
 }
-
 
 event PostBeginPlay()
 {
@@ -56,7 +58,10 @@ event PostBeginPlay()
     if (!ActorExistenceCheck(Class'MOCAStalkerNode') || !ActorExistenceCheck(Class'MOCAharry'))
     {
         EnterErrorMode();
+		return;
     }
+
+	SetTimer(0.125, true, 'HandleAnger');
 }
 
 event Bump( Actor Other )
@@ -76,6 +81,20 @@ event HitWall (Vector HitNormal, Actor HitWall)
         Log("BUMPED A WALL AHHHHHHHH!!!!!!!!!!!!!!!!!");
         GotoState('stateRetreat', 'retreat');
     }
+}
+
+function HandleAnger()
+{
+	if ( ( IsStaring && IsOtherLookingAt(PlayerHarry, minDot) ) || ( GetDistanceFromHarry() < 128.0 ) )
+	{
+		angerValue = FClamp(angerValue + angerRate, 0, requiredAnger);
+		Log("Increasing anger to " $ string(angerValue) $ ", Harry is " $ string(GetDistanceFromHarry()) $ " units away.");
+	}
+	else if (angerValue > 0 && !IsOtherLookingAt(PlayerHarry, minDot))
+	{
+		angerValue = FClamp(angerValue - relaxRate, 0, requiredAnger);
+		Log("Decreasing anger to " $ string(angerValue));
+	}
 }
 
 function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
@@ -221,14 +240,14 @@ state stateRetreat
 
     event EndState()
     {
-        super.EndState();
+        IsStaring = False;
         GroundSpeed = DefGroundSpeed;
     }
     
     event Timer()
     {
         local int randStop;
-        randStop = rand(16);
+        randStop = rand(32);
         if (randStop == 0)
         {
             Gotostate('stateRetreat', 'stare');
@@ -273,22 +292,19 @@ state stateRetreat
 
     stare:
         Log("STARING!!!!!!!!!!!!");
+		IsStaring = True;
         Acceleration = vect(0.00,0.00,0.00);
         Velocity = vect(0.00,0.00,0.00);
         LoopAnim(stareAnim, stareRate);
 
-        randNumber = rand(10);
-        if (IsOtherLookingAt(PlayerHarry, minDot))
+        randNumber = rand(24);
+		if (angerValue >= requiredAnger)
+		{
+			GotoState('stateAttack');
+		}
+        else if (randNumber == 0)
         {
-            angerValue = clamp(angerValue + angerRate, 0, requiredAnger);
-            Log("Anger raised to " $ string(angerValue) $ "out of " $ string(requiredAnger));
-            if (angerValue >= requiredAnger)
-            {
-                GotoState('stateAttack');
-            }
-        }
-        if (randNumber == 0)
-        {
+			IsStaring = False;
             Goto('retreat');
         }
         else
@@ -306,7 +322,6 @@ state stateAttack
         Acceleration = vect(0.00,0.00,0.00);
         Velocity = vect(0.00,0.00,0.00);
         Log("ATTACKING!!!!!!!!!!!!!!");
-        SetTimer(0.05,true);
         GroundSpeed = attackSpeed;
         LoopAnim(attackAnim, attackRate);
     }
@@ -321,19 +336,6 @@ state stateAttack
     {
         Super.AlterDestination();
         
-    }
-
-    event Timer ()
-    {
-        if(angerValue > 0)
-        {
-            angerValue -= clamp(angerValue - relaxRate, 0, requiredAnger);
-            Log("Anger reduced to " $ string(angerValue));
-        }
-        else
-        {
-            Log("Already at 0 anger");
-        }
     }
 
     begin:
@@ -366,7 +368,6 @@ state stateAttackDerailed
         Log("ATTACK DERAILING!!!!!!!!!!!!!");
         PlaySound(attackSound, SLOT_None, 1.0,,noiseRadius);
         LoopAnim(attackAnim, attackRate);
-        SetTimer(0.05,true);
         GroundSpeed = attackSpeed;
     }
 
@@ -374,12 +375,6 @@ state stateAttackDerailed
     {
         Super.EndState();
         GroundSpeed = DefGroundSpeed;
-    }
-
-    event Timer ()
-    {
-        angerValue -= clamp(angerValue - relaxRate, 0, requiredAnger);
-        Log("Anger reduced to " $ string(angerValue));
     }
 
     begin:
@@ -394,6 +389,7 @@ state stateAttackDerailed
             GotoState('stateRetreat', 'retreat');
         }
 
+		SleepForTick();
         GotoState('stateAttack');
 }
 
@@ -427,14 +423,8 @@ state stateDie
 
 state stateCooldown
 {
-    event Timer ()
-    {
-        angerValue -= clamp(angerValue - relaxRate, 0, requiredAnger);
-    }
-
     begin:
-        SetTimer(0.05,true);
-        angerRate++;
+        //angerRate++;
         Acceleration = vect(0.00,0.00,0.00);
         Velocity = vect(0.00,0.00,0.00);
         sleep(stalkCooldown);
@@ -452,7 +442,7 @@ defaultproperties
     SightRadius=512.0
     CollisionHeight=65
     stalkCooldown=10
-    requiredAnger=50
+    requiredAnger=25
     activationDistance=5000
     bAdvancedTactics=true
     noiseRadius=1000
@@ -461,7 +451,7 @@ defaultproperties
     minDot=0.25
     maxTravelDistance=9999999
     angerRate=1
-    relaxRate=1
+    relaxRate=0.0625
     affectAmbience=True
     waitRate=1.0
     sneakRate=1.0
