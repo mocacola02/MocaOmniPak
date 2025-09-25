@@ -7,16 +7,18 @@ class MOCAharry extends harry;
 
 struct SpellMap
 {
-  var() const editconst ESpellType SpellSlot; // What spell slot to assign the spell to?
-  var() class<baseSpell> SpellToAssign; // What custom spell class to assign to the slot?
-  var() ESpellType SpellToActAs;  // What spell to act as? For example, if you set this as SPELL_Rictusempra, it will activate actors designed for Rictusempra. By default, it will act as the assigned spell slot if blank.
+  var() const editconst ESpellType SpellSlot; 				// What spell slot to assign the spell to?
+  var() class<baseSpell> SpellToAssign; 					// What custom spell class to assign to the slot?
+  var() ESpellType SpellToActAs;  							// What spell to act as? For example, if you set this as SPELL_Rictusempra, it will activate actors designed for Rictusempra.
+  															// By default, it will act as the assigned spell slot if blank.
 };
 
 var() class<Weapon> DefaultWeapon;
 var() bool saveOnLoad;
 
-var(MOCASpellbook) Array<Class<baseSpell>> DefaultSpellbook;
-var(MOCASpellbook) SpellMap SpellMapping[28];
+var(MOCAMagic) Array<Class<baseSpell>> DefaultSpellbook;	// Moca: What default spells do we have?
+var(MOCAMagic) SpellMap SpellMapping[28];					// Moca: What spells are mapped to each spell slot?
+// TODO: var(MOCAMagic) bool UseDynamicWandParticles;		// Moca: Use the dynamic particle colors/sprites? Def: True
 
 var Actor LastStoredBase;
 
@@ -34,6 +36,8 @@ var int DefaultWeaponSlot;
 var int CurrentWeapon;
 
 var FadeActorController mcFade;
+
+var bool MocaDebugMode;
 
 ////////////////
 // EVENTS
@@ -115,6 +119,12 @@ event BaseChanged(Actor OldBase, Actor NewBase)
 // FUNCTIONS
 ////////////////
 
+exec function MocaMode()
+{
+	MocaDebugMode = !MocaDebugMode;
+	Log("MocaMode = " $ string(MocaDebugMode));
+}
+
 exec function ShowCollectibles()
 {
 	local int nCount;
@@ -149,7 +159,7 @@ function AddHarryWeapon (class<Weapon> WeaponToSpawn)
 
 exec function ChangeWand(int WeaponSlot)
 {
-	if (WeaponSlot == 3 || WeaponSlot > 4 || WeaponSlot <= 0)
+	if ( (WeaponSlot == 3 || WeaponSlot > 4 || WeaponSlot <= 0) || (WeaponSlot == 4 && !MocaDebugMode) )
 	{
 		WeaponSlot = 2;
 	}
@@ -317,11 +327,11 @@ function name GetCurrIdleAnimName()
   }
 }
 
-function screenFade (float fadeOpacity, float fadeOutTime)
+function ScreenFade (float fadeOpacity, float fadeOutTime)
 {
-  local FadeViewController mcCamFade;
-  mcCamFade = Spawn(Class'FadeViewController');
-  mcCamFade.Init (fadeOpacity, 0, 0, 0, fadeOutTime);
+  local FadeViewController CamFade;
+  CamFade = Spawn(Class'FadeViewController');
+  CamFade.Init(fadeOpacity, 0, 0, 0, fadeOutTime);
 }
 
 exec function AltFire (optional float f)
@@ -424,11 +434,11 @@ state caught
 
   begin:
     sleep(1.0);
-    screenFade(1.0, 2.0);
+    ScreenFade(1.0, 2.0);
     sleep(2.5);
     TeleportHarry(respawnLoc,respawnRot);
     sleep(0.5);
-    screenFade(0.0, 2.0);
+    ScreenFade(0.0, 2.0);
     bKeepStationary = False;
     GotoState('PlayerWalking');
 }

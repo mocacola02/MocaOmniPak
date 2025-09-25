@@ -407,7 +407,7 @@ state stateKill
         PlayAnim(killAnim, killRate);
         PlaySound(killSound, SLOT_None, 1.0,,noiseRadius);
         sleep(0.8);
-        screenFade(1.0,0.02);
+        ScreenFade(1.0,0.02);
         sleep(2.0);
         PlayerHarry.ConsoleCommand("LoadGame 0");
 }

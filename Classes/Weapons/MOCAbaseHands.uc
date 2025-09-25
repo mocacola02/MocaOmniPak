@@ -9,12 +9,12 @@ function actor TraceForInteracts (vector TraceEnd, vector TraceStart, optional v
 	local actor aHitActor;
 	local vector HitLoc;
 	local vector HitNorm;
-	local harry PlayerHarry;
+	local MOCAharry PlayerHarry;
     local MOCAInteractProp MocaProp;
 
-	PlayerHarry = Harry(Level.PlayerHarryActor);
+	PlayerHarry = MOCAharry(Owner);
 
-    if (HPConsole(PlayerHarry.Player.Console).bDebugMode)
+    if (PlayerHarry.MocaDebugMode == True)
     {
         SpawnSprite(TraceStart);
         SpawnSprite(TraceEnd);

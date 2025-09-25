@@ -222,7 +222,7 @@ function bool SeesHarry()
     return false;
 }
 
-function screenFade (float fadeOpacity, float fadeOutTime)
+function ScreenFade (float fadeOpacity, float fadeOutTime)
 {
   local FadeViewController mcCamFade;
   mcCamFade = Spawn(Class'FadeViewController');

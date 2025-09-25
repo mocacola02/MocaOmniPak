@@ -20,7 +20,7 @@ var float fPickupFlyTime;
 event PreBeginPlay()
 {
     Super.PreBeginPlay();
-    soundPickup = pickUpSound;
+    soundPickup = None;
 }
 
 event Touch (Actor Other)
@@ -29,6 +29,11 @@ event Touch (Actor Other)
   if ( Other.IsA('Tut1Gnome') )
   {
     return;
+  }
+
+  if (Other.IsA('harry'))
+  {
+	PlaySound(pickUpSound,,SoundVolMult);
   }
 }
 
@@ -123,4 +128,5 @@ defaultproperties
      bAlignBottom=False
      attractionSpeed=300.0
      bCanFly=True
+	 SoundVolMult=1.0
 }

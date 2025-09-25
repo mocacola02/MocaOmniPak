@@ -23,4 +23,5 @@ defaultproperties
      bProjTarget=False
      bBlockCamera=False
      bBounce=True
+	 SoundVolMult=0.7
 }
