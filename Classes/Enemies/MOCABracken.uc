@@ -20,6 +20,4 @@ defaultproperties
     stareAnim=Idle
     killAnim=Kill
     dieAnim=Die
-    GroundSpeed=260
-    attackSpeed=280
 }

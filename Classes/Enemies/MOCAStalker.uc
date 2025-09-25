@@ -446,8 +446,8 @@ defaultproperties
     activationDistance=5000
     bAdvancedTactics=true
     noiseRadius=1000
-    GroundSpeed=180
-    attackSpeed=250
+    GroundSpeed=340
+    attackSpeed=400
     minDot=0.25
     maxTravelDistance=9999999
     angerRate=1
