@@ -280,7 +280,7 @@ state stateRetreat
         randNumber = rand(10);
         if (IsOtherLookingAt(PlayerHarry, minDot))
         {
-            angerValue += angerRate;
+            angerValue = clamp(angerValue + angerRate, 0, requiredAnger);
             Log("Anger raised to " $ string(angerValue) $ "out of " $ string(requiredAnger));
             if (angerValue >= requiredAnger)
             {
@@ -327,7 +327,7 @@ state stateAttack
     {
         if(angerValue > 0)
         {
-            angerValue -= relaxRate;
+            angerValue -= clamp(angerValue - relaxRate, 0, requiredAnger);
             Log("Anger reduced to " $ string(angerValue));
         }
         else
@@ -378,7 +378,7 @@ state stateAttackDerailed
 
     event Timer ()
     {
-        angerValue -= relaxRate;
+        angerValue -= clamp(angerValue - relaxRate, 0, requiredAnger);
         Log("Anger reduced to " $ string(angerValue));
     }
 
@@ -429,7 +429,7 @@ state stateCooldown
 {
     event Timer ()
     {
-        angerValue -= relaxRate;
+        angerValue -= clamp(angerValue - relaxRate, 0, requiredAnger);
     }
 
     begin:
