@@ -305,7 +305,7 @@ defaultproperties
     chaseSpeed=230
     CollisionHeight=65
     CollisionRadius=15
-    DebugErrMessage="WARNING: Requires path nodes and MOCAharry."
+    DebugErrMessage="MOCAHunter requires path nodes and MOCAharry."
     DrawScale=1.0
     eVulnerableToSpell=SPELL_None
     EyeHeight=20.75

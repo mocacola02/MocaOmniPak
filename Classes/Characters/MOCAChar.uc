@@ -375,4 +375,5 @@ defaultproperties
 {
      maxTravelDistance=150
      tiltOnMovement=True
+	 DebugErrMessage="No debug message provided. Please complain to Moca about this!"
 }
