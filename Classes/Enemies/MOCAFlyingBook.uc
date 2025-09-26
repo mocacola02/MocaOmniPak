@@ -83,6 +83,7 @@ function bool DetermineSleep()
 	}
 	
 	Print("Not going home yet!");
+	CanGoHome = False;
 	return false;
 }
 
