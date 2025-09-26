@@ -36,10 +36,12 @@ event AlterDestination()
     }
 }
 
-exec function MocaMode()
+function Print(string LogMessage)
 {
-	MocaDebugMode = !MocaDebugMode;
-	Log("MocaMode = " $ string(MocaDebugMode));
+	if (MocaDebugMode)
+	{
+		Log(LogMessage);
+	}
 }
 
 function bool ActorExistenceCheck(Class<Actor> ActorToCheck)
@@ -90,10 +92,30 @@ function EnableTurnTo(actor TurnTarget)
     MakeTurnToPermanentController();
 }
 
+function DisableTurnTo()
+{
+	bTurnTo_FollowActor = false;
+	TurnTo_TargetActor = None;
+	DestroyTurnToPermanentController();
+}
+
 function float GetDistanceFromHarry()
 {
     return VSize(Location - PlayerHarry.Location);
 }
+
+function rotator GetRotationFacingActor(Actor Other)
+{
+    local vector ToTarget;
+
+    if (Other == None)
+        return Rotation;
+
+    ToTarget = Other.Location - Location;
+
+    return Rotator(ToTarget);
+}
+
 
 function NavigationPoint GetFurthestNavPoint(actor actorToCheck)
 {

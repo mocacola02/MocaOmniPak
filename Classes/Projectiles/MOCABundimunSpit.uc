@@ -4,8 +4,6 @@
 
 class MOCABundimunSpit extends MOCAProjectile;
 
-var float DamageToDeal;
-
 function OnLand(vector HitNormal)
 {
     local MOCABundimunSpray BS;
@@ -25,7 +23,6 @@ function OnLand(vector HitNormal)
 
 defaultproperties
 {
-    Damage=10
     DamageToDeal=15
     LaunchSpeed=100
     LightType=LT_None

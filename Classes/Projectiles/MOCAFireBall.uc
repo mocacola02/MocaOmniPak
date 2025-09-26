@@ -7,7 +7,7 @@ class MOCAFireBall extends MOCAProjectile;
 defaultproperties
 {
 	LaunchSpeed=700
-    Damage=30
+    DamageToDeal=30
     LifeSpan=6.0
     LightType=LT_Steady
     bReallyDynamicLight=True

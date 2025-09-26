@@ -12,7 +12,7 @@ var() class<Actor> LandedClass;			// What class to spawn when the particle lands
 var() bool bUseSpawnRotation;    	// If true, launch using projectile's own rotation
 var() bool bHomingTowardTarget;  	// If true, steer gently toward ShotTarget
 
-var() int DamageToHarry; 			// How much damage should Harry take?
+var() float DamageToDeal;
 var() float LaunchSpeed;         	// Initial speed of projectile
 var() float LaunchAngle;         	// Angle in degrees (0 = forward, 90 = straight up)
 var() float GravityScale;        	// Scale gravity effect (1.0 = normal, 0.0 = none)
@@ -21,7 +21,7 @@ var() float HomingAccuracy;			// How accurate is the homing? 0.0 is most accurat
 
 var() name DamageName; 				// Name of the damage type harry will take
 
-var Actor ParticleActor;            // Instance of spawned effect
+var ParticleFX ParticleActor;            // Instance of spawned effect
 
 var vector DesiredDirection;     	// Stored direction to target (for homing)
 var vector InitialDir;           	// Stored initial launch direction
@@ -122,7 +122,7 @@ function KillProjectile()
 {
     if (ParticleActor != None)
     {
-        ParticleActor.Destroy();
+        ParticleActor.Shutdown();
         ParticleActor = None;
     }
 
@@ -139,7 +139,7 @@ event Touch(Actor Other)
     super.Touch(Other);
     if (Other.IsA('harry'))
     {
-        PlayerHarry.TakeDamage(DamageToHarry,Pawn(Owner),Location,Velocity,DamageName);
+        PlayerHarry.TakeDamage(DamageToDeal,Pawn(Owner),Location,Velocity,DamageName);
         KillProjectile();
     }
 }
@@ -161,7 +161,7 @@ defaultproperties
     Damage=20
     MomentumTransfer=50000
     ParticleClass=None
-    DamageToHarry=10
+    DamageToDeal=10
     DamageName=MOCAProjectile
 
     HomingStrength=0.25

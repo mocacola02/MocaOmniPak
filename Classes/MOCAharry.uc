@@ -121,8 +121,19 @@ event BaseChanged(Actor OldBase, Actor NewBase)
 
 exec function MocaMode()
 {
+	local MOCAChar A;
+	local int ActorCount;
+
 	MocaDebugMode = !MocaDebugMode;
 	Log("MocaMode = " $ string(MocaDebugMode));
+
+	foreach AllActors(class'MOCAChar', A)
+	{
+		A.MocaDebugMode = MocaDebugMode;
+		ActorCount++;
+	}
+
+	Log("MocaMode set on " $ string(ActorCount) $ " MOCAChars.");
 }
 
 exec function ShowCollectibles()
