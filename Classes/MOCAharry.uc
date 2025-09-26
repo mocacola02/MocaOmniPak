@@ -514,6 +514,8 @@ state PlayerSwimming
 
 	Global.PlayerTick( DeltaTime );
 
+	LoopAnim('Spongify');
+
 	if (  !IsA('BroomHarry') && Physics == PHYS_Walking )
 	{
 		DesiredRotation.Pitch = 0;
@@ -730,7 +732,7 @@ state PlayerSwimming
 
 		if ( (Physics == PHYS_Walking)  )
 		{
-			Speed = VSize2d( Velocity );
+			Speed = VSize2d( Velocity ) * 3;
 
 			if(   (!bAnimTransition || (AnimFrame > 0))
 			   && !( AnimSequence == HarryAnims[HarryAnimSet].Land && (Speed < 5 || VSize2D(acceleration)==0) )  //You need to NOT be (landing and not-moving)    //(GetAnimGroup(AnimSequence) != 'Landing') )
@@ -782,9 +784,9 @@ state PlayerSwimming
     HarryAnims[0].Land        = 'Land';
     Log("Changing to swim anims");
     SetAnimSet(0);
-    GroundSpeed = 140.00;
-    AirSpeed = 200.00;
-    AirControl = 0.25;
+    GroundSpeed = 600.00;
+    AirSpeed = 600.00;
+    AirControl = 1.0;
     inWater = true;
     WalkBob = vect(0.00,0.00,0.00);
     DodgeDir = DODGE_None;

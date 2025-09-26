@@ -1,5 +1,7 @@
 class MOCAFireseedPlant extends MOCAChar;
 
+// This actor needs to be rewritten.
+
 var() float DistanceToAttack; //Moca: Required distance to attack Harry, Def: 500
 var() float FireballLaunchSpeed; //Moca: How high should fireballs be shot, Def: 700
 //var() float RangeMult;		// Moca: Multiplier for range. Def: 1.0
@@ -20,7 +22,11 @@ event Tick (float DeltaTime)
 	if (isHarryNear(DistanceToAttack))
 	{
 		RangeIntensity = GetDistanceFromHarry() / 200;
-		Log("Range intensity: " $ string(RangeIntensity));
+
+		if (MocaDebugMode)
+		{
+			Log("Range intensity: " $ string(RangeIntensity));
+		}	
 	}
 }
 

@@ -97,18 +97,13 @@ function HandleAnger()
 	}
 }
 
-function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
+function ProcessSpell()
 {
-    Super.HandleSpellRictusempra(spell,vHitLocation);
-    if (eVulnerableToSpell == ESpellType.SPELL_Rictusempra)
-    {
-        hitsTaken++;
-        if (hitsTaken >= hitsToKill && hitsToKill != 0)
-        {
-            GotoState('stateDie');
-        }
-    }
-    return True;
+	hitsTaken++;
+	if (hitsTaken >= hitsToKill && hitsToKill != 0)
+	{
+		GotoState('stateDie');
+	}
 }
 
 function ChangeNodeView(float newDistance)
