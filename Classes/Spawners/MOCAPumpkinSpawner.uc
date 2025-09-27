@@ -45,7 +45,7 @@ state stateSpawn
         if (!animCooldown)
         {
 			SetCollision(false,false,false);
-			PlayAnim('Hit',2.0,0.0);
+			PlayAnim('Hit',RandRange(1.34,2.34),0.0);
 			PlaySound(visibleSpawnSounds.Ending);
         }
 
