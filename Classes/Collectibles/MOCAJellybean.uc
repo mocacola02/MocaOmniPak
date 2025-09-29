@@ -5,7 +5,7 @@
 class MOCAJellybean extends Jellybean;
 
 var float CurrentYawF; // Float version of yaw
-var() float RotationSpeed; // Default: 160 | How fast should bean spin? (in degrees per second)
+var() float RotationSpeed; // Moca: How fast should bean spin? (in degrees per second) Def: 160.0
 
 auto state BounceIntoPlace
 {
@@ -13,11 +13,11 @@ auto state BounceIntoPlace
     {
         if ( bFallsToGround )
         {
-        // SetPhysics(2);
-        SetPhysics(PHYS_Falling);
-        } else {
-        // SetPhysics(0);
-        SetPhysics(PHYS_None);
+        	SetPhysics(PHYS_Falling);
+        }
+		else
+		{
+        	SetPhysics(PHYS_None);
         }
     }
 
@@ -30,9 +30,14 @@ auto state BounceIntoPlace
         CurrentYawF += RotationSpeed * DeltaTime;
 
         if (CurrentYawF >= 360.0)
-            CurrentYawF -= 360.0;
+		{
+			CurrentYawF -= 360.0;
+		}
+            
         else if (CurrentYawF < 0.0)
-            CurrentYawF += 360.0;
+		{
+			CurrentYawF += 360.0;
+		} 
 
         NewRotation.Pitch = 0;
         NewRotation.Yaw = int(CurrentYawF * 65536.0 / 360.0) & 65535;
@@ -41,7 +46,9 @@ auto state BounceIntoPlace
         SetRotation(NewRotation);
 
         if (bBounceIntoPlaceTiming)
-            fBounceIntoPlaceTimeout -= DeltaTime;
+		{
+			fBounceIntoPlaceTimeout -= DeltaTime;
+		}
     }
 }
 

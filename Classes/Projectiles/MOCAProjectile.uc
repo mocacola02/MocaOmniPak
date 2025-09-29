@@ -4,33 +4,33 @@
 
 class MOCAProjectile extends Projectile;
 
-var() class<ParticleFX> ParticleClass;    	// What effect to spawn (e.g. fireball trail)
-var() class<ParticleFX> DespawnEmitter; 	// Particles to spawn on destroy
+var() class<ParticleFX> ParticleClass;    	// Moca: What effect to spawn (e.g. fireball trail)
+var() class<ParticleFX> DespawnEmitter; 	// Moca: Particles to spawn on destroy
 
-var() class<Actor> LandedClass;			// What class to spawn when the particle lands on the ground?
+var() class<Actor> LandedClass;				// Moca: What class to spawn when the particle lands on the ground?
 
-var() bool bUseSpawnRotation;    	// If true, launch using projectile's own rotation
-var() bool bHomingTowardTarget;  	// If true, steer gently toward ShotTarget
+var() bool bUseSpawnRotation;    			// Moca: If true, launch using projectile's own rotation
+var() bool bHomingTowardTarget;  			// Moca: If true, steer gently toward ShotTarget
 
 var() float DamageToDeal;
-var() float LaunchSpeed;         	// Initial speed of projectile
-var() float LaunchAngle;         	// Angle in degrees (0 = forward, 90 = straight up)
-var() float GravityScale;        	// Scale gravity effect (1.0 = normal, 0.0 = none)
-var() float HomingStrength;      	// Blend factor (0 = none, 1 = instant snap)
-var() float HomingAccuracy;			// How accurate is the homing? 0.0 is most accurate, with higher numbers being less accurate. Def: 50
+var() float LaunchSpeed;         			// Moca: Initial speed of projectile
+var() float LaunchAngle;         			// Moca: Angle in degrees (0 = forward, 90 = straight up)
+var() float GravityScale;        			// Moca: Scale gravity effect (1.0 = normal, 0.0 = none)
+var() float HomingStrength;      			// Moca: Blend factor (0 = none, 1 = instant snap)
+var() float HomingAccuracy;					// Moca: How accurate is the homing? 0.0 is most accurate, with higher numbers being less accurate. Def: 50
 
-var() name DamageName; 				// Name of the damage type harry will take
+var() name DamageName; 						// Moca: Name of the damage type harry will take
 
-var ParticleFX ParticleActor;            // Instance of spawned effect
+var ParticleFX ParticleActor;            	// Instance of spawned effect
 
-var vector DesiredDirection;     	// Stored direction to target (for homing)
-var vector InitialDir;           	// Stored initial launch direction
-var vector ShotTarget;           	// Where this projectile is aimed
-var vector Gravity;					// Projectile gravity
+var vector DesiredDirection;     			// Stored direction to target (for homing)
+var vector InitialDir;           			// Stored initial launch direction
+var vector ShotTarget;           			// Where this projectile is aimed
+var vector Gravity;							// Projectile gravity
 
 var harry PlayerHarry;
 
-var bool NoDespawnEmit;				// Whether or not to use a particle emission on despawn
+var bool NoDespawnEmit;						// Whether or not to use a particle emission on despawn
 
 
 event PostBeginPlay()

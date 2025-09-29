@@ -23,3 +23,8 @@ ascii art by GJakaKL*/
 class MOCACharmedSkeleton extends MOCAChar;
 
 // To be done
+
+function PostBeginPlay()
+{
+	ErrorMsg("MOCACharmedSkeleton is currently being rewritten. Please don't use it, it literally does nothing.");
+}

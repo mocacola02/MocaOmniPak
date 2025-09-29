@@ -1,10 +1,10 @@
 class MOCAChar extends HChar;
 
-var() bool affectAmbience;
-var() bool bypassErrorMode;
-var(MOCACharHealth) int hitsToKill;             //How many hits does it take to die? If 0, cannot die. Def: 0
-var(MOCACharMovement) float maxTravelDistance;  //How far can the actor travel from its initial location? Def: 150
-var(MOCACharMovement) bool tiltOnMovement;      //Should this actor lean into its movement direction (like Harry)? Def: true
+var() bool affectAmbience;	// Moca: Does this actor affect MOCAAmbiencePlayer? Not yet implemented. Def: False
+var() bool bypassErrorMode;	// Moca: Bypass the error message that happens if you are missing a necessary component. Not recommended in most cases. Def: False
+var(MOCACharHealth) int hitsToKill;             // Moca: How many hits does it take to die? If 0, cannot die. Def: 0
+var(MOCACharMovement) float maxTravelDistance;  // Moca: How far can the actor travel from its initial location? Def: 150
+var(MOCACharMovement) bool tiltOnMovement;      // Moca: Should this actor lean into its movement direction (like Harry)? Def: true
 
 var bool inErrorMode;
 var bool MocaDebugMode;

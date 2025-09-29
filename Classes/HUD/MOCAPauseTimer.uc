@@ -12,10 +12,10 @@ var() bool DestroyWhenDone;		// Moca: Should the trigger destroy when finished
 var() float TimerLength;		// Moca: How long to pause for
 var() string PauseMessage;		// Moca: What message should display while paused
 
-var(MOCALoadLevelAction) string NewMap;		// Moca: What map to load if we're on AM_LoadLevel
+var(MOCALoadLevelAction) string NewMap;					// Moca: What map to load if we're on AM_LoadLevel
 var(MOCALoadLevelAction) Texture LoadingScreenImage;	// Moca: What image to use as the loading screen
 
-var(MOCAShowDialogAction) bool NotYetImplemented;	// Moca: The dialogue mode hasn't been added yet.
+var(MOCAShowDialogAction) bool NotYetImplemented;		// Moca: The dialogue mode hasn't been added yet.
 
 var bool Active;
 

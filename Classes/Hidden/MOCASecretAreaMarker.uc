@@ -4,8 +4,8 @@
 
 class MOCASecretAreaMarker extends SecretAreaMarker;
 
-var(SecretAreaMarker) array<Sound> soundPool; //List of possible reveal sounds
-var(SecretAreaMarker) float FoundSoundVolume; //Volume of sound
+var(SecretAreaMarker) array<Sound> soundPool; // Moca: List of possible reveal sounds
+var(SecretAreaMarker) float FoundSoundVolume; // Moca: Volume of sound
 
 
 event PostBeginPlay()

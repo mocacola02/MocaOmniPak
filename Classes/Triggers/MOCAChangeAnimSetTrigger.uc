@@ -9,7 +9,7 @@ enum enumHarryAnimSet {
   HARRY_ANIM_SET_DUEL
 };
 
-var() enumHarryAnimSet newAnimSet; //Moca: What set to change to?
+var() enumHarryAnimSet newAnimSet; // Moca: What set to change to?
 
 event Activate( Actor Other, pawn Instigator )
 {

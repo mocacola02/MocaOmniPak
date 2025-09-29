@@ -10,11 +10,11 @@ var MOCAStealthTrigger stealthTrigger;
 var int randLook;
 var bool isAwake;
 
-var() float timeToLook;         //How long to look in a direction. Ignored if randomTimeToLook is true. Def: 1.0
-var() bool randomTimeToLook;    //Whether or not to randomize TTL. Def: True
-var() float minTime;            //Minimum time to look when determining a random TTL value. Def: 1.5
-var() float maxTime;            //Maximum time to look when determining a random TTL value. Def: 4.5
-var() bool asleepOnSpawn;       //Should the watcher be inactive on spawn (requires a trigger to be enabled). Def: false
+var() float timeToLook;         // Moca: How long to look in a direction. Ignored if randomTimeToLook is true. Def: 1.0
+var() bool randomTimeToLook;    // Moca: Whether or not to randomize TTL. Def: True
+var() float minTime;            // Moca: Minimum time to look when determining a random TTL value. Def: 1.5
+var() float maxTime;            // Moca: Maximum time to look when determining a random TTL value. Def: 4.5
+var() bool asleepOnSpawn;       // Moca: Should the watcher be inactive on spawn (requires a trigger to be enabled). Def: false
 
 event PreBeginPlay()
 {

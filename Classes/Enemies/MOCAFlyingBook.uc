@@ -7,18 +7,18 @@ enum WakeMode
 	WM_Trigger
 };
 
-var() byte SleepChance;
+var() byte SleepChance;			// Moca: How likely is the book to go back to its resting point when close to home? Higher = more likely. Only works if WM_Proximity. Def: 128
 
-var() float AttackDistance;
-var() float AttackDelay;
-var() float DamageAmount;
-var() float StunDurationMult;
-var() float HomeRange;
-var() float WakeUpRange;
+var() float AttackDistance;		// Moca: At what distance will the book start attacking? Def: 192.0
+var() float AttackDelay;		// Moca: How long in seconds will the book wait before enabling attacking after it begins flying? Def: 5.0
+var() float DamageAmount;		// Moca: How much damage will Harry take when hit? Def: 5.0
+var() float StunDurationMult;	// Moca: How long will the book be stunned when hit? This works as a multiplier, 2.0 means twice as fast, 3.0 thrice as fast, etc. Def: 1.0
+var() float HomeRange;			// Moca: How far from the book's starting point will the book detect its home? Used for going back to home. Def: 256.0
+var() float WakeUpRange;		// Moca: How far can the book detect Harry to wake up? Only works if WM_Proximity. Def: 384.0
 
-var() Sound FlySound;
+var() Sound FlySound;			// Moca: What sound to use as the flying sound? Def: Sound'HPSounds.Critters_sfx.PIX_wingflap_loop'
 
-var() WakeMode WakeUpMode;
+var() WakeMode WakeUpMode;		// Moca: What activates the book? WM_Always means always flying, WM_Proximity means Harry must get close enough based on WakeUpRange, WM_Trigger means it must be triggered. Def: WM_Proximity
 
 // Not a fan of some of these bools, quick and sloppy fix for going home
 var bool GoingHome;

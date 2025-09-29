@@ -4,12 +4,12 @@
 
 class MOCABundimun extends MOCAChar;
 
-var() bool StayAboveGround; //Moca: Should it always be above ground?
-var() int BumpDamage; //Moca: How much damage from bumping into its body?
-var() int StunDuration; //Moca: How long should it stay stunned from Rictu?
-var() float PukeDistance; //Moca: How far should the poison reach?
-var() float TriggerDistance; //Moca: How far can the bundi detect Harry?
-var() float pukeDamage; //Moca: How much damage should puke do?
+var() bool StayAboveGround; // Moca: Should it always be above ground? Def: False
+var() float BumpDamage; // Moca: How much damage from bumping into its body? Def: 15.0
+var() float StunDuration; // Moca: How long should it stay stunned from Rictu? Def: 5.0
+var() float PukeDistance; // Moca: How far should the poison reach? Def: 10.0
+var() float TriggerDistance; // Moca: How far can the bundi detect Harry? Def: 500.0
+var() float pukeDamage; // Moca: How much damage should puke do? Def: 10.0
 var Rotator NewRot;
 var float Forward;
 //var float ShadowScaleIncrement;

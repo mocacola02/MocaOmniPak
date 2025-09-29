@@ -7,14 +7,15 @@ class MOCAChangeSizeTrigger extends MOCATrigger;
 //TODO: this all feels really inefficient
 
 var bool hasBeenActivated;
-var() float sizeMultiplier;   //What size to make Harry Def: 2.0
-var() float growthFrameRate;  //How smooth should the resize be? Def: 60.0
-var() float growthTime;       //How long should the resize take? Def: 2.0
-var() bool mustBeReactivated; //Does the trigger need to be reactivated by another trigger to grow again? Def: True
-var() name growthAnimation;   //What animation should Harry play while growing? Def: fidget_1
-var() bool freezeHarryDuringGrowth; //Should Harry be held in place during growth? If false, movement may be buggy. Def: True
+var() float sizeMultiplier;   			// Moca: What size to make Harry Def: 2.0
+var() float growthFrameRate;  			// Moca: How smooth should the resize be? Def: 60.0
+var() float growthTime;       			// Moca: How long should the resize take? Def: 2.0
+var() bool mustBeReactivated; 			// Moca: Does the trigger need to be reactivated by another trigger to grow again? Def: True
+var() name growthAnimation;   			// Moca: What animation should Harry play while growing? Def: fidget_1
+var() bool freezeHarryDuringGrowth; 	// Moca: Should Harry be held in place during growth? If false, movement may be buggy. Def: True
 
 //so many variables. almost certainly a better way to do this but if it works...... and we aren't exactly strapped for memory
+//follow up comment: bruh
 var float Elapsed;
 var float FrameTime;
 var float Alpha;

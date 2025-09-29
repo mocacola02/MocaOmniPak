@@ -1,32 +1,56 @@
 // cracker without the barrel
 class MOCAWizardCracker extends MOCAPawn;
 
-var() float SwellRate; //Moca: How long does it take for the cracker to swell up? 1.0 is regular speed, 2.0 is 2x speed, etc. Def: 1.5
-var() float BurstDelay; //Moca: How long to wait after done swelling to burst? Def: 2.0
-var() float BurstRadius; //Moca: How far does the burst reach?
-var() float BurstDamage; //Moca: How much damage does the burst do? This represents the maximum damage if BurstFalloff=True. Def: 15.0
-var() float DirectHitDamage; //Moca: How much damage should a direct hit on Harry do? Def: 20.0
-var() float CameraShakeIntensity; //Moca: How much should the camera shake from bursts? Def: 100.0
-var() float CameraShakeDuration; //Moca: How long should camera shake. Def: 0.75
+var() float SwellRate; 				//Moca: How long does it take for the cracker to swell up? 1.0 is regular speed, 2.0 is 2x speed, etc. Def: 1.5
+var() float BurstDelay; 			//Moca: How long to wait after done swelling to burst? Def: 2.0
+var() float BurstRadius; 			//Moca: How far does the burst reach?
+var() float BurstDamage; 			//Moca: How much damage does the burst do? This represents the maximum damage if BurstFalloff=True. Def: 15.0
+var() float DirectHitDamage; 		//Moca: How much damage should a direct hit on Harry do? Def: 20.0
+var() float CameraShakeIntensity; 	//Moca: How much should the camera shake from bursts? Def: 100.0
+var() float CameraShakeDuration; 	//Moca: How long should camera shake. Def: 0.75
 
-var() bool ActAsSpell; //Moca: Should the fire cracker act as a spell? Works similarly to SwordMode activating spell functions. Def: False
-var() bool BurstFalloff; //Moca: Should less damage be done the further away from the burst Harry is? Def: True
-var() bool ExplodeOnTouch; //Moca: Should the wizard cracker explode on touch? Aka it cannot be picked up. Def: False
-var() bool WaitForSwell; //Moca: Should we wait for the swelling to finish before starting BurstDelay? Def: True
+var() bool ActAsSpell; 				//Moca: Should the fire cracker act as a spell? Works similarly to SwordMode activating spell functions. Def: False
+var() bool BurstFalloff; 			//Moca: Should less damage be done the further away from the burst Harry is? Def: True
+var() bool ExplodeOnTouch; 			//Moca: Should the wizard cracker explode on touch? Aka it cannot be picked up. Def: False
+var() bool WaitForSwell; 			//Moca: Should we wait for the swelling to finish before starting BurstDelay? Def: True
+
+var(MOCAWizardCrackerSounds) Sound SwellSound;	// Moca: What sound to play when swelling?
+var(MOCAWizardCrackerSounds) Sound PopSound;	// Moca: What sound to play when bursting?
+var(MOCAWizardCrackerSounds) Sound LandSound;	// Moca: What sound to play when landing on the ground?
+var(MOCAWizardCrackerSounds) Sound PulseSound;	// Moca: What sound to play when pulsing?
+var(MOCAWizardCrackerSounds) float MinPopPitch;	// Moca: Minimum burst sound pitch
+var(MOCAWizardCrackerSounds) float MaxPopPitch;	// Moca: Maximum burst sound pitch
 
 var bool IsSwelling;
 var bool DirectHit;
 var bool CanHitHarry;
 var vector LastSafeLocation;
 
+var float WCSoundRadius;
+
 function Burst();
 function float DetermineDamage(float Distance);
+
+event PostBeginPlay()
+{
+	Super.PostBeginPlay();
+	
+	if (WCSoundRadius == 9)
+	{
+		WCSoundRadius = BurstRadius * 0.5;
+	}
+}
 
 event FellOutOfWorld()
 {
     local vector HandPos;
     HandPos = PlayerHarry.BonePos('bip01 R Hand');
     SetLocation(HandPos);
+}
+
+function float GetRandomPitch(float fMin, float fMax)
+{
+	return RandRange(fMin,fMax);
 }
 
 function PrepareTimer()
@@ -98,6 +122,7 @@ state stateBeingThrown
 
     event Landed(vector HitNormal)
     {
+		PlaySound(LandSound,SLOT_Interact,,,WCSoundRadius);
         GotoState('stateSwell');
     }
 
@@ -116,8 +141,10 @@ state stateSwell
         {
             IsSwelling = True;
             PrepareTimer();
+			PlaySound(SwellSound,SLOT_Misc,,,WCSoundRadius);
             PlayAnim('swell',SwellRate);
             FinishAnim();
+			PlaySound(PulseSound,SLOT_Misc,,,WCSoundRadius,,,true);
             LoopAnim('shake');
         }
 }
@@ -138,6 +165,8 @@ state stateBurst
     {
         local float DistanceFromHarry;
 
+		StopSound(PulseSound);
+
         if (ActAsSpell)
         {
             PlayerHarry.AutoHitAreaEffect(BurstRadius);
@@ -156,6 +185,8 @@ state stateBurst
             ShakeAmount *= CameraShakeIntensity;
             PlayerHarry.ShakeView(0.2,ShakeAmount,ShakeAmount);
         }
+
+		PlaySound(PopSound,SLOT_Interact,,,WCSoundRadius,GetRandomPitch(MinPopPitch,MaxPopPitch));
 
         Spawn(class'Firecracker_Burst',,,Location);
 
@@ -208,4 +239,11 @@ defaultproperties
     
     BurstFalloff=True
     WaitForSwell=True
+	
+	SwellSound=MultiSound'wizard_cracker_swell_multi'
+	PopSound=Sound'wizard_cracker_pop'
+	LandSound=MultiSound'wizard_cracker_land_multi'
+	PulseSound=Sound'wizard_cracker_pulse'
+	MinPopPitch=0.85
+	MaxPopPitch=1.15
 }

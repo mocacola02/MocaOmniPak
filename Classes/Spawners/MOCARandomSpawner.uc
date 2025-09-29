@@ -4,7 +4,7 @@
 
 class MOCARandomSpawner extends Triggers;
 
-var() array<Class<Actor>> CustomSpawnClasses; // Configurable array in the editor
+var() array<Class<Actor>> CustomSpawnClasses; // Moca: Configurable array in the editor
 var() float fVelocityModifier;
 var() name SpawnTag;
 var() bool bThrowItem;
@@ -13,7 +13,7 @@ var() float fAdditionalZVelocity;
 var(SpawnThingyPatrol) name nameFirstPatrolPoint;
 var(SpawnThingyPatrol) bool bLoopPatrolPath;
 //var() bool preventRepeatedSpawns;
-var() bool bUseCustomSpawnClasses; // Boolean to use custom array defined in-editor
+var() bool bUseCustomSpawnClasses; // Moca: Boolean to use custom array defined in-editor
 
 // Preset array of actors defined in the code
 var Class<Actor> PresetSpawnClasses[118]; 

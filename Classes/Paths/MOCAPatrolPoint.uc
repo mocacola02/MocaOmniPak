@@ -1,8 +1,8 @@
 class MOCAPatrolPoint extends PatrolPoint;
 
-var() Array<name> PatrolAnimList; //Moca: List of patrol anims
-var() Array<name> PauseAnimList; //Moca: List of pause anims
-var() bool logEachChange; //Moca: Whether or not to log each animation change. Only needed for debugging.
+var() Array<name> PatrolAnimList; 	// Moca: List of patrol anims
+var() Array<name> PauseAnimList; 	// Moca: List of pause anims
+var() bool logEachChange; 			// Moca: Whether or not to log each animation change. Only needed for debugging.
 
 var int patrolAnimCount;
 var int pauseAnimCount;

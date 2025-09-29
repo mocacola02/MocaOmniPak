@@ -1,7 +1,7 @@
 class MOCAForceField extends HProp;
 
-var() float AttractionRange;          // Maximum AttractionRange of effect
-var() float Attraction;     // Positive = pull, Negative = push, 0 = no force
+var() float AttractionRange;    // Moca: Maximum AttractionRange of effect
+var() float Attraction;     	// Moca: Positive = pull, Negative = push, 0 = no force
 var vector lastHarryPos;
 
 auto state stateDormant

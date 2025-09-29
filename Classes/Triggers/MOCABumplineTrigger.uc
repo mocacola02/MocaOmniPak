@@ -11,11 +11,12 @@ struct BumpSetMapping
     var string Prefix;    // The prefix to prepend
 };
 
-//Is this a good idea? Dunno, probably not. I made this pretty early on to learning UnrealScript
+// Is this a good idea? Dunno, probably not. I made this pretty early on to learning UnrealScript
+// follow up some time after the comment above: wtf lmfao
 var BumpSetMapping BumpSetMappings[286]; // Array to hold bumpset and prefix mappings.
 
-var() bool randomLinePerTrigger; //Moca: Should lines be random, if false use user-set bumplines
-var() name TouchClass; //Moca: Name of actor that should trigger the bumpline when touched
+var() bool randomLinePerTrigger; 	// Moca: Should lines be random, if false use user-set bumplines
+var() name TouchClass; 				// Moca: Name of actor that should trigger the bumpline when touched
 
 function Trigger (Actor Other, Pawn Instigator)
 {

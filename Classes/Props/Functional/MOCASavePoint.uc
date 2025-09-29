@@ -4,10 +4,10 @@
 
 class MOCASavePoint extends SavePoint;
 
-var() Sound SaveJingle; //Moca: What sound to play after saving
-var() float JingleVolumeMult; //Moca: Volume control for SaveJingle
-var() float TimeToRegenerate; //Moca: If SaveOnce=False, how long should it take to regen
-var() float BobStrength; //Moca: How intense should the floating movement be
+var() Sound SaveJingle; 		// Moca: What sound to play after saving
+var() float JingleVolumeMult; 	// Moca: Volume control for SaveJingle
+var() float TimeToRegenerate; 	// Moca: If SaveOnce=False, how long should it take to regen
+var() float BobStrength; 		// Moca: How intense should the floating movement be
 
 event PostBeginPlay()
 {

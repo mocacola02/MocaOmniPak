@@ -2,12 +2,12 @@ class MOCAFireseedPlant extends MOCAChar;
 
 // This actor needs to be rewritten.
 
-var() float DistanceToAttack; //Moca: Required distance to attack Harry, Def: 500
-var() float FireballLaunchSpeed; //Moca: How high should fireballs be shot, Def: 700
-//var() float RangeMult;		// Moca: Multiplier for range. Def: 1.0
-var() float FireCooldown; //Moca: Required time between firing, may cause issues if too low, Def: 2
-var() bool alwaysAttack; //Moca: Should plants always spit fire, def: false
-var() vector fireballOffset; //Moca: Spawn location offset for spawning fireballs, def: 0,0,0
+var() float DistanceToAttack; 		// Moca: Required distance to attack Harry, Def: 500
+var() float FireballLaunchSpeed; 	// Moca: How high should fireballs be shot, Def: 700
+//var() float RangeMult;			// Moca: Multiplier for range. Def: 1.0
+var() float FireCooldown; 			// Moca: Required time between firing, may cause issues if too low, Def: 2
+var() bool alwaysAttack; 			// Moca: Should plants always spit fire, def: False
+var() vector fireballOffset; 		// Moca: Spawn location offset for spawning fireballs, def: 0,0,0
 var float cooldown;
 var float RangeIntensity;
 

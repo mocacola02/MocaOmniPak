@@ -5,12 +5,12 @@
 class MOCACollectible extends HProp;
 
 
-var() float RotationSpeed; // Moca: How fast should bean spin? (in degrees per second) Def: 160
-var() Sound pickUpSound;    //Moca: What sound to play on pickup?
-var() bool bFallsToGround; //Moca: Should bean fall to ground? Def: True
-var() bool attractedToHarry; //Moca: Should bean move towards harry? Def: False
-var() float attractionSpeed; //Moca: How fast should bean move towards harry? Def: 300.0
-var() vector attractionOffset; //Moca: Position offset to be attacted to Def: (0,0,0)
+var() float RotationSpeed; 		// Moca: How fast should bean spin? (in degrees per second) Def: 160
+var() Sound pickUpSound;    	// Moca: What sound to play on pickup? Def: Sound'HPSounds.Magic_sfx.pickup11'
+var() bool bFallsToGround; 		// Moca: Should bean fall to ground? Def: True
+var() bool attractedToHarry; 	// Moca: Should bean move towards harry? Def: False
+var() float attractionSpeed; 	// Moca: How fast should bean move towards harry? Def: 300.0
+var() vector attractionOffset; 	// Moca: Position offset to be attacted to Def: (0,0,0)
 
 var bool bInitialized;
 

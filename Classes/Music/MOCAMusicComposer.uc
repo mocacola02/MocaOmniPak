@@ -2,13 +2,13 @@ class MOCAMusicComposer extends MOCAMusicActors;
 
 struct DynamicTracks
 {
-    var() string SongName; 			//Moca: Name of song to play
-    var() string NextSongName;      //Moca: Name of the next song after this one
-    var() float CheckRate;          //Moca: Second intervals to check. For example, if set to 4.0, it will mark points every 4th second in the song, and activate when it hits one of those marks. If 0.0, it will wait until the end of the song to switch.
-    var() float CrossFadeLength;    //Moca: Amount of fade to use when changing from this track to the next
+    var() string SongName; 			// Moca: Name of song to play
+    var() string NextSongName;      // Moca: Name of the next song after this one
+    var() float CheckRate;          // Moca: Second intervals to check. For example, if set to 4.0, it will mark points every 4th second in the song, and activate when it hits one of those marks. If 0.0, it will wait until the end of the song to switch.
+    var() float CrossFadeLength;    // Moca: Amount of fade to use when changing from this track to the next
 };
 
-var() array<DynamicTracks> ListOfSongs; //Moca: List of songs.
+var() array<DynamicTracks> ListOfSongs; // Moca: List of songs.
 
 var bool ReadyToProgress;
 

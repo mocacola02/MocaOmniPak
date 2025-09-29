@@ -4,14 +4,14 @@
 
 class MOCABabbler extends MOCAChar;
 
-var () float timeBetweenBabble; 	//How many seconds in between the connected babble sounds. Def: 0.1
-var () float delayBeforeEnding; 	//How many seconds to hold on the subtitles after done talking. Def: 2.0
-var () float voiceVolume; 			//How loud should the voice be. Def: 1.4
-var () float babbleVoicePitch; 		//How high or deep should the voice. Def: 128
-var () float voiceRadius; 			//How far should the voice reach? Def: 100000.0
-var () name babbleAnim; 			//What animation to use for babbling. Def: Idle
-var () string customMessage; 		//Type a message here to skip setting up a bumpline. Def: empty
-var () bool turnToHarry; 			//Should actor turn towards Harry while talking. Def: false
+var () float timeBetweenBabble; 	// Moca: How many seconds in between the connected babble sounds. Def: 0.1
+var () float delayBeforeEnding; 	// Moca: How many seconds to hold on the subtitles after done talking. Def: 2.0
+var () float voiceVolume; 			// Moca: How loud should the voice be. Def: 1.4
+var () float babbleVoicePitch; 		// Moca: How high or deep should the voice. Def: 128
+var () float voiceRadius; 			// Moca: How far should the voice reach? Def: 100000.0
+var () name babbleAnim; 			// Moca: What animation to use for babbling. Def: Idle
+var () string customMessage; 		// Moca: Type a message here to skip setting up a bumpline. Def: empty
+var () bool turnToHarry; 			// Moca: Should actor turn towards Harry while talking. Def: false
 
 var int currentLetter;
 var array<sound> lettersToBabble;

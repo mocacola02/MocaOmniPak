@@ -4,17 +4,17 @@
 
 class MOCAHunter extends MOCAChar;
 
-var() bool neverSleep;                          //Should the actor never sleep? Def: False
-var() float chaseSpeed;                         //How fast to chase after harry Def: 230
-var() float wakeUpDistance;                     //The distance at which Harry will wake up the actor Def: 400
-var() int attemptsToFindHarry;                  //How many seconds should the actor attempt to find Harry after losing him? Def: 10
-var(MOCAHunterAnims) name awakenAnim;           //Name of the wake up animation
-var(MOCAHunterAnims) name caughtAnim;           //Name of the catch animation
-var(MOCAHunterAnims) name caughtTransAnim;      //Name of the transition to catch animation (skipped if blank)
-var(MOCAHunterAnims) name idleAnim;             //Name of the idle animation
-var(MOCAHunterAnims) name sleepAnim;            //Name of the sleeping animation
-var(MOCAHunterAnims) name walkAnim;             //Name of the walking animation
-var() Sound caughtSound;                        //Sound to play when catching Harry
+var() bool neverSleep;                          // Moca: Should the actor never sleep? Def: False
+var() float chaseSpeed;                         // Moca: How fast to chase after harry Def: 230
+var() float wakeUpDistance;                     // Moca: The distance at which Harry will wake up the actor Def: 400
+var() int attemptsToFindHarry;                  // Moca: How many seconds should the actor attempt to find Harry after losing him? Def: 10
+var(MOCAHunterAnims) name awakenAnim;           // Moca: Name of the wake up animation
+var(MOCAHunterAnims) name caughtAnim;           // Moca: Name of the catch animation
+var(MOCAHunterAnims) name caughtTransAnim;      // Moca: Name of the transition to catch animation (skipped if blank)
+var(MOCAHunterAnims) name idleAnim;             // Moca: Name of the idle animation
+var(MOCAHunterAnims) name sleepAnim;            // Moca: Name of the sleeping animation
+var(MOCAHunterAnims) name walkAnim;             // Moca: Name of the walking animation
+var() Sound caughtSound;                        // Moca: Sound to play when catching Harry
 
 var bool correctingPath;
 var int attemptsMade;

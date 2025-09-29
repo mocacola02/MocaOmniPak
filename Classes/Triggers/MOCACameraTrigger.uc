@@ -18,9 +18,9 @@ enum ECamMode
 	CM_Free
 };
 
-var() bool OrientHarry;  //Moca: Orient Harry to face CameraTarget?
-var() ECamMode CameraMode; //Moca: CameraMode to switch to
-var() Name CameraTargetTag; //Moca: Tag of the MOCACameraTarget
+var() bool OrientHarry;  	// Moca: Orient Harry to face CameraTarget?
+var() ECamMode CameraMode; 	// Moca: CameraMode to switch to
+var() Name CameraTargetTag; // Moca: Tag of the MOCACameraTarget
 
 function Activate ( actor Other, pawn Instigator )
 {

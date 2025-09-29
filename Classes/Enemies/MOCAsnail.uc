@@ -4,7 +4,7 @@
 
 class MOCAsnail extends orangesnail;
 
-var() class<SnailTrail> trailToSpawn; //What SnailTrail class to spawn
+var() class<SnailTrail> trailToSpawn; // Moca: What SnailTrail class to spawn
 
 function DoTrailUpdates (float fDeltaTime)
 {

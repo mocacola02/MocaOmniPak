@@ -4,8 +4,8 @@
 
 class MOCACake extends MOCABabbler;
 
-var (MOCABabbler) int hitsUntilDeath; //How many Flipendo hits until cake dies :(  If 0, never die.  Def: 0
-var (MOCABabbler) bool randomTalkAnim; //Randomize talk animation. Def: true
+var (MOCABabbler) int hitsUntilDeath; // Moca: How many Flipendo hits until cake dies :(  If 0, never die.  Def: 0
+var (MOCABabbler) bool randomTalkAnim; // Moca: Randomize talk animation. Def: true
 var int currentHits;
 var Color prevColor;
 var Color dieColor;

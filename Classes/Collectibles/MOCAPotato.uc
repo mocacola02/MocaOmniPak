@@ -4,7 +4,7 @@
 
 class MOCAPotato extends MOCACollectible;
 
-var() bool funnyMode; //Enable the funny :) def: false
+var() bool funnyMode; //Moca: Enable the funny :) def: false
 
 event PostBeginPlay()
 {

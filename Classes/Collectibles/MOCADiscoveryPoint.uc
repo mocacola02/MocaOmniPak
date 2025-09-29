@@ -4,14 +4,14 @@
 
 class MOCADiscoveryPoint extends MOCACollectible;
 
-var() float minHoverTime;   // Minimum amount of time to circle above harry. Def: 2.5
-var() float maxHoverTime;   // Maximum amount of time to circle above harry. Def: 5.0
+var() float minHoverTime;   // Moca: Minimum amount of time to circle above harry. Def: 2.5
+var() float maxHoverTime;   // Moca: Maximum amount of time to circle above harry. Def: 5.0
 
 var vector CircleCenter;     // The point to circle around
 var vector TargetPoint;      // The point to fly to after done
-var() float CircleRadius;      // Distance from center
-var() float CircleSpeed;       // Angular speed in radians/sec
-var() float FlySpeed;          // Speed when flying to target
+var() float CircleRadius;      // Moca: Distance to keep from Harry's center while circling Harry. Def: 48.0
+var() float CircleSpeed;       // Moca: Angular speed in radians/sec while circling. Def: 400.0
+var() float FlySpeed;          // Moca: Speed when flying to target. Def: 400.0
 var bool flyDone;            // Switch between orbiting and flying
 
 var float CircleAngle;       // Keeps track of the orbit angle

@@ -2,12 +2,12 @@ class MOCAContinuousMusicTrigger extends MusicTrigger;
 
 // Needs cleanup, repetitive stuff going on
 
-var(MOCASongArrays) array<String> songList;           //List of songs to play
-var(MOCASongArrays) array<float> delayBetweenSong;    //How many seconds of delay after the song in the corresponding songList slot finishes playing
-var(MOCASongArrays) array<int> numberOfLoops;         //How many times should the song in the corresponding songList slot loop before fading out?
-var() bool randomizeOrder;              //Should the song list be randomized? If false, it plays them in order of the list. Def: False
-var() bool preventRepeats;              //Should songs all be played once before repeating? Def: True
-var() bool killPlayingTriggers;         //Should already playing MOCAContinuousMusicTriggers be destroyed
+var(MOCASongArrays) array<String> songList;           	// Moca: List of songs to play
+var(MOCASongArrays) array<float> delayBetweenSong;    	// Moca: How many seconds of delay after the song in the corresponding songList slot finishes playing
+var(MOCASongArrays) array<int> numberOfLoops;         	// Moca: How many times should the song in the corresponding songList slot loop before fading out?
+var() bool randomizeOrder;              				// Moca: Should the song list be randomized? If false, it plays them in order of the list. Def: False
+var() bool preventRepeats;              				// Moca: Should songs all be played once before repeating? Def: True
+var() bool killPlayingTriggers;         				// Moca: Should already playing MOCAContinuousMusicTriggers be destroyed
 
 var int currentLoop;
 var int songIndex;

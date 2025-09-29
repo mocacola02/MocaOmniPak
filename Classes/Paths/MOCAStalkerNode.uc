@@ -3,8 +3,8 @@
 //=============================================================================
 class MOCAStalkerNode extends PathNode;
 
-var() float dotMin;
-var() float requiredDistance;
+var() float dotMin;				// Moca: Minimum dot product that will trigger being seen. Def: 0.25
+var() float requiredDistance;	// Moca: Required distance to be triggered as seen. Def: 2000.0
 var harry PlayerHarry;
 
 var float DefReqDist;
