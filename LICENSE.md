@@ -1,7 +1,5 @@
 # MocaOmniPak License
 
----
-
 ## Terms of Use
 
 By using any portion of this repository or its contents, you agree to the following:
@@ -25,6 +23,9 @@ By using any portion of this repository or its contents, you agree to the follow
 5. **Ownership of Third-Party Content**  
    - Any content derived from other sources (including Epic Games, KnowWonder, Zeekerss, Metallicafan212, or other community members) remains the property of their respective owners.
 
+6. **Most Importantly**
+   - Have fun!
+
 ---
 
 ## License Type
@@ -34,4 +35,4 @@ If you need an SPDX identifier for external referencing, the closest match is:
 
 ---
 
-© 2025 Moca Cola
+© 2025 LunaMoca (aka Moca Cola)
