@@ -96,11 +96,10 @@ event Touch(Actor Other)
 
 event BaseChanged(Actor OldBase, Actor NewBase)
 {
-	local MOCABundimun Bundi;
-
 	Super.BaseChanged(OldBase, NewBase);
 	if (NewBase.IsA('MOCABundimun'))
 	{
+		local MOCABundimun Bundi;
 		Bundi = MOCABundimun(NewBase);
 		if (Bundi.IsInState('stateStunned'))
 		{

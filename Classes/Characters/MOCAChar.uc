@@ -38,6 +38,11 @@ event AlterDestination()
     }
 }
 
+event EndState()
+{
+	PreviousState = GetStateName();
+}
+
 function Print(string LogMessage)
 {
 	if (bMocaDebugMode)

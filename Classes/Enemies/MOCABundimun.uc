@@ -41,6 +41,7 @@ event Bump (Actor Other)
 {
 	if ( PlayerHarry == Other && IsInState('stateSpitting'))
 	{
+		Log("DEALING BUMP DAMAGE TO HARRY!!!!!!!!!!!!!!!!!!");
 		DoBumpDamage(Location, 'BundiBody');
 	}
 }
@@ -156,6 +157,7 @@ state stateSpitting
 {
     event BeginState()
     {
+		bCanHit = True;
         AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_shoot';
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
         LoopAnim('Attack');
@@ -262,7 +264,7 @@ defaultproperties
 {
 	ShadowScale=0.0
     bCantStandOnMe=True
-    pukeDamage=10
+    pukeDamage=7.0
     PukeDistance=75
     eVulnerableToSpell=SPELL_Rictusempra
     BumpDamage=15

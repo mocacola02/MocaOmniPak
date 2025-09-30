@@ -1,5 +1,7 @@
 class MOCAFlyingBook extends MOCAChar;
 
+// TODO: Clean up
+
 enum WakeMode
 {
 	WM_Always,
@@ -27,9 +29,10 @@ var bool bCanAttack;
 var bool bCanGoHome;
 var bool bHomeCheckCooldown;
 
+var string PrevState;
+
 var Vector ReturnLocation;
-var Vector TempVelocity;
-var Vector TempAcceleration;
+var Vector TempLocation;
 
 var InterpolationPoint TargetIPoint;
 
@@ -107,6 +110,8 @@ auto state stateIdle
 {
 	event BeginState()
 	{
+		eVulnerableToSpell = SPELL_None;
+		
 		if(WakeUpMode == WM_Always)
 		{
 			GotoState('stateFly');
@@ -192,22 +197,22 @@ state stateFly
 	
 	event EndState()
 	{
+		Super.EndState();
+		TempLocation = Location;
 		bCanAttack = False;
 		AmbientSound = None;
-		SetPhysics(PHYS_Flying);
 		bCollideWorld = True;
 		bAlignBottom = False;
 		bCanGoHome = False;
 		bHomeCheckCooldown = False;
 		TargetIPoint = SplineManager.Dest;
 		DestroyControllers();
+		SetPhysics(PHYS_Flying);
 	}
 
 	event Tick (float DeltaTime)
 	{
 		Global.Tick(DeltaTime);
-
-		Print("Velocity: " $ string(Velocity) $ " Acceleration: " $ string(Acceleration));
 
 		if (isHarryNear(AttackDistance) && bCanAttack)
 		{
@@ -237,10 +242,12 @@ state stateAttack
 	event BeginState()
 	{
 		EnableTurnTo(PlayerHarry);
+		SetLocation(TempLocation);
 	}
 
 	event EndState()
 	{
+		Super.EndState();
 		DisableTurnTo();
 	}
 
@@ -248,6 +255,7 @@ state stateAttack
 	{
 		local MOCAPaperBall PaperBall;
 
+		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
 		PaperBall = Spawn(class'MOCAPaperBall',self,,Location,Rotation,true);
 		Spawn(class'Paper_Hit',self,,Location);
 	}
@@ -274,14 +282,18 @@ state stateHit
 		eVulnerableToSpell = SPELL_None;
 		hitsTaken++;
 		EnableTurnTo(PlayerHarry);
+		SetLocation(TempLocation);
 	}
 
 	event EndState()
 	{
+		Super.EndState();
 		DisableTurnTo();
 	}
 
 	begin:
+		Print("Previous state: " $ PreviousState);
+		Print("Hits taken " $ string(hitsTaken) $ " out of " $ string(hitsToKill));
 		if(PreviousState == 'stateFly')
 		{
 			if (hitsTaken >= hitsToKill)
@@ -317,8 +329,35 @@ state stateHit
 
 state stateDie
 {
+	event BeginState()
+	{
+		SetLocation(TempLocation);
+	}
+
 	event HitWall(vector vHitNormal, Actor Wall)
 	{
+		Print("BOOK HIT WALL, TIME TO DIE!!!!!!!!!!!!!!!!!!");
+		GotoState('stateDie','die');
+	}
+
+	event Landed(vector HitNormal)
+	{
+		Print("BOOK LANDED, TIME TO DIE!!!!!!!!!!!!!!!!!!");
+		GotoState('stateDie','die');
+	}
+
+	event Bump(Actor Other)
+	{
+		super.Bump(Other);
+		if (Other.IsA('HPawn'))
+		{
+			if (HPawn(Other).bCantStandOnMe)
+			{
+				return;
+			}
+		}
+
+		Print("BOOK BUMPED, TIME TO DIE!!!!!!!!!!!!!!!!");
 		GotoState('stateDie','die');
 	}
 
@@ -339,6 +378,7 @@ state stateDie
 	
 	fall:
 		FinishAnim();
+		SetPhysics(PHYS_Walking);
 		PlayAnim('Die2Fall');
 		FinishAnim();
 		LoopAnim('fall');
