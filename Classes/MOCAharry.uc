@@ -168,6 +168,12 @@ function AddHarryWeapon (class<Weapon> WeaponToSpawn)
 	}
 }
 
+function PickupActor(Actor Other)
+{
+	Super.PickupActor(Other);
+	StopAimSoundFX();
+}
+
 exec function ChangeWand(int WeaponSlot)
 {
 	if ( (WeaponSlot == 3 || WeaponSlot > 4 || WeaponSlot <= 0) || (WeaponSlot == 4 && !bMocaDebugMode) )
@@ -289,28 +295,28 @@ function PlayIdle()
 
 function StartAimSoundFX()
 {
-  if ( bInDuelingMode && (CurrentDuelSpell == 2) )
-  {
-    return;
-  }
-  PlaySound(Sound'Spell_aim',SLOT_Misc);
-  if ( bInDuelingMode && (CurrentDuelSpell == 1) )
-  {
-    PlaySound(Sound'Dueling_MIM_buildup',SLOT_Interact);
-  } else {
-    PlaySound(Sound'spell_loop_nl',SLOT_Interact,,,,,,true);
-  }
+	if ( bInDuelingMode && (CurrentDuelSpell == 2) )
+	{
+		return;
+	}
+	PlaySound(Sound'Spell_aim',SLOT_Misc);
+	if ( bInDuelingMode && (CurrentDuelSpell == 1) )
+	{
+		PlaySound(Sound'Dueling_MIM_buildup',SLOT_Interact);
+	} else {
+		PlaySound(Sound'spell_loop_nl',SLOT_Interact,,,,,,true);
+	}
 }
 
 function StopAimSoundFX()
 {
-  if ( bInDuelingMode && (CurrentDuelSpell == 1) )
-  {
-    StopSound(Sound'Dueling_MIM_buildup',SLOT_Interact);
-  } else {
-    StopSound(Sound'Spell_aim',SLOT_Misc,2.5);
-    StopSound(Sound'spell_loop_nl',SLOT_Interact,0.75);
-  }
+	if ( bInDuelingMode && (CurrentDuelSpell == 1) )
+	{
+		StopSound(Sound'Dueling_MIM_buildup',SLOT_Interact);
+	} else {
+		StopSound(Sound'Spell_aim',SLOT_Misc,2.5);
+		StopSound(Sound'spell_loop_nl',SLOT_Interact,0.75);
+	}
 }
 
 function SetAnimSet(int newSet)

@@ -117,7 +117,7 @@ defaultproperties
 	bUseBumpLine=true
 	voicePitch=128
 	voiceRadius=100000.0
-	turnToHarry=false
+	bTurnToHarry=false
 	hitsUntilDeath=5
 	randomTalkAnim=true
 	dieColor=(R=255,G=26,B=26,A=255)

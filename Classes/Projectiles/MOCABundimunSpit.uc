@@ -15,7 +15,7 @@ function OnLand(vector HitNormal)
         {
             BS.SetOwner(Owner);
             BS.DamageToDeal = DamageToDeal;
-			NoDespawnEmit = True;
+			bNoDespawnEmit = True;
         }
     }
     KillProjectile();

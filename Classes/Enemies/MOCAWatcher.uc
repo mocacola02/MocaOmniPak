@@ -108,7 +108,7 @@ state stateIdle
 		if (stealthTrigger == None)
 		{
 			stealthTrigger = Spawn(Class'MOCAStealthTrigger',self);
-			stealthTrigger.attachedToKnight = True;
+			stealthTrigger.bAttachedToKnight = True;
 		}
 		determineTTL(False);
 		randLook = RandRange(0, 1);

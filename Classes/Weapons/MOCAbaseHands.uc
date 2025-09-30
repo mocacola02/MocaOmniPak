@@ -53,7 +53,7 @@ function actor TraceForInteracts (vector TraceEnd, vector TraceStart, optional v
     if (aHitActor != None && ( aHitActor.IsA('MOCAInteractProp')))
     {
         MocaProp = MOCAInteractProp(aHitActor);
-        if (!MocaProp.doOnceFulfilled){
+        if (!MocaProp.bDoOnceFulfilled){
             Log("Successfully hit interactable!");
             MOCAInteractProp(aHitActor).LineTraceHit();
             PlayerHarry.GotoState('stateInteract');   

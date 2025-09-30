@@ -22,7 +22,7 @@ var int iBean;
 
 // Function to execute when hit by the line trace
 function LineTraceHit() {
-    if (!doOnceFulfilled) {
+    if (!bDoOnceFulfilled) {
         Super.LineTraceHit();
         GotoState('turnover');
     }
