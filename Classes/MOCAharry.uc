@@ -168,6 +168,20 @@ function AddHarryWeapon (class<Weapon> WeaponToSpawn)
 	}
 }
 
+function SetNewMesh()
+{
+	if ( bIsGoyle && (Mesh == SkeletalMesh'MOCAharry') )
+	{
+		Mesh = SkeletalMesh'skGoyleMesh';
+		DrawScale = 1.14999998;
+	}
+	if (  !bIsGoyle && (Mesh == SkeletalMesh'skGoyleMesh') )
+	{
+		Mesh = SkeletalMesh'MOCAharry';
+		DrawScale = 1.0;
+	}
+}
+
 function PickupActor(Actor Other)
 {
 	Super.PickupActor(Other);
