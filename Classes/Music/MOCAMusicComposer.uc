@@ -10,7 +10,7 @@ struct DynamicTracks
 
 var() array<DynamicTracks> ListOfSongs; // Moca: List of songs.
 
-var bool ReadyToProgress;
+var bool bReadyToProgress;
 
 var int PrevSongIndex;
 var int SongIndex;
@@ -121,7 +121,7 @@ state stateCounting
 		else
 		{
 			local string SongFileName;
-			ReadyToProgress = True;
+			bReadyToProgress = True;
 			SongFileName = ListOfSongs[SongIndex].SongName $ ".ogg";
 			Log(string(self) $ " is attemping to get length of file " $ SongFileName);
 			TimerCheckRate = GetMusicLength(SongFileName);
@@ -139,10 +139,10 @@ state stateCounting
 
 	event Timer()
 	{
-		if (ReadyToProgress)
+		if (bReadyToProgress)
 		{
 			Log(string(self) $ " was ready to progress so let's do this");
-			ReadyToProgress = False;
+			bReadyToProgress = False;
 			ProgressSongs(SongOverride);
 			SongOverride = -1;
 			GotoState('stateDormant');
@@ -152,7 +152,7 @@ state stateCounting
 	function ReadyUp(optional int Override)
 	{
 		Log(string(self) $ " is counting and has ready'd up!");
-		ReadyToProgress = True;
+		bReadyToProgress = True;
 		SongOverride = Override;
 	}
 

@@ -4,7 +4,7 @@
 
 class MOCABundimun extends MOCAChar;
 
-var() bool StayAboveGround; // Moca: Should it always be above ground? Def: False
+var() bool bStayAboveGround; // Moca: Should it always be above ground? Def: False
 var() float BumpDamage; // Moca: How much damage from bumping into its body? Def: 15.0
 var() float StunDuration; // Moca: How long should it stay stunned from Rictu? Def: 5.0
 var() float PukeDistance; // Moca: How far should the poison reach? Def: 10.0
@@ -13,7 +13,7 @@ var() float pukeDamage; // Moca: How much damage should puke do? Def: 10.0
 var Rotator NewRot;
 var float Forward;
 //var float ShadowScaleIncrement;
-var bool CanHit;
+var bool bCanHit;
 var BundimunDeath KillEmit;
 var BundimunDig DigEmit;
 var BundimunShrink ShrinkEmit;
@@ -53,17 +53,17 @@ function ProcessStomp()
 
 function DoBumpDamage (Vector vDamageLoc, name nameDamage)
 {
-    if (CanHit)
+    if (bCanHit)
     {
         PlayerHarry.TakeDamage(BumpDamage,self,vDamageLoc,vect(0.00,0.00,0.00),nameDamage);
-        CanHit = False;
+        bCanHit = False;
 		SetTimer(1.0,false,'ResetBumpHit');
     }
 }
 
 function ResetBumpHit()
 {
-	CanHit = True;
+	bCanHit = True;
 }
 
 function ProcessSpell()
@@ -87,7 +87,7 @@ function Puke()
 auto state determineState
 {
     begin:
-        if (StayAboveGround)
+        if (bStayAboveGround)
 		{
             GotoState('stateDig','rise');
         }
@@ -169,7 +169,7 @@ state stateSpitting
 
     event Tick (float DeltaTime)
     {
-		if (!isHarryNear(triggerDistance) && !StayAboveGround)
+		if (!isHarryNear(triggerDistance) && !bStayAboveGround)
         {
             GotoState('stateDig','sink');
         }

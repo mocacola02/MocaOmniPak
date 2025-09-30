@@ -21,10 +21,10 @@ var() Sound FlySound;			// Moca: What sound to use as the flying sound? Def: Sou
 var() WakeMode WakeUpMode;		// Moca: What activates the book? WM_Always means always flying, WM_Proximity means Harry must get close enough based on WakeUpRange, WM_Trigger means it must be triggered. Def: WM_Proximity
 
 // Not a fan of some of these bools, quick and sloppy fix for going home
-var bool GoingHome;
-var bool CanAttack;
-var bool CanGoHome;
-var bool HomeCheckCooldown;
+var bool bGoingHome;
+var bool bCanAttack;
+var bool bCanGoHome;
+var bool bHomeCheckCooldown;
 
 var Vector ReturnLocation;
 
@@ -49,7 +49,7 @@ function ProcessSpell()
 function SaveStartLocation()
 {
 	ReturnLocation = Location;
-	if (MocaDebugMode)
+	if (bMocaDebugMode)
 	{
 		Log(string(self) $ "'s start location saved as: " $ string(ReturnLocation));
 	}
@@ -62,7 +62,7 @@ function bool CheckAttack()
 
 function bool DetermineSleep()
 {
-	HomeCheckCooldown = True;
+	bHomeCheckCooldown = True;
 	if (SleepChance < 255)
 	{
 		local int RandSleep;
@@ -83,7 +83,7 @@ function bool DetermineSleep()
 	}
 	
 	Print("Not going home yet!");
-	CanGoHome = False;
+	bCanGoHome = False;
 	return false;
 }
 
@@ -121,9 +121,9 @@ state stateGoHome
 		local float DistanceFromStart;
 		DistanceFromStart = VSize(ReturnLocation - Location);
 
-		if (DistanceFromStart < 3.0 || GoingHome)
+		if (DistanceFromStart < 3.0 || bGoingHome)
 		{
-			GoingHome = True;
+			bGoingHome = True;
 
 			local float DistanceFromHome;
 			DistanceFromHome = VSize(vHome - Location);
@@ -131,7 +131,7 @@ state stateGoHome
 			if (DistanceFromHome < 3.0)
 			{
 				SetLocation(vHome);
-				GoingHome = False;
+				bGoingHome = False;
 				GotoState('stateIdle');
 			}
 			else
@@ -154,9 +154,9 @@ state stateFly
 {
 	event BeginState()
 	{
-		CanGoHome = False;
-		CanAttack = False;
-		HomeCheckCooldown = False;
+		bCanGoHome = False;
+		bCanAttack = False;
+		bHomeCheckCooldown = False;
 		SetTimer(AttackDelay,false,'EnableAttacks');
 		LoopAnim(WalkAnimName);
 		AmbientSound = FlySound;
@@ -165,40 +165,40 @@ state stateFly
 	
 	event EndState()
 	{
-		CanAttack = False;
+		bCanAttack = False;
 		DestroyControllers();
 		AmbientSound = None;
 		SetPhysics(PHYS_Flying);
 		bCollideWorld = True;
 		bAlignBottom = False;
-		CanGoHome = False;
-		HomeCheckCooldown = False;
+		bCanGoHome = False;
+		bHomeCheckCooldown = False;
 	}
 
 	event Tick (float DeltaTime)
 	{
 		Global.Tick(DeltaTime);
 
-		if (isHarryNear(AttackDistance) && CanAttack)
+		if (isHarryNear(AttackDistance) && bCanAttack)
 		{
 			GotoState('stateAttack');
 		}
 
-		if (CanGoHome && !HomeCheckCooldown && CloseToHome(HomeRange) && DetermineSleep() && WakeUpMode == WM_Proximity && !isHarryNear(AttackDistance))
+		if (bCanGoHome && !bHomeCheckCooldown && CloseToHome(HomeRange) && DetermineSleep() && WakeUpMode == WM_Proximity && !isHarryNear(AttackDistance))
 		{
 			GotoState('stateGoHome');
 		}
-		else if (!CloseToHome(HomeRange) && !CanGoHome)
+		else if (!CloseToHome(HomeRange) && !bCanGoHome)
 		{
 			Print("Can now go home if close");
-			HomeCheckCooldown = False;
-			CanGoHome = True;
+			bHomeCheckCooldown = False;
+			bCanGoHome = True;
 		}
 	}
 
 	function EnableAttacks()
 	{
-		CanAttack = True;
+		bCanAttack = True;
 	}
 	
 	begin:

@@ -69,15 +69,9 @@ function bool HandleSpell (optional baseSpell spell, optional Vector vHitLocatio
             ProcessSpell();
             return true;
         }
-        else
-        {
-            return False;
-        }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 function ProcessSpell()

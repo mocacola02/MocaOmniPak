@@ -11,7 +11,7 @@ var () float babbleVoicePitch; 		// Moca: How high or deep should the voice. Def
 var () float voiceRadius; 			// Moca: How far should the voice reach? Def: 100000.0
 var () name babbleAnim; 			// Moca: What animation to use for babbling. Def: Idle
 var () string customMessage; 		// Moca: Type a message here to skip setting up a bumpline. Def: empty
-var () bool turnToHarry; 			// Moca: Should actor turn towards Harry while talking. Def: false
+var () bool bTurnToHarry; 			// Moca: Should actor turn towards Harry while talking. Def: false
 
 var int currentLetter;
 var array<sound> lettersToBabble;
@@ -236,7 +236,7 @@ state DoingBumpLine
 		goto ('babble');
 	
 	babble:
-		if (turnToHarry)
+		if (bTurnToHarry)
 		{
 			TurnTo(LocationSameZ(PlayerHarry.Location));
 		}

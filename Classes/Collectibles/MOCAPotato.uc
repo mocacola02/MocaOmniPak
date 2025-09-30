@@ -4,12 +4,12 @@
 
 class MOCAPotato extends MOCACollectible;
 
-var() bool funnyMode; //Moca: Enable the funny :) def: false
+var() bool bFunnyMode; //Moca: Enable the funny :) def: false
 
 event PostBeginPlay()
 {
     super.PostBeginPlay();
-    if (funnyMode)
+    if (bFunnyMode)
     {
         pickUpSound=Sound'MocaSoundPak.Meme.Potato';
         soundPickup = pickUpSound;

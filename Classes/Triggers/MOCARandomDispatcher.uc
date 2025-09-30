@@ -8,8 +8,8 @@ class MOCARandomDispatcher extends Triggers;
 
 var() Array<name>  OutEvents; // Events to select from.
 var() Array<float> OutDelays; // Relative delays before generating events.
-var() bool dispatchAllAtOnce; //Moca: Should it randomly dispatch all events after a single trigger?
-var() bool eventsFireOnce; //Moca: Should it be able to trigger events multiple times?
+var() bool bDispatchAllAtOnce; //Moca: Should it randomly dispatch all events after a single trigger?
+var() bool bEventsFireOnce; //Moca: Should it be able to trigger events multiple times?
 var int i;                // Internal counter.
 
 function Trigger( actor Other, pawn EventInstigator )
@@ -24,7 +24,7 @@ event Activate( actor Other, pawn EventInstigator )
 	{
 		Log("Starting dispatch...");
 		Instigator = EventInstigator;
-		if (dispatchAllAtOnce)
+		if (bDispatchAllAtOnce)
 		{
 			gotostate('Dispatch', 'loop');
 		}
@@ -62,7 +62,7 @@ state Dispatch
 			}
 				
 		}
-		if (eventsFireOnce)
+		if (bEventsFireOnce)
 		{
 			RemoveEventFromList();
 		}
@@ -84,7 +84,7 @@ state Dispatch
 				foreach AllActors( class 'Actor', Target, OutEvents[i] )
 					Target.Trigger( Self, Instigator );
 			}
-			if (eventsFireOnce)
+			if (bEventsFireOnce)
 			{
 				RemoveEventFromList();
 			}
@@ -94,6 +94,6 @@ state Dispatch
 
 defaultproperties
 {
-     eventsFireOnce=True
+     bEventsFireOnce=True
      Texture=Texture'MocaTexturePak.EditorIco.ICO_RandomDispatcher'
 }

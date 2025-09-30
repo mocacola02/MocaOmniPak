@@ -14,7 +14,7 @@ struct SpellMap
 };
 
 var() class<Weapon> DefaultWeapon;
-var() bool saveOnLoad;
+var() bool bSaveOnLoad;
 
 var(MOCAMagic) Array<Class<baseSpell>> DefaultSpellbook;	// Moca: What default spells do we have?
 var(MOCAMagic) SpellMap SpellMapping[28];					// Moca: What spells are mapped to each spell slot?
@@ -23,9 +23,9 @@ var(MOCAMagic) SpellMap SpellMapping[28];					// Moca: What spells are mapped to
 var Actor LastStoredBase;
 
 var bool bWallJumped;
-var bool DebugWeaponToggleCooldown;
-var bool inWater;
-var bool IsInvisible;
+var bool bDebugWeaponToggleCooldown;
+var bool bInWater;
+// TODO: var bool bIsInvisible;
 
 var vector HitNormal;
 
@@ -37,7 +37,7 @@ var int CurrentWeapon;
 
 var FadeActorController mcFade;
 
-var bool MocaDebugMode;
+var bool bMocaDebugMode;
 
 ////////////////
 // EVENTS
@@ -52,7 +52,7 @@ event PostBeginPlay()
 
 	HUDType = class'MOCAHUD';
 
-	if (saveOnLoad)
+	if (bSaveOnLoad)
 	{
 		SaveGame();
 	}
@@ -83,7 +83,7 @@ event TravelPostAccept()
 
 	InitWands();
 
-	MOCAHUD(myHUD).isLoading = False;
+	MOCAHUD(myHUD).bIsLoading = False;
 	HPConsole(Player.Console).bLockMenus = false;
 	HPConsole(Player.Console).LoadingBackground = Texture'HGame.LoadingScreen.FELoadingScreen';
 }
@@ -124,12 +124,12 @@ exec function MocaMode()
 	local MOCAChar A;
 	local int ActorCount;
 
-	MocaDebugMode = !MocaDebugMode;
-	Log("MocaMode = " $ string(MocaDebugMode));
+	bMocaDebugMode = !bMocaDebugMode;
+	Log("MocaMode = " $ string(bMocaDebugMode));
 
 	foreach AllActors(class'MOCAChar', A)
 	{
-		A.MocaDebugMode = MocaDebugMode;
+		A.bMocaDebugMode = bMocaDebugMode;
 		ActorCount++;
 	}
 
@@ -170,7 +170,7 @@ function AddHarryWeapon (class<Weapon> WeaponToSpawn)
 
 exec function ChangeWand(int WeaponSlot)
 {
-	if ( (WeaponSlot == 3 || WeaponSlot > 4 || WeaponSlot <= 0) || (WeaponSlot == 4 && !MocaDebugMode) )
+	if ( (WeaponSlot == 3 || WeaponSlot > 4 || WeaponSlot <= 0) || (WeaponSlot == 4 && !bMocaDebugMode) )
 	{
 		WeaponSlot = 2;
 	}
@@ -353,9 +353,9 @@ exec function AltFire (optional float f)
   local Vector TraceDirection;
   local Vector TraceEnd;
   
-  //Log(string(DebugWeaponToggleCooldown));
-  DebugWeaponToggleCooldown=False;
-  //Log(string(DebugWeaponToggleCooldown));
+  //Log(string(bDebugWeaponToggleCooldown));
+  bDebugWeaponToggleCooldown=False;
+  //Log(string(bDebugWeaponToggleCooldown));
 
   if ( HarryAnimChannel.IsCarryingActor() )
   {
@@ -798,7 +798,7 @@ state PlayerSwimming
     GroundSpeed = 600.00;
     AirSpeed = 600.00;
     AirControl = 1.0;
-    inWater = true;
+    bInWater = true;
     WalkBob = vect(0.00,0.00,0.00);
     DodgeDir = DODGE_None;
     bIsCrouching = False;
@@ -829,7 +829,7 @@ state PlayerSwimming
     HarryAnims[0].Fall        = 'Fall';
     HarryAnims[0].Land        = 'Land';
     SetAnimSet(0);
-    inWater = false;
+    bInWater = false;
     WalkBob = vect(0.00,0.00,0.00);
     bIsCrouching = False;
     StopAiming();

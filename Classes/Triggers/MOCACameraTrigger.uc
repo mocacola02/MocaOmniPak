@@ -18,7 +18,7 @@ enum ECamMode
 	CM_Free
 };
 
-var() bool OrientHarry;  	// Moca: Orient Harry to face CameraTarget?
+var() bool bOrientHarry;  	// Moca: Orient Harry to face CameraTarget?
 var() ECamMode CameraMode; 	// Moca: CameraMode to switch to
 var() Name CameraTargetTag; // Moca: Tag of the MOCACameraTarget
 
@@ -50,7 +50,7 @@ function ProcessTrigger()
 
 		PlayerHarry.BossTarget = CamTarget;
 
-		if (OrientHarry)
+		if (bOrientHarry)
 		{
 			log("rotat");
 			PlayerHarry.SetRotation(Rotator(CamTarget.Location - PlayerHarry.Location));

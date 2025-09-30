@@ -6,13 +6,13 @@ class MOCASetRespawnTrigger extends MOCATrigger;
 
 var() Vector respawnLocation;
 var() Rotator respawnRotation;
-var() bool useOwnTransform; //If true, use the location and rotation of this trigger. Def: True
+var() bool bUseOwnTransform; //If true, use the location and rotation of this trigger. Def: True
 
 event PreBeginPlay()
 {
 	Super.PreBeginPlay();
 
-    if (useOwnTransform)
+    if (bUseOwnTransform)
     {
         respawnLocation = Location;
         respawnRotation = Rotation;
@@ -39,5 +39,5 @@ function ProcessTrigger()
 
 defaultproperties {
     bTriggerOnceOnly=True
-    useOwnTransform=True
+    bUseOwnTransform=True
 }

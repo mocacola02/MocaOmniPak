@@ -1,16 +1,17 @@
 class MOCAChar extends HChar;
 
-var() bool affectAmbience;	// Moca: Does this actor affect MOCAAmbiencePlayer? Not yet implemented. Def: False
-var() bool bypassErrorMode;	// Moca: Bypass the error message that happens if you are missing a necessary component. Not recommended in most cases. Def: False
+var() bool bAffectAmbience;	// Moca: Does this actor affect MOCAAmbiencePlayer? Not yet implemented. Def: False
+var() bool bBypassErrorMode;	// Moca: Bypass the error message that happens if you are missing a necessary component. Not recommended in most cases. Def: False
 var(MOCACharHealth) int hitsToKill;             // Moca: How many hits does it take to die? If 0, cannot die. Def: 0
 var(MOCACharMovement) float maxTravelDistance;  // Moca: How far can the actor travel from its initial location? Def: 150
 var(MOCACharMovement) bool tiltOnMovement;      // Moca: Should this actor lean into its movement direction (like Harry)? Def: true
 
-var bool inErrorMode;
-var bool MocaDebugMode;
+var bool bInErrorMode;
+var bool bMocaDebugMode;
+
 var int hitsTaken;
+
 var name PreviousState;
-var NavigationPoint prevNavP;
 var string DebugErrMessage;
 
 var Vector lastHarryDirection;
@@ -18,6 +19,7 @@ var Vector lastHarryPos;
 var Vector vHome;
 var Vector vNewPos;
 
+var NavigationPoint prevNavP;
 
 event PostBeginPlay()
 {
@@ -38,7 +40,7 @@ event AlterDestination()
 
 function Print(string LogMessage)
 {
-	if (MocaDebugMode)
+	if (bMocaDebugMode)
 	{
 		Log(LogMessage);
 	}
@@ -48,7 +50,7 @@ function bool ActorExistenceCheck(Class<Actor> ActorToCheck)
 {
     local Actor A;
 
-    if (bypassErrorMode)
+    if (bBypassErrorMode)
     {
         return true;
     }
@@ -79,7 +81,7 @@ function EnterErrorMode()
     DrawScale = 0.25;
     Texture = Texture'MocaTexturePak.ICO_ActorErrorBubble';
     Log("IIIIIIIIIIIIIIIIIIIII start printing error");
-    inErrorMode = True;
+    bInErrorMode = True;
 	*/
 
 	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: " $ DebugErrMessage);

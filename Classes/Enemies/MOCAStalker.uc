@@ -35,7 +35,7 @@ var(MOCAStalkerSounds) Sound killSound;     //Moca: Sound to play while killing 
 var(MOCAStalkerSounds) Sound dieSound;      //Moca: Sound to play while dying
 var(MOCAStalkerSounds) float noiseRadius;   //Moca: How far noise can reach Def: 1000
 
-var bool IsStaring;
+var bool bIsStaring;
 
 var float DefGroundSpeed;
 var float angerValue;
@@ -85,7 +85,7 @@ event HitWall (Vector HitNormal, Actor HitWall)
 
 function HandleAnger()
 {
-	if ( ( IsStaring && IsOtherLookingAt(PlayerHarry, minDot) ) || ( GetDistanceFromHarry() < 128.0 ) )
+	if ( ( bIsStaring && IsOtherLookingAt(PlayerHarry, minDot) ) || ( GetDistanceFromHarry() < 128.0 ) )
 	{
 		angerValue = FClamp(angerValue + angerRate, 0, requiredAnger);
 		Log("Increasing anger to " $ string(angerValue) $ ", Harry is " $ string(GetDistanceFromHarry()) $ " units away.");
@@ -235,7 +235,7 @@ state stateRetreat
 
     event EndState()
     {
-        IsStaring = False;
+        bIsStaring = False;
         GroundSpeed = DefGroundSpeed;
     }
     
@@ -289,7 +289,7 @@ state stateRetreat
 
     stare:
         Log("STARING!!!!!!!!!!!!");
-		IsStaring = True;
+		bIsStaring = True;
         Acceleration = vect(0.00,0.00,0.00);
         Velocity = vect(0.00,0.00,0.00);
         LoopAnim(stareAnim, stareRate);
@@ -301,7 +301,7 @@ state stateRetreat
 		}
         else if (randNumber == 0)
         {
-			IsStaring = False;
+			bIsStaring = False;
             Goto('retreat');
         }
         else
@@ -449,7 +449,7 @@ defaultproperties
     maxTravelDistance=9999999
     angerRate=1
     relaxRate=0.0625
-    affectAmbience=True
+    bAffectAmbience=True
     waitRate=1.0
     sneakRate=1.0
     retreatRate=1.0

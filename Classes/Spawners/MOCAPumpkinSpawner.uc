@@ -4,13 +4,13 @@
 
 class MOCAPumpkinSpawner extends MOCAVisibleSpawner;
 
-var bool DoFadeOut;
+var bool bDoFadeOut;
 
 event Tick (float DeltaTime)
 {
 	Super.Tick(DeltaTime);
 
-	if (DoFadeOut)
+	if (bDoFadeOut)
 	{
 		Opacity = FClamp(Opacity - (1.0 * DeltaTime), 0.0, 1.0);
 	}
@@ -38,11 +38,11 @@ state stateSpawn
 {
     event EndState()
     {
-        animCooldown = false;
+        bAnimCooldown = false;
     }
 
     begin:
-        if (!animCooldown)
+        if (!bAnimCooldown)
         {
 			SetCollision(false,false,false);
 			PlayAnim('Hit',RandRange(1.34,2.34),0.0);
@@ -50,7 +50,7 @@ state stateSpawn
         }
 
         SpawnItem();
-        animCooldown = true;
+        bAnimCooldown = true;
         sleep(listOfSpawns[currentSpawnIndex].spawnDelay);
 
         if (numOfSpawns > maxSpawns)
@@ -73,13 +73,13 @@ state stateDone
         }
         else
         {
-			DoFadeOut = True;
+			bDoFadeOut = True;
 			Sleep(2.0);
 			SetCollision(true,true,true);
             PlayAnim(spawnAnims.EndSpawning,1.34,0.0);
             PlaySound(visibleSpawnSounds.Closing);
 			Sleep(0.2);
-			DoFadeOut = False;
+			bDoFadeOut = False;
 			Opacity = 1.0;
             FinishAnim();
             GotoState('stateDormant');

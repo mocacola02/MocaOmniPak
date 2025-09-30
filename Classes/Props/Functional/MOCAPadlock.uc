@@ -6,7 +6,7 @@ class MOCAPadlock extends MOCAHP3Objects;
 
 var ParticleFX fxExplode;
 var() Class<ParticleFX> fxExplodeClass;
-var() bool fastOpen; 			// Moca: If true, use faster opening animation
+var() bool bFastOpen; 			// Moca: If true, use faster opening animation
 var() Sound UnlockSounds[3]; 	// Moca: Sounds to use for unlock animation
 
 event PreBeginPlay()
@@ -25,7 +25,7 @@ event Destroyed()
 
 function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
 {
-  if (fastOpen)
+  if (bFastOpen)
   {
     GotoState('openUpFast');
   }

@@ -2,6 +2,8 @@
 // MOCAChestInteract.
 //================================================================================
 
+// TODO: Rewrite this. pretty old class
+
 class MOCAChestInteract extends MOCAInteractProp;
 
 const nMAX_EJECTED_OBJECTS= 8;

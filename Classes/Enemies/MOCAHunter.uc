@@ -4,7 +4,7 @@
 
 class MOCAHunter extends MOCAChar;
 
-var() bool neverSleep;                          // Moca: Should the actor never sleep? Def: False
+var() bool bNeverSleep;                          // Moca: Should the actor never sleep? Def: False
 var() float chaseSpeed;                         // Moca: How fast to chase after harry Def: 230
 var() float wakeUpDistance;                     // Moca: The distance at which Harry will wake up the actor Def: 400
 var() int attemptsToFindHarry;                  // Moca: How many seconds should the actor attempt to find Harry after losing him? Def: 10
@@ -16,7 +16,7 @@ var(MOCAHunterAnims) name sleepAnim;            // Moca: Name of the sleeping an
 var(MOCAHunterAnims) name walkAnim;             // Moca: Name of the walking animation
 var() Sound caughtSound;                        // Moca: Sound to play when catching Harry
 
-var bool correctingPath;
+var bool bCorrectingPath;
 var int attemptsMade;
 var NavigationPoint randNavP;
 
@@ -33,7 +33,7 @@ event PreBeginPlay()
     vHome = Location;
     //HitsLeft = hitsToKill;
 
-    if (NeverSleep)
+    if (bNeverSleep)
     {
         GotoState('stateIdle');
     }
@@ -51,9 +51,9 @@ event PostBeginPlay()
 event HitWall (Vector HitNormal, Actor HitWall)
 {
     Super.HitWall(HitNormal,HitWall);
-    if (!correctingPath)
+    if (!bCorrectingPath)
     {
-        correctingPath = True;
+        bCorrectingPath = True;
         GotoState('stateIdle', 'gosomewhere');
     }
 }
@@ -97,7 +97,7 @@ auto state stateSleep
         goto('loop');
     
     loop:
-        if(isHarryNear(wakeUpDistance) || neverSleep == true)
+        if(isHarryNear(wakeUpDistance) || bNeverSleep == true)
         {
             GotoState('stateIdle', 'awaken');
         }
@@ -126,7 +126,7 @@ state stateIdle
         eVulnerableToSpell= DefVulSpell;
         log("beginning idle");
         LoopAnim(idleAnim);
-        if (inErrorMode)
+        if (bInErrorMode)
         {
             GotoState('stateError');
         }

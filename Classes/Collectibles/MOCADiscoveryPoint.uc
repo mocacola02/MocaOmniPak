@@ -12,7 +12,7 @@ var vector TargetPoint;      // The point to fly to after done
 var() float CircleRadius;      // Moca: Distance to keep from Harry's center while circling Harry. Def: 48.0
 var() float CircleSpeed;       // Moca: Angular speed in radians/sec while circling. Def: 400.0
 var() float FlySpeed;          // Moca: Speed when flying to target. Def: 400.0
-var bool flyDone;            // Switch between orbiting and flying
+var bool bFlyDone;            // Switch between orbiting and flying
 
 var float CircleAngle;       // Keeps track of the orbit angle
 
@@ -22,7 +22,7 @@ event PostBeginPlay()
     attractionSpeed += (FRand() * 10.0);
     PlaySound(Sound'MocaSoundPak.Magic.SFX_DiscoveryPointStart',SLOT_None,,,1500);
 
-    if (!attractedToHarry)
+    if (!bAttractedToHarry)
     {
         bCollideWorld = True;
         SetPhysics(PHYS_Walking);
@@ -53,7 +53,7 @@ state stateCircle
 
         CircleCenter = PlayerHarry.Location + attractionOffset;
 
-        if (!flyDone)
+        if (!bFlyDone)
         {
             // Convert degrees/sec to radians/sec
             RadSpeed = CircleSpeed * Pi / 180.0;
@@ -100,7 +100,7 @@ state stateCircle
     begin:
         Log("Circling harry!");
         sleep(FClamp(FRand() * maxHoverTime, minHoverTime, maxHoverTime));
-        flyDone = true;
+        bFlyDone = true;
         sleep(0.2);
         Super.Touch(PlayerHarry);
 }
@@ -137,7 +137,7 @@ defaultproperties
     SoundPitch=128
     SoundRadius=64
     SoundVolume=255
-    attractedToHarry=True
+    bAttractedToHarry=True
     attractionSpeed=300.0
     CircleRadius=48.0
     CircleSpeed=400.0

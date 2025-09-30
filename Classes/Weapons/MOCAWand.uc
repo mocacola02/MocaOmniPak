@@ -4,7 +4,7 @@
 
 class MOCAWand extends baseWand;
 
-var bool isAiming;
+var bool bIsAiming;
 var MOCAharry MocaPlayerHarry;
 
 event PostBeginPlay()
@@ -24,7 +24,7 @@ event PostBeginPlay()
 event Tick (float fTimeDelta)
 {
     Super.Tick(fTimeDelta);
-    if (isAiming)
+    if (bIsAiming)
     {
         if (!ClassIsChildOf(CurrentSpell,class'MOCAbaseSpell'))
         {
@@ -65,7 +65,7 @@ event Tick (float fTimeDelta)
 function StartChargingSpell (bool bChargeSpell, optional bool in_bHarryUsingSword, optional Class<baseSpell> ChargeSpellClass)
 {
     Super.StartChargingSpell(bChargeSpell,in_bHarryUsingSword,ChargeSpellClass);
-    isAiming = true;
+    bIsAiming = true;
     fxChargeParticles.bEmit = true;
     LightType = LT_Steady;
 }
@@ -73,7 +73,7 @@ function StartChargingSpell (bool bChargeSpell, optional bool in_bHarryUsingSwor
 function StopChargingSpell()
 {
     Super.StopChargingSpell();
-    isAiming = false;
+    bIsAiming = false;
     fxChargeParticles.bEmit = false;
     LightType = LT_None;
 }

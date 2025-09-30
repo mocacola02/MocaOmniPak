@@ -2,7 +2,7 @@ class MOCAHUD extends HPHud;
 
 var MOCAharry HarryMoca;
 
-var bool isLoading;
+var bool bIsLoading;
 
 var Texture LoadingImg;
 
@@ -24,7 +24,7 @@ function SetLoading(Texture LoadingImage, string MapName, optional float LoadDel
 	PauseTicker.PauseMessage = "";
 
 	LoadingImg = LoadingImage;
-	isLoading = true;
+	bIsLoading = true;
 
 	PauseTicker.Activate(self,HarryMoca);
 }
@@ -60,7 +60,7 @@ function PostRender(Canvas C)
 {
     super.PostRender(C);
 
-    if (isLoading)
+    if (bIsLoading)
     {
         ShowDelayedScreen(C);
     }

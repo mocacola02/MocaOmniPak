@@ -1,12 +1,12 @@
 class MOCASpongifyPad extends SpongifyPad;
 
 var() float PadSize;     		// Moca: Custom size for the pad, only works if UseDrawScale is false. Def: 1.0
-var() bool UseCollisionRadius; 	// Moca: Use this SpongifyPad's collision radius as the PadSize? Def: True
+var() bool bUseCollisionRadius; 	// Moca: Use this SpongifyPad's collision radius as the PadSize? Def: True
 
 event PostBeginPlay()
 {
 	Super.PostBeginPlay();
-	if (UseCollisionRadius)
+	if (bUseCollisionRadius)
 	{
 		PadSize = (CollisionRadius / 48);
 	}
@@ -84,5 +84,5 @@ function OnBounce (Actor Other)
 defaultproperties
 {
      PadSize=1
-	 UseCollisionRadius=True
+	 bUseCollisionRadius=True
 }

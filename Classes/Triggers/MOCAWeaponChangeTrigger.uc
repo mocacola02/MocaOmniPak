@@ -5,7 +5,7 @@
 class MOCAWeaponChangeTrigger extends MOCATrigger;
 
 var() class<Weapon> WeaponToSpawn; // Change the type to class<Actor>
-var bool inactive;
+var bool bInactive;
 
 function PreBeginPlay()
 {
@@ -19,7 +19,7 @@ function PreBeginPlay()
 }
 
 function Activate ( actor Other, pawn Instigator ) {
-    if (!inactive)
+    if (!bInactive)
     {
         ProcessTrigger();
     }

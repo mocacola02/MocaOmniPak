@@ -14,7 +14,7 @@ function actor TraceForInteracts (vector TraceEnd, vector TraceStart, optional v
 
 	PlayerHarry = MOCAharry(Owner);
 
-    if (PlayerHarry.MocaDebugMode == True)
+    if (PlayerHarry.bMocaDebugMode == True)
     {
         SpawnSprite(TraceStart);
         SpawnSprite(TraceEnd);

@@ -5,26 +5,26 @@ class MOCAContinuousMusicTrigger extends MusicTrigger;
 var(MOCASongArrays) array<String> songList;           	// Moca: List of songs to play
 var(MOCASongArrays) array<float> delayBetweenSong;    	// Moca: How many seconds of delay after the song in the corresponding songList slot finishes playing
 var(MOCASongArrays) array<int> numberOfLoops;         	// Moca: How many times should the song in the corresponding songList slot loop before fading out?
-var() bool randomizeOrder;              				// Moca: Should the song list be randomized? If false, it plays them in order of the list. Def: False
-var() bool preventRepeats;              				// Moca: Should songs all be played once before repeating? Def: True
-var() bool killPlayingTriggers;         				// Moca: Should already playing MOCAContinuousMusicTriggers be destroyed
+var() bool bRandomizeOrder;              				// Moca: Should the song list be randomized? If false, it plays them in order of the list. Def: False
+var() bool bPreventRepeats;              				// Moca: Should songs all be played once before repeating? Def: True
+var() bool bKillPlayingTriggers;         				// Moca: Should already playing MOCAContinuousMusicTriggers be destroyed
 
 var int currentLoop;
 var int songIndex;
 var array<int> playedSongs;
-var bool isPlaying;
-var bool coolingDown;
-var bool firstPlay;
+var bool bIsPlaying;
+var bool bCoolingDown;
+var bool bFirstPlay;
 var int previousIndex;
 
 event PostBeginPlay()
 {
     super.PostBeginPlay();
 
-    if (preventRepeats && !randomizeOrder)
+    if (bPreventRepeats && !bRandomizeOrder)
     {
         Log("We don't need prevent repeats for non-randomized playback");
-        preventRepeats = false;
+        bPreventRepeats = false;
     }
 }
 
@@ -32,11 +32,11 @@ function ProcessTrigger()
 {
     local MOCAContinuousMusicTrigger A;
 
-    if (killPlayingTriggers)
+    if (bKillPlayingTriggers)
     {
         foreach AllActors(class'MOCAContinuousMusicTrigger', A)
         {
-            if (A.isPlaying && A != self)
+            if (A.bIsPlaying && A != self)
             {
                 Log("Destroying other trigger: " $ string(A));
                 A.StopMusic(A.SongHandle, A.FadeOutTime);
@@ -45,7 +45,7 @@ function ProcessTrigger()
         }
     }
 
-    isPlaying = true;
+    bIsPlaying = true;
 
     if (songList.Length <= 1)
     {
@@ -70,13 +70,13 @@ function DetermineSong()
 
     Log("Determining song");
 
-    if (randomizeOrder) //If randomized
+    if (bRandomizeOrder) //If randomized
     {  
         songIndex = rand(songList.Length);  //Get random index
 
         Log("Our random index is " $ string(songIndex));
 
-        if (preventRepeats) // If preventing repeats
+        if (bPreventRepeats) // If preventing repeats
         {
             Log("Trying to prevent repeats...");
 
@@ -219,5 +219,5 @@ defaultproperties
     numberOfLoops(2)=3
 
     bTriggerOnceOnly=True
-    killPlayingTriggers=True
+    bKillPlayingTriggers=True
 }

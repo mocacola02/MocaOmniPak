@@ -10,8 +10,8 @@ struct TimedEvent
 };
 
 var() array<TimedEvent> listOfEvents;
-var() bool destroyWhenDone; // Should the trigger destroy when timeline is done? Def: True
-var() bool loopWhenDone;    // Should the timeline loop on finish?
+var() bool bDestroyWhenDone; // Should the trigger destroy when timeline is done? Def: True
+var() bool bLoopWhenDone;    // Should the timeline loop on finish?
 
 var float waitTime;
 
@@ -28,10 +28,10 @@ event PostBeginPlay()
         Destroy();
     }
 
-    if (loopWhenDone && destroyWhenDone)
+    if (bLoopWhenDone && bDestroyWhenDone)
     {
-        Log("Timeline shouldn't loop AND destroy, deactivating destroyWhenDone on: " $ string(self));
-        destroyWhenDone = false;
+        Log("Timeline shouldn't loop AND destroy, deactivating bDestroyWhenDone on: " $ string(self));
+        bDestroyWhenDone = false;
     }
 
     SortEvents();
@@ -101,12 +101,12 @@ state stateCount
             Log("Finished timeline");
             currIndex = 0;
             nextIndex = 0;
-            if (destroyWhenDone)
+            if (bDestroyWhenDone)
             {
                 Destroy();
             }
             
-            if (loopWhenDone)
+            if (bLoopWhenDone)
             {
                 Goto('begin');
             }
@@ -122,6 +122,6 @@ state stateCount
 
 defaultproperties
 {
-    destroyWhenDone=True
+    bDestroyWhenDone=True
     Texture=Texture'MocaTexturePak.EditorIco.ICO_TimelineTrigger'
 }

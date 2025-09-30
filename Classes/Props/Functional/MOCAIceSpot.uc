@@ -3,7 +3,7 @@ class MOCAIceSpot extends MOCAPawn;
 var() float TimeToLive; 		// Moca: How long should ice remain? Def: 60.0
 var() float GrowthTime; 		// Moca: How long should it take for the ice to grow in seconds? Def: 5.0
 var() ESpellType ShatterSpell; 	// Moca: What spell, if any, should shatter the ice if cast on? Def: SPELL_Flipendo
-var() bool UseMoverCollision;   // Moca: If true, model collision will not be applied and instead will send an event (based on the Event property) to trigger a mover when freezing/melting/shattering. Intended to be used with an invisible mover for special poly collision. Def: False
+var() bool bUseMoverCollision;   // Moca: If true, model collision will not be applied and instead will send an event (based on the Event property) to trigger a mover when freezing/melting/shattering. Intended to be used with an invisible mover for special poly collision. Def: False
 
 var float CurrentGrowthTime;
 var Iceberg_Grow FreezeParticles;

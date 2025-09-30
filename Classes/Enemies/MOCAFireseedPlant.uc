@@ -6,7 +6,7 @@ var() float DistanceToAttack; 		// Moca: Required distance to attack Harry, Def:
 var() float FireballLaunchSpeed; 	// Moca: How high should fireballs be shot, Def: 700
 //var() float RangeMult;			// Moca: Multiplier for range. Def: 1.0
 var() float FireCooldown; 			// Moca: Required time between firing, may cause issues if too low, Def: 2
-var() bool alwaysAttack; 			// Moca: Should plants always spit fire, def: False
+var() bool bAlwaysAttack; 			// Moca: Should plants always spit fire, def: False
 var() vector fireballOffset; 		// Moca: Spawn location offset for spawning fireballs, def: 0,0,0
 var float cooldown;
 var float RangeIntensity;
@@ -23,7 +23,7 @@ event Tick (float DeltaTime)
 	{
 		RangeIntensity = GetDistanceFromHarry() / 200;
 
-		if (MocaDebugMode)
+		if (bMocaDebugMode)
 		{
 			Log("Range intensity: " $ string(RangeIntensity));
 		}	
@@ -54,7 +54,7 @@ auto state stateIdle
 {
     event BeginState()
     {
-        if(alwaysAttack)
+        if(bAlwaysAttack)
         {
             gotostate('stateFireLoop');
         }

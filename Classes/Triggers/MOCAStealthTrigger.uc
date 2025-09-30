@@ -4,11 +4,11 @@
 
 class MOCAStealthTrigger extends MOCATrigger;
 
-var bool doOnce;
-var bool attachedToKnight;
+var bool bDoOnce;
+var bool bAttachedToKnight;
 
 function Activate ( actor Other, pawn Instigator ) {
-    if (doOnce && !PlayerHarry.IsInState('caught')) {
+    if (bDoOnce && !PlayerHarry.IsInState('caught')) {
         GotoState('ProcessTrigger');
     }
 }
@@ -16,24 +16,24 @@ function Activate ( actor Other, pawn Instigator ) {
 state ProcessTrigger
 {
     begin:
-        doOnce = False;
-        if (attachedToKnight)
+        bDoOnce = False;
+        if (bAttachedToKnight)
         {
             Owner.GotoState('catch');
         }
         PlayerHarry.GotoState('caught');
         sleep(4.0);
-        doOnce = True;
+        bDoOnce = True;
 }
 
 defaultproperties
 {
-    doOnce=True
+    bDoOnce=True
     CollisionHeight=35
     CollisionRadius=42
     CollisionWidth=0
     CollideType=CT_Box
-    attachedToKnight=False
+    bAttachedToKnight=False
     LightBrightness=128
     LightHue=128
     LightSaturation=128

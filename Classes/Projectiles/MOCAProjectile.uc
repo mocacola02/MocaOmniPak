@@ -30,7 +30,7 @@ var vector Gravity;							// Projectile gravity
 
 var harry PlayerHarry;
 
-var bool NoDespawnEmit;						// Whether or not to use a particle emission on despawn
+var bool bNoDespawnEmit;						// Whether or not to use a particle emission on despawn
 
 
 event PostBeginPlay()
@@ -126,7 +126,7 @@ function KillProjectile()
         ParticleActor = None;
     }
 
-    if (!NoDespawnEmit)
+    if (!bNoDespawnEmit)
     {
         Spawn(DespawnEmitter);
     }

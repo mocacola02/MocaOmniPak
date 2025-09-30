@@ -9,7 +9,7 @@ struct SpawnedProperties
 struct SpawnSettings
 {
     var() Class<actor> actorToSpawn;    // Moca: What actor class to spawn
-    var() Byte spawnChance;             // Moca: How likely is it to spawn if useSpawnChance == true? Higher number means more likely to spawn
+    var() Byte spawnChance;             // Moca: How likely is it to spawn if bUseSpawnChance == true? Higher number means more likely to spawn
     var() float spawnDelay;             // Moca: How much of a delay in seconds after spawning?
     var() vector spawnLocationOffset;   // Moca: Location offset to set to spawned actor and particle
     var() Rotator spawnRotation;        // Moca: Rotation of spawned actor
@@ -20,9 +20,9 @@ struct SpawnSettings
 };
 
 var(MOCASpawnActors) array<SpawnSettings> listOfSpawns; // Moca: What should we spawn and what settings?
-var(MOCASpawnActors) bool randomSpawnOrder;    // Moca: Should particles spawn in no particular order? Def: True
-var(MOCASpawnActors) bool useSpawnChance;   // Moca: Should spawn chance be taken into consideration? Def: False
-var(MOCASpawnActors) bool varyVelocity; // Moca: Should the velocity of spawn items be varied to avoid landing in the same place? Def: True
+var(MOCASpawnActors) bool bRandomSpawnOrder;    // Moca: Should particles spawn in no particular order? Def: True
+var(MOCASpawnActors) bool bUseSpawnChance;   // Moca: Should spawn chance be taken into consideration? Def: False
+var(MOCASpawnActors) bool bVaryVelocity; // Moca: Should the velocity of spawn items be varied to avoid landing in the same place? Def: True
 var(MOCASpawnActors) int maxVelocityVariance; // Moca: Maximum amount of variance to apply to spawn velocity. Def = 16
 
 var(MOCASpawnAmount) int numberToSpawn;        // Moca: How many actors to spawn. Ignored if minAmountToSpawn and maxAmountToSpawn are set. If all are 0, this will be set to 4. Def: 4
@@ -32,7 +32,7 @@ var(MOCASpawnAmount) int maxLives;          // Moca: How many times can the spaw
 
 var array<float> spawnWeights;
 
-var bool noWeights;
+var bool bNoWeights;
 
 var int maxIndex;
 var int currentSpawnIndex;
@@ -58,7 +58,7 @@ event PostBeginPlay()
 
     maxIndex = listOfSpawns.Length;
 
-    if (useSpawnChance)
+    if (bUseSpawnChance)
     {
         DetermineSpawnWeights();
     }
@@ -128,7 +128,7 @@ function SpawnItem()
     local float RandAmount;
     local int RandAmountMult;
 
-    if (randomSpawnOrder)
+    if (bRandomSpawnOrder)
     {
         currentSpawnIndex = Rand(listOfSpawns.Length);
     }
@@ -151,7 +151,7 @@ function SpawnItem()
     
     Dir = Vector(Rotation);
 
-    if (varyVelocity)
+    if (bVaryVelocity)
     {
         RandAmountMult = Clamp(Rand(maxVelocityVariance),2,maxVelocityVariance);
         RandAmount = FRand() * RandAmountMult;
@@ -235,13 +235,13 @@ defaultproperties
 {
     listOfSpawns(0)=(actorToSpawn=Class'Jellybean',spawnChance=255,spawnDelay=1.0,spawnSound=Sound'spawn_bean01',spawnParticle=Class'Spawn_flash_1',velocityMult=1.0)
     eVulnerableToSpell=SPELL_Flipendo
-    randomSpawnOrder=true
+    bRandomSpawnOrder=true
     numberToSpawn=4
     maxLives=4
     DrawType=DT_Sprite
     Texture=Texture'MocaTexturePak.EditorIco.MOCASpawnerIcon'
     bHidden=True
-    varyVelocity=True
+    bVaryVelocity=True
     maxVelocityVariance=4
     bBlockPlayers=false
 }

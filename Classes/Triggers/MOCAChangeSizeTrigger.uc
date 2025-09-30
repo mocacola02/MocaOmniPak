@@ -4,15 +4,15 @@
 
 class MOCAChangeSizeTrigger extends MOCATrigger;
 
-//TODO: this all feels really inefficient
+//TODO: this all feels really inefficient, clean this up
 
-var bool hasBeenActivated;
+var bool bHasBeenActivated;
 var() float sizeMultiplier;   			// Moca: What size to make Harry Def: 2.0
 var() float growthFrameRate;  			// Moca: How smooth should the resize be? Def: 60.0
 var() float growthTime;       			// Moca: How long should the resize take? Def: 2.0
-var() bool mustBeReactivated; 			// Moca: Does the trigger need to be reactivated by another trigger to grow again? Def: True
+var() bool bMustBeReactivated; 			// Moca: Does the trigger need to be reactivated by another trigger to grow again? Def: True
 var() name growthAnimation;   			// Moca: What animation should Harry play while growing? Def: fidget_1
-var() bool freezeHarryDuringGrowth; 	// Moca: Should Harry be held in place during growth? If false, movement may be buggy. Def: True
+var() bool bFreezeHarryDuringGrowth; 	// Moca: Should Harry be held in place during growth? If false, movement may be buggy. Def: True
 
 //so many variables. almost certainly a better way to do this but if it works...... and we aren't exactly strapped for memory
 //follow up comment: bruh
@@ -49,23 +49,23 @@ var float CurrentGroundJumpSpeed;
 var float CurrentGroundEctoSpeed;
 var float CurrentAccelRate;
 var float CurrentJumpZ;
-var bool isExternalTrigger;
+var bool bIsExternalTrigger;
 var vector preGrowthLocation;
 
 event Activate (Actor Other, Pawn Instigator)
 {
-  if(hasBeenActivated)
+  if(bHasBeenActivated)
   {
-    hasBeenActivated = false;
+    bHasBeenActivated = false;
     //Log("REACTIVATED!");
   }
   else
   {
-    isExternalTrigger = true;
-    if ((Other.IsA('harry') || isExternalTrigger) && !hasBeenActivated)
+    bIsExternalTrigger = true;
+    if ((Other.IsA('harry') || bIsExternalTrigger) && !bHasBeenActivated)
     {
-      hasBeenActivated = true;
-      isExternalTrigger = false;
+      bHasBeenActivated = true;
+      bIsExternalTrigger = false;
       Disable('Touch');
       preGrowthLocation = PlayerHarry.Location;
       //Log("Hold Harry at: " $ string(preGrowthLocation));
@@ -78,14 +78,14 @@ state stateChangeSize
 {
   event Tick (float DeltaTime)
   {
-    if (freezeHarryDuringGrowth)
+    if (bFreezeHarryDuringGrowth)
     {
       PlayerHarry.SetLocation(vec(preGrowthLocation.X,preGrowthLocation.Y,PlayerHarry.Location.Z));
     }
   }
 
   begin:
-    if (freezeHarryDuringGrowth)
+    if (bFreezeHarryDuringGrowth)
     {
       PlayerHarry.bKeepStationary = true;
     }
@@ -171,7 +171,7 @@ state stateChangeSize
 
     //Log("Start, End, and Harry's AccelRate: " $ string(StartAccelRate) $ ", " $ string(EndAccelRate) $ ", " $ string(PlayerHarry.AccelRate));
 
-    if (!mustBeReactivated)
+    if (!bMustBeReactivated)
     {
       Enable('Touch');
     }
@@ -204,7 +204,7 @@ defaultproperties
   sizeMultiplier=2.0
   growthFrameRate=60.0
   growthTime=2.0
-  mustBeReactivated=true
+  bMustBeReactivated=true
   growthAnimation=fidget_1
-  freezeHarryDuringGrowth=true
+  bFreezeHarryDuringGrowth=true
 }

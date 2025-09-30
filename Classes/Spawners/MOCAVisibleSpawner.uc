@@ -19,7 +19,7 @@ struct Animations
 var(MOCAVisibleSpawnAnimations) Animations spawnAnims;
 var(MOCAVisibleSounds) Sounds visibleSpawnSounds;
 
-var bool animCooldown;
+var bool bAnimCooldown;
 
 auto state stateDormant
 {
@@ -44,11 +44,11 @@ state stateSpawn
 {
     event EndState()
     {
-        animCooldown = false;
+        bAnimCooldown = false;
     }
 
     begin:
-        if (!animCooldown)
+        if (!bAnimCooldown)
         {
             if (maxLives <= 0)
             {
@@ -63,7 +63,7 @@ state stateSpawn
         }
 
         SpawnItem();
-        animCooldown = true;
+        bAnimCooldown = true;
         sleep(listOfSpawns[currentSpawnIndex].spawnDelay);
 
         if (numOfSpawns > maxSpawns)

@@ -2,23 +2,25 @@
 // Watcher.
 //================================================================================
 
+// TODO: Rewrite this, pretty old class at this point
+
 class MOCAWatcher extends MOCAChar;
 
-var bool lastWasRight;
-var bool firstLook;
+var bool bLastWasRight;
+var bool bFirstLook;
 var MOCAStealthTrigger stealthTrigger;
 var int randLook;
-var bool isAwake;
+var bool bIsAwake;
 
-var() float timeToLook;         // Moca: How long to look in a direction. Ignored if randomTimeToLook is true. Def: 1.0
-var() bool randomTimeToLook;    // Moca: Whether or not to randomize TTL. Def: True
+var() float timeToLook;         // Moca: How long to look in a direction. Ignored if bRandomTimeToLook is true. Def: 1.0
+var() bool bRandomTimeToLook;    // Moca: Whether or not to randomize TTL. Def: True
 var() float minTime;            // Moca: Minimum time to look when determining a random TTL value. Def: 1.5
 var() float maxTime;            // Moca: Maximum time to look when determining a random TTL value. Def: 4.5
-var() bool asleepOnSpawn;       // Moca: Should the watcher be inactive on spawn (requires a trigger to be enabled). Def: false
+var() bool bAsleepOnSpawn;       // Moca: Should the watcher be inactive on spawn (requires a trigger to be enabled). Def: false
 
 event PreBeginPlay()
 {
-  Super.PreBeginPlay();
+	Super.PreBeginPlay();
 }
 
 event PostBeginPlay()
@@ -54,94 +56,94 @@ event Tick(float DeltaTime)
 
 function determineTTL (bool lookBack)
   {
-    if (randomTimeToLook)
-    {
-      timeToLook = RandRange(minTime, maxTime);
-    }
+	if (bRandomTimeToLook)
+	{
+		timeToLook = RandRange(minTime, maxTime);
+	}
   }
 
 function playSqueak ()
 {
-  local float squeakPitch;
-  squeakPitch = RandRange(0.75, 1.25);
-  PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024, squeakPitch);
+	local float squeakPitch;
+	squeakPitch = RandRange(0.75, 1.25);
+	PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024, squeakPitch);
 }
 
 event Trigger (Actor Other, Pawn EventInstigator)
   {
-    if (isAwake)
-    {
-      asleepOnSpawn = False;
-      PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
-      GotoState('asleep');
-    }
-    else
-    {
-      MultiSkins[1] = Texture'MocaTexturePak.Skins.beam';
-      PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
-      GotoState('stateIdle');
-    }
+	if (bIsAwake)
+	{
+		bAsleepOnSpawn = False;
+		PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
+		GotoState('asleep');
+	}
+	else
+	{
+		MultiSkins[1] = Texture'MocaTexturePak.Skins.beam';
+		PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
+		GotoState('stateIdle');
+	}
   }
 
 auto state asleep 
 {
-  begin:
-  Log("KNIGHT IS SLEEPING!!!!!!!!!!!");
-    if (stealthTrigger != None)
-    {
-      stealthTrigger.Destroy();
-    }
-    if (!asleepOnSpawn)
-    {
-      GotoState('stateIdle');
-    }
-    MultiSkins[1] = Texture'MocaTexturePak.Misc.transparent';
-    LoopAnim('Idle');
+	begin:
+		Log("KNIGHT IS SLEEPING!!!!!!!!!!!");
+		if (stealthTrigger != None)
+		{
+			stealthTrigger.Destroy();
+		}
+		if (!bAsleepOnSpawn)
+		{
+			GotoState('stateIdle');
+		}
+		MultiSkins[1] = Texture'MocaTexturePak.Misc.transparent';
+		LoopAnim('Idle');
 }
 
 state stateIdle
 {
-  begin:
-    Log("KNIGHT IS IDLE!!!!!!!!!!!!!!!!!");
-    if (stealthTrigger == None)
-    {
-      stealthTrigger = Spawn(Class'MOCAStealthTrigger',self);
-      stealthTrigger.attachedToKnight = True;
-    }
-    determineTTL(False);
-    randLook = RandRange(0, 1);
-    sleep(timeToLook);
-    if (randLook == 0)
-    {
-      GotoState('lookLeft');
-    }
-    else
-    {
-      GotoState('lookRight');
-    }
+	begin:
+		Log("KNIGHT IS IDLE!!!!!!!!!!!!!!!!!");
+		if (stealthTrigger == None)
+		{
+			stealthTrigger = Spawn(Class'MOCAStealthTrigger',self);
+			stealthTrigger.attachedToKnight = True;
+		}
+		determineTTL(False);
+		randLook = RandRange(0, 1);
+		sleep(timeToLook);
+		if (randLook == 0)
+		{
+			GotoState('lookLeft');
+		}
+		else
+		{
+			GotoState('lookRight');
+		}
 }
 
 state lookLeft
 {
-  begin:
-    lastWasRight = False;
-    PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-    Log("Left");
-    determineTTL(True);
-    PlayAnim('Idle2Left');
-    FinishAnim();
-    LoopAnim('IdleLeft');
-    sleep(timeToLook);
-    PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-    PlayAnim('Left2Idle');
-    FinishAnim();
-    GotoState('stateIdle'); // Transition back to idle state
+	begin:
+		bLastWasRight = False;
+		PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
+		Log("Left");
+		determineTTL(True);
+		PlayAnim('Idle2Left');
+		FinishAnim();
+		LoopAnim('IdleLeft');
+		sleep(timeToLook);
+		PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
+		PlayAnim('Left2Idle');
+		FinishAnim();
+		GotoState('stateIdle'); // Transition back to idle state
 }
 
 state lookRight
 {
   begin:
-    lastWasRight = True;
+    bLastWasRight = True;
     PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
     Log("Right");
     determineTTL(True);
@@ -168,9 +170,9 @@ state catch
 defaultproperties
 {
   Mesh=SkeletalMesh'MocaModelPak.skKnightWatcher'
-  firstLook=True
+  bFirstLook=True
   timeToLook=1.0
-  randomTimeToLook=True
+  bRandomTimeToLook=True
   DrawScale=1.2
   CollisionHeight=58
   minTime=1.5

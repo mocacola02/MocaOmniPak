@@ -6,7 +6,7 @@ class MOCAExplodingSpawner extends MOCASpawner;
 
 var Rotator explodeRot;
 var() float AmountToFloat;                  // Moca: How high should the particle rise before exploding, Default: 15
-var() bool shakeCamera;                     // Moca: Should the camera shake upon explosion
+var() bool bShakeCamera;                     // Moca: Should the camera shake upon explosion
 var() float fShakeTime;                     // Moca: How long should camera shake
 var() float fRollMagnitude;                 // Moca: Shake roll intensity
 var() float fVertMagnitude;                 // Moca: Shake vertical intensity
@@ -44,7 +44,7 @@ state Burst
         PlaySound(explodeSound,,0.5);
         sleep(5.75);
         Spawn(explodeParticle,,,,explodeRot);
-        if (shakeCamera)
+        if (bShakeCamera)
         {
             PlayerHarry.ShakeView(fShakeTime,fRollMagnitude,fVertMagnitude);
         } 
@@ -56,7 +56,7 @@ state Burst
 defaultproperties
 {
      AmountToFloat=15
-     shakeCamera=True
+     bShakeCamera=True
      fShakeTime=2
      fRollMagnitude=100
      fVertMagnitude=100

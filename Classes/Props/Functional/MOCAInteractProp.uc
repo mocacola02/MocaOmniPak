@@ -4,24 +4,24 @@
 
 class MOCAInteractProp extends HProp;
 
-var() bool doOnce;
-var bool doOnceFulfilled;
-var() bool actAsTrigger;
-var() bool destroyOnTrigger;
+var() bool bDoOnce;
+var bool bDoOnceFulfilled;
+var() bool bActAsTrigger;
+var() bool bDestroyOnTrigger;
 var() float CooldownLength;
-var bool CoolingDown;
+var bool bCoolingDown;
 var float TimeLeft;
 
 function bool CheckCooldown();
 
 function LineTraceHit() {
-    Log("Hit! doOnceFulfilled = " $doOnceFulfilled);
-    if (doOnce && !doOnceFulfilled) {
-        doOnceFulfilled = True;
-        Log("Attempting to trigger (doonce)");
+    Log("Hit! bDoOnceFulfilled = " $bDoOnceFulfilled);
+    if (bDoOnce && !bDoOnceFulfilled) {
+        bDoOnceFulfilled = True;
+        Log("Attempting to trigger (bDoOnce)");
         TriggerEvent( Event, Self, None );
     }
-    else if (doOnce && doOnceFulfilled)
+    else if (bDoOnce && bDoOnceFulfilled)
     {
         Log("already done");
     }
@@ -39,7 +39,7 @@ function TriggerEvent( Name EventName, Actor Other, Pawn EventInstigator )
 {
     Log("Trigger started for event:" $ EventName);
     local Actor A;
-    if (actAsTrigger && !IsInState('cooldown'))
+    if (bActAsTrigger && !IsInState('cooldown'))
     {
         if ( (EventName == '') || (EventName == 'None') ){
             Log("no event");
@@ -49,8 +49,8 @@ function TriggerEvent( Name EventName, Actor Other, Pawn EventInstigator )
         ForEach AllActors( class 'Actor', A, EventName ) {
             Log("starting event");
             A.Trigger(Other, EventInstigator);
-            CoolingDown = True;
-            if (destroyOnTrigger) {
+            bCoolingDown = True;
+            if (bDestroyOnTrigger) {
                 Log('Destroying Trigger');
                 Destroy();
             }
@@ -98,11 +98,11 @@ state cooldown
 }
 
 defaultproperties {
-    doOnce=True
+    bDoOnce=True
     bCollideWorld=false
     CooldownLength=3
-    actAsTrigger=True
-    doOnce=True
-    destroyOnTrigger=True
-    CoolingDown=False
+    bActAsTrigger=True
+    bDoOnce=True
+    bDestroyOnTrigger=True
+    bCoolingDown=False
 }

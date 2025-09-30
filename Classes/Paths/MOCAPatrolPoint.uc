@@ -1,15 +1,17 @@
 class MOCAPatrolPoint extends PatrolPoint;
 
+// Tbh I forget what all this does and i'm too lazy to read it rn. i think it just adds extra anim options or something
+
 var() Array<name> PatrolAnimList; 	// Moca: List of patrol anims
 var() Array<name> PauseAnimList; 	// Moca: List of pause anims
-var() bool logEachChange; 			// Moca: Whether or not to log each animation change. Only needed for debugging.
+var() bool bLogEachChange; 			// Moca: Whether or not to log each animation change. Only needed for debugging.
 
 var int patrolAnimCount;
 var int pauseAnimCount;
 var int currPatrol;
 var int currPause;
 
-var bool touchCooldown;
+var bool bTouchCooldown;
 
 event PostBeginPlay()
 {
@@ -34,7 +36,7 @@ event PostBeginPlay()
 
 event Touch (Actor Other)
 {
-    if (touchCooldown)
+    if (bTouchCooldown)
     {
         return;
     }
@@ -44,7 +46,7 @@ event Touch (Actor Other)
         return;
     }
 
-    touchCooldown = true;
+    bTouchCooldown = true;
 
     SetTimer(1.0,false);
 
@@ -69,7 +71,7 @@ event Touch (Actor Other)
         }
         PauseAnim = PauseAnimList[currPause];
     }
-    if (logEachChange)
+    if (bLogEachChange)
     {
         Log("PatrolAnim: " @ string(PatrolAnim));
         Log("PauseAnim: " @ string(PauseAnim));
@@ -80,7 +82,7 @@ event Touch (Actor Other)
 
 event Timer()
 {
-    touchCooldown = false;
+    bTouchCooldown = false;
 }
 
 defaultproperties

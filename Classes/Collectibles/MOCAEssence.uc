@@ -1,5 +1,5 @@
 //================================================================================
-// MOCAEssence. alternate bean essentially, but cooler :sunglasses:
+// MOCAEssence. the OG custom collectible
 //================================================================================
 
 class MOCAEssence extends MOCACollectible;
@@ -32,5 +32,5 @@ defaultproperties
     SoundPitch=128
     SoundRadius=4
     SoundVolume=255
-    attractedToHarry=True
+    bAttractedToHarry=True
 }

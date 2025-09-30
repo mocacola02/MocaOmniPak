@@ -15,7 +15,7 @@ struct BumpSetMapping
 // follow up some time after the comment above: wtf lmfao
 var BumpSetMapping BumpSetMappings[286]; // Array to hold bumpset and prefix mappings.
 
-var() bool randomLinePerTrigger; 	// Moca: Should lines be random, if false use user-set bumplines
+var() bool bRandomLinePerTrigger; 	// Moca: Should lines be random, if false use user-set bumplines
 var() name TouchClass; 				// Moca: Name of actor that should trigger the bumpline when touched
 
 function Trigger (Actor Other, Pawn Instigator)
@@ -43,7 +43,7 @@ function ProcessBumpline()
 
     Log("Triggered " $ string(self));
 
-    if (randomLinePerTrigger)
+    if (bRandomLinePerTrigger)
     {
         Log('Randomizing');
         RandomIndex = Rand(ArrayCount(BumpSetMappings));
@@ -346,7 +346,7 @@ defaultproperties
      BumpSetMappings(283)=(BumpSet="WhompBump",Prefix="Ron")
      BumpSetMappings(284)=(BumpSet="WhompBump2",Prefix="Ron")
      BumpSetMappings(285)=(BumpSet="SnapeBumps",Prefix="Snp")
-     randomLinePerTrigger=True
+     bRandomLinePerTrigger=True
      bUseBumpLine=True
      bHidden=True
      Physics=PHYS_None
