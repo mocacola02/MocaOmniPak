@@ -27,6 +27,10 @@ var bool bCanGoHome;
 var bool bHomeCheckCooldown;
 
 var Vector ReturnLocation;
+var Vector TempVelocity;
+var Vector TempAcceleration;
+
+var InterpolationPoint TargetIPoint;
 
 event PostBeginPlay()
 {
@@ -34,6 +38,7 @@ event PostBeginPlay()
 
 	if (WakeUpMode == WM_Always)
 	{
+		FollowSplinePath(Tag);
 		GotoState('stateFly');
 	}
 }
@@ -43,16 +48,21 @@ function ShootPaper();
 
 function ProcessSpell()
 {
-	GotoState('stateHit');
+	if(!IsInState('stateIdle'))
+	{
+		GotoState('stateHit');
+	}	
 }
 
 function SaveStartLocation()
 {
 	ReturnLocation = Location;
-	if (bMocaDebugMode)
-	{
-		Print(string(self) $ "'s start location saved as: " $ string(ReturnLocation));
-	}
+	Print(string(self) $ "'s start location saved as: " $ string(ReturnLocation));
+}
+
+exec function StopBook()
+{
+	SplineSpeed = 0;
 }
 
 function bool CheckAttack()
@@ -166,25 +176,27 @@ state stateFly
 		LoopAnim(WalkAnimName);
 		AmbientSound = FlySound;
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
-		Print("Following spline path with start point " $ string(DestSplinePoint));
-		FollowSplinePath(Tag,,,DestSplinePoint);
+		FollowSplinePath(Tag, [StartPointName] TargetIPoint.Name);
 	}
 	
 	event EndState()
 	{
 		bCanAttack = False;
-		DestroyControllers();
 		AmbientSound = None;
 		SetPhysics(PHYS_Flying);
 		bCollideWorld = True;
 		bAlignBottom = False;
 		bCanGoHome = False;
 		bHomeCheckCooldown = False;
+		TargetIPoint = SplineManager.Dest;
+		DestroyControllers();
 	}
 
 	event Tick (float DeltaTime)
 	{
 		Global.Tick(DeltaTime);
+
+		Print("Velocity: " $ string(Velocity) $ " Acceleration: " $ string(Acceleration));
 
 		if (isHarryNear(AttackDistance) && bCanAttack)
 		{
@@ -233,7 +245,6 @@ state stateAttack
 		PlayAnim('PrepAttack');
 		FinishAnim();
 		PlayAnim('attack');
-		ShootPaper();
 		FinishAnim();
 
 		if (CheckAttack())
@@ -249,7 +260,6 @@ state stateHit
 	event BeginState()
 	{
 		bCanAttack = True;
-		DestroyControllers();
 		eVulnerableToSpell = SPELL_None;
 		hitsTaken++;
 		EnableTurnTo(PlayerHarry);
