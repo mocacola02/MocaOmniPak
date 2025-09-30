@@ -9,6 +9,7 @@ enum WakeMode
 
 var() byte SleepChance;			// Moca: How likely is the book to go back to its resting point when close to home? Higher = more likely. Only works if WM_Proximity. Def: 128
 
+var() name FlySplineTag;
 var() float AttackDistance;		// Moca: At what distance will the book start attacking? Def: 192.0
 var() float AttackDelay;		// Moca: How long in seconds will the book wait before enabling attacking after it begins flying? Def: 5.0
 var() float DamageAmount;		// Moca: How much damage will Harry take when hit? Def: 5.0
@@ -32,14 +33,15 @@ var Vector TempAcceleration;
 
 var InterpolationPoint TargetIPoint;
 
-event PostBeginPlay()
+event Trigger(Actor Other, Pawn Instigator)
 {
-	super.PostBeginPlay();
-
-	if (WakeUpMode == WM_Always)
+    if (WakeUpMode == WM_Trigger && IsInState('stateIdle'))
+    {
+        GotoState('stateIdle', 'wakeup');
+    }
+	else if(WakeUpMode == WM_Trigger && !IsInState('stateIdle'))
 	{
-		FollowSplinePath(Tag);
-		GotoState('stateFly');
+		bCanGoHome = True;
 	}
 }
 
@@ -103,14 +105,23 @@ function bool DetermineSleep()
 
 auto state stateIdle
 {
+	event BeginState()
+	{
+		if(WakeUpMode == WM_Always)
+		{
+			GotoState('stateFly');
+		}
+	}
+
 	begin:
 		bCanAttack = False;
 		LoopAnim(IdleAnimName);
 
-		if (isHarryNear(WakeUpRange))
+		if (isHarryNear(WakeUpRange) && WakeUpMode == WM_Proximity)
 		{
 			Goto('wakeup');
 		}
+
 		sleep(0.25);
 		Goto('begin');
 
@@ -176,7 +187,7 @@ state stateFly
 		LoopAnim(WalkAnimName);
 		AmbientSound = FlySound;
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
-		FollowSplinePath(Tag, [StartPointName] TargetIPoint.Name);
+		FollowSplinePath(FlySplineTag, [StartPointName] TargetIPoint.Name);
 	}
 	
 	event EndState()

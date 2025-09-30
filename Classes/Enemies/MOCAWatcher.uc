@@ -70,7 +70,7 @@ function playSqueak ()
 }
 
 event Trigger (Actor Other, Pawn EventInstigator)
-  {
+{
 	if (bIsAwake)
 	{
 		bAsleepOnSpawn = False;
@@ -83,7 +83,7 @@ event Trigger (Actor Other, Pawn EventInstigator)
 		PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
 		GotoState('stateIdle');
 	}
-  }
+}
 
 auto state asleep 
 {
