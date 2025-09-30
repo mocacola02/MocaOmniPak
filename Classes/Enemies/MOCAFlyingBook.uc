@@ -51,12 +51,16 @@ function SaveStartLocation()
 	ReturnLocation = Location;
 	if (bMocaDebugMode)
 	{
-		Log(string(self) $ "'s start location saved as: " $ string(ReturnLocation));
+		Print(string(self) $ "'s start location saved as: " $ string(ReturnLocation));
 	}
 }
 
 function bool CheckAttack()
 {
+	local float HarryDist;
+	HarryDist = GetDistanceFromHarry();
+	Print("Book's distance from Harry: " $ string(HarryDist));
+
 	return (GetDistanceFromHarry() < AttackDistance);
 }
 
@@ -90,6 +94,7 @@ function bool DetermineSleep()
 auto state stateIdle
 {
 	begin:
+		bCanAttack = False;
 		LoopAnim(IdleAnimName);
 
 		if (isHarryNear(WakeUpRange))
@@ -110,6 +115,7 @@ state stateGoHome
 {
 	event BeginState()
 	{
+		bCanAttack = False;
 		Print("Going home");
 		LoopAnim(IdleAnimName,,2.0);
 		SetPhysics(PHYS_Flying);
@@ -155,12 +161,13 @@ state stateFly
 	event BeginState()
 	{
 		bCanGoHome = False;
-		bCanAttack = False;
 		bHomeCheckCooldown = False;
 		SetTimer(AttackDelay,false,'EnableAttacks');
 		LoopAnim(WalkAnimName);
 		AmbientSound = FlySound;
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+		Print("Following spline path with start point " $ string(DestSplinePoint));
+		FollowSplinePath(Tag,,,DestSplinePoint);
 	}
 	
 	event EndState()
@@ -200,9 +207,6 @@ state stateFly
 	{
 		bCanAttack = True;
 	}
-	
-	begin:
-		FollowSplinePath(Tag);
 }
 
 state stateAttack
@@ -230,6 +234,7 @@ state stateAttack
 		FinishAnim();
 		PlayAnim('attack');
 		ShootPaper();
+		FinishAnim();
 
 		if (CheckAttack())
 		{
@@ -243,6 +248,7 @@ state stateHit
 {
 	event BeginState()
 	{
+		bCanAttack = True;
 		DestroyControllers();
 		eVulnerableToSpell = SPELL_None;
 		hitsTaken++;
@@ -259,9 +265,19 @@ state stateHit
 		{
 			if (hitsTaken >= hitsToKill)
 			{
-
+				GotoState('stateDie', 'fromfly');
 			}
-			PlayAnim('FlyStunned',StunDurationMult,,,'Move');
+			else
+			{
+				PlayAnim('FlyStunned',StunDurationMult,,,'Move');
+			}
+		}
+		else if(PreviousState == 'stateAttack')
+		{
+			if (hitsTaken >= hitsToKill)
+			{
+				GotoState('stateDie', 'fromattack');
+			}
 		}
 		else
 		{
@@ -280,6 +296,10 @@ state stateHit
 
 state stateDie
 {
+	event HitWall(vector vHitNormal, Actor Wall)
+	{
+		GotoState('stateDie','die');
+	}
 
 	die:
 		PlayAnim('FallDie');
@@ -318,8 +338,8 @@ defaultproperties
 
     SoundRadius=75
 
-    CollisionRadius=8.00
-    CollisionHeight=16.00
+    CollisionRadius=16.00
+    CollisionHeight=24.00
 
 	bAlignBottom=False
     bBlockActors=False
@@ -329,7 +349,7 @@ defaultproperties
 	hitsToKill=3
 
 	SleepChance=128
-	AttackDistance=192
+	AttackDistance=384
 	AttackDelay=5.0
     DamageAmount=2.00
 	StunDurationMult=1.0

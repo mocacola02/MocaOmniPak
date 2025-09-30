@@ -6,9 +6,9 @@ event PreBeginPlay()
 	
 	local int X,Y,Z;
 
-	X = Round(RandRange(100,1000));
-	Y = Round(RandRange(100,1000));
-	Z = Round(RandRange(100,1000));
+	X = Round(RandRange(20000,50000));
+	Y = Round(RandRange(20000,50000));
+	Z = Round(RandRange(20000,50000));
 
 	RotationRate.Pitch = X;
 	RotationRate.Roll = Y;
@@ -25,4 +25,5 @@ defaultproperties
 	DespawnEmitter=Class'Paper_Hit'
 	DamageName=PaperBall
 	Mesh=SkeletalMesh'MocaModelPak.skPaperBallMesh'
+	bFixedRotationDir=True
 }

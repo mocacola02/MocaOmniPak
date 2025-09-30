@@ -4,6 +4,52 @@
 
 class MOCAPawn extends HPawn;
 
+var() bool bFloatingActor;		// Moca: Is this actor a floating actor? Use this for stuff like floating torches. Def: False
+var() bool bRotateWhenFloating;	// Moca: Whether or not to apply RotationRate while floating. Def: True
+
+var() float RotationSpeed;		// Moca: How fast should the actor rotate on its Yaw axis (aka turning left or right)? Def: 128.0
+var() float BobSpeed;			// Moca: How fast should the floating actor bob up and down? Def: 128.0
+var() float BobIntensity;		// Moca: How intense should the bobbing be? Aka how far up and down does it go? Def: 1.0
+
+var float BobTime;
+var Vector StartingLocation;
+
+event PreBeginPlay()
+{
+	Super.PreBeginPlay();
+
+	StartingLocation = Location;
+
+	if(bFloatingActor)
+	{
+		bFixedRotationDir = bRotateWhenFloating;
+	}
+}
+
+event Tick(float DeltaTime)
+{
+	super.Tick(DeltaTime);
+
+	if(bFloatingActor)
+	{
+		DoBob(DeltaTime);
+	}
+}
+
+function DoBob(float DeltaTime)
+{
+	local float Offset;
+	local Rotator NewRotation;
+
+	BobTime += DeltaTime * BobSpeed * 2 * Pi;
+	Offset = sin(BobTime) * BobIntensity;
+
+	NewRotation.Yaw = Rotation.Yaw + (RotationSpeed * DeltaTime);
+
+	SetLocation(StartingLocation + vect(0,0,1) * Offset);
+	SetRotation(NewRotation);
+}
+
 function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
 {
   return HandleSpell(spell,vHitLocation);
@@ -97,4 +143,12 @@ function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
 
     Log("No mapping found for " $ string(TestSpell));
     return SPELL_None;
+}
+
+defaultproperties
+{
+	RotationSpeed=3000.0
+	BobIntensity=8.0
+	BobSpeed=0.5
+	bRotateWhenFloating=True
 }

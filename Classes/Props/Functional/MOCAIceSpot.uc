@@ -80,6 +80,8 @@ state stateFreeze
 {
     event Tick(float DeltaTime)
     {
+		Global.Tick(DeltaTime);
+
         if (CurrentGrowthTime < GrowthTime)
         {
             ChangeBergSize(DeltaTime);
