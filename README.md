@@ -5,7 +5,7 @@ Models, textures, and sounds are separate due to file size limits. The packages 
 ## User Agreement
 By using any portion of my content in any way (including non-Unreal projects), you agree to the following:
 
- - While in Beta, do not share the packages or repo without permission. Mod/map releases are fine, but a heads up would be appreciated. 
+ - While in Private Beta (ends October 14th, 2025), do not share the packages or repo without permission. Mod/map releases are fine, but a heads up would be appreciated. 
  - You must include credit in some form. A credit in a readme file is fine, as long as it is easily available to other users. I appreciate in-game credit, but it is not required.
  - You cannot use this content in any commercial product or mod. This includes redistributing the assets directly or using them in another project commercially.
  - Please do not ping or message the HP2 New Engine (M212 Engine) developers regarding bugs in my content. Direct ALL bug or feature requests to this repo, or ping me in the HP Modding Discord (@moca). You can open a ticket in [Issues](https://github.com/mocacola02/MocaOmniPak/issues).
