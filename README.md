@@ -1,25 +1,17 @@
 # MocaOmniPak
-Repo for all of my custom HP2 PC content.
-Models, textures, and sounds are separate due to file size limits. The packages can be found in [Releases](https://github.com/mocacola02/MocaOmniPak/releases).
+Repo for all of my custom HP2 classes.
+Models, textures, and sounds are only included in Releases due to Github file size limits. The packages can be found in [Releases](https://github.com/mocacola02/MocaOmniPak/releases).
+
+Please do not ping or message the HP2 New Engine (M212 Engine) developers regarding bugs in my content. Direct ALL bug or feature requests to this repo, or ping me in the HP Modding Discord (@moca). Preferably, you can open a ticket in [Issues](https://github.com/mocacola02/MocaOmniPak/issues).
 
 ## User Agreement
-By using any portion of my content in any way (including non-Unreal projects), you agree to the following:
-
- - While in Private Beta (ends October 14th, 2025), do not share the packages or repo without permission. Mod/map releases are fine, but a heads up would be appreciated. 
- - You must include credit in some form. A credit in a readme file is fine, as long as it is easily available to other users. I appreciate in-game credit, but it is not required.
- - You cannot use this content in any commercial product or mod. This includes redistributing the assets directly or using them in another project commercially.
- - Please do not ping or message the HP2 New Engine (M212 Engine) developers regarding bugs in my content. Direct ALL bug or feature requests to this repo, or ping me in the HP Modding Discord (@moca). You can open a ticket in [Issues](https://github.com/mocacola02/MocaOmniPak/issues).
- - Any feature requests made will be publicly available -- there will be no exclusive content additions.
- - I reserve the right to implement any bug fixes or other changes/additions introduced in forks. I will give full credit to any contributors via this page. **If you are interested in making changes or additions, feel free to reach out to me about contributing.**
-
-Any content derived from another source, including but not limited to KnowWonder, Zeekerss, and members of the modding community who helped with certain code snippets, belong to their respective owners.
+By using any portion of my content in any way (including non-Unreal projects), you agree to the [License](https://github.com/mocacola02/MocaOmniPak/blob/main/LICENSE.md).
 
 ## Installing
 ### Installing the M212 Engine
 This content requires the M212 Engine for HP2. As of now, it is currently in beta and only available on the [HP Modding Discord](https://discord.gg/tpN4grB). Please join the server to download the updated engine. The [HP Modding Discord](https://discord.gg/tpN4grB) is also a great resource for modding and mapping questions, so I recommend sticking around.
 
 After downloading the engine installer from the server, run the installer and install the engine into your HP2 game installation.
-
 
 ### Pre-Built Packages
 To install pre-built content packages, download the latest files from [Releases](https://github.com/mocacola02/MocaOmniPak/releases). **You will need to download the latest MocaOmniPak, MocaTexturePak, MocaModelPak, and MocaSoundPak.**
