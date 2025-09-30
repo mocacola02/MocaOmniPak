@@ -34,4 +34,4 @@ If you need an SPDX identifier for external referencing, the closest match is:
 
 ---
 
-© 2025 Moca Cola. All rights reserved.
+© 2025 Moca Cola
