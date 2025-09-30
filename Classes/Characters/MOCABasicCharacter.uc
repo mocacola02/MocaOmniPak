@@ -1,0 +1,1 @@
+class MOCABasicCharacter extends MOCAChar;

@@ -173,7 +173,7 @@ function SetNewMesh()
 	if ( bIsGoyle && (Mesh == SkeletalMesh'MOCAharry') )
 	{
 		Mesh = SkeletalMesh'skGoyleMesh';
-		DrawScale = 1.14999998;
+		DrawScale = 1.15;
 	}
 	if (  !bIsGoyle && (Mesh == SkeletalMesh'skGoyleMesh') )
 	{

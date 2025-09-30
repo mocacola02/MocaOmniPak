@@ -2,7 +2,7 @@
 // MOCADementor.
 //================================================================================
 
-class MOCADementor extends Characters;
+class MOCADementor extends MOCABasicCharacter;
 
 defaultproperties
 {
