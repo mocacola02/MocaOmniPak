@@ -1,36 +1,34 @@
 class MOCASpawner extends MOCAPawn;
 
-// TODO: Spawn angle stuff is all out of wack
-
 struct SpawnedProperties
 {
-    var() string PropertyName;          
-    var() string PropertyValue;         
+    var() string PropertyName;
+    var() string PropertyValue;
 };
 
 struct SpawnSettings
 {
-    var() Class<actor> actorToSpawn;    
-    var() Byte spawnChance;             
-    var() float spawnDelay;             
-    var() vector spawnLocationOffset;   
-    var() Rotator spawnRotation;        
-    var() float velocityMult;           
-    var() Sound spawnSound;             
+    var() Class<actor> actorToSpawn;
+    var() Byte spawnChance;
+    var() float spawnDelay;
+    var() vector spawnLocationOffset;
+    var() Rotator spawnRotation;
+    var() float velocityMult;
+    var() Sound spawnSound;
     var() class<ParticleFX> spawnParticle;
-    var() array<SpawnedProperties> spawnProperties; 
+    var() array<SpawnedProperties> spawnProperties;
 };
 
-var(MOCASpawnActors) array<SpawnSettings> listOfSpawns;	// Moca: List of actors to spawn.
-var(MOCASpawnActors) bool bRandomSpawnOrder;    		// Moca: Spawn in a random order.
-var(MOCASpawnActors) bool bUseSpawnChance;   			// Moca: Apply spawn chance.
-var(MOCASpawnActors) bool bVaryVelocity; 				// Moca: Vary the velocity to avoid actors landing in similar places.
+var(MOCASpawnActors) array<SpawnSettings> listOfSpawns;
+var(MOCASpawnActors) bool bRandomSpawnOrder;
+var(MOCASpawnActors) bool bUseSpawnChance;
+var(MOCASpawnActors) bool bVaryVelocity;
 var(MOCASpawnActors) int maxVelocityVariance;
 
-var(MOCASpawnAmount) int numberToSpawn;        
-var(MOCASpawnAmount) int minAmountToSpawn;     
-var(MOCASpawnAmount) int maxAmountToSpawn;     
-var(MOCASpawnAmount) int maxLives;         
+var(MOCASpawnAmount) int numberToSpawn;
+var(MOCASpawnAmount) int minAmountToSpawn;
+var(MOCASpawnAmount) int maxAmountToSpawn;
+var(MOCASpawnAmount) int maxLives;
 
 var array<float> spawnWeights;
 var bool bNoWeights;
@@ -43,11 +41,10 @@ var int maxSpawns;
 var ESpellType defaultSpell;
 var ParticleFX particleOnSpawn;
 
-var(MOCASpawnGlobal) bool bUseGlobalSpawnSettings;		// Moca: Allows usage of the variables below. Def: False
-var(MOCASpawnGlobal) vector GlobalSpawnOffset;        	// Moca: Spawn offset set to all spawned actors. Def: 0,0,0
-var(MOCASpawnGlobal) rotator GlobalSpawnDirection;    	// Moca: Base rotation for spawn angle. Def: 0,0,0
-var(MOCASpawnGlobal) vector GlobalSpawnAngle;         	// Moca: Angle variance per axis (X=Pitch, Y=Yaw, Z=Roll in degrees). Def: 20,20,0
-
+var(MOCASpawnGlobal) bool bUseGlobalSpawnSettings;
+var(MOCASpawnGlobal) vector GlobalSpawnOffset;
+var(MOCASpawnGlobal) rotator GlobalSpawnDirection;
+var(MOCASpawnGlobal) vector GlobalSpawnAngle;
 
 event PostBeginPlay()
 {
@@ -96,8 +93,6 @@ function DetermineSpawnWeights()
         totalWeight += int(listOfSpawns[i].spawnChance);
     }
 
-    Log("totalWeight = " $ string(totalWeight));
-
     for (i = 0; i < maxIndex; i++)
     {
         spawnWeights[i] = float(listOfSpawns[i].spawnChance) / float(totalWeight);
@@ -120,7 +115,7 @@ function vector GetRandomizedDirection()
     local float u, v, theta, phi;
     local float RandPitch, RandYaw;
     local rotator Offset;
-    local float DegToUnr; // degrees -> Unreal rotator units
+    local float DegToUnr;
 
     DegToUnr = 65536.0 / 360.0;
 
@@ -129,8 +124,8 @@ function vector GetRandomizedDirection()
         u = FRand();
         v = FRand();
 
-        theta = 2.0 * PI * u;        // azimuth
-        phi   = Acos(2.0 * v - 1.0); // polar
+        theta = 2.0 * PI * u;
+        phi   = Acos(2.0 * v - 1.0);
 
         Dir.X = Sin(phi) * Cos(theta);
         Dir.Y = Sin(phi) * Sin(theta);
@@ -139,8 +134,8 @@ function vector GetRandomizedDirection()
         return Normal(Dir);
     }
 
-    RandPitch = (FRand() * 2.0 - 1.0) * GlobalSpawnAngle.X; // X = pitch degrees
-    RandYaw   = (FRand() * 2.0 - 1.0) * GlobalSpawnAngle.Y; // Y = yaw degrees
+    RandPitch = (FRand() * 2.0 - 1.0) * GlobalSpawnAngle.X;
+    RandYaw   = (FRand() * 2.0 - 1.0) * GlobalSpawnAngle.Y;
 
     Offset.Pitch = int(RandPitch * DegToUnr);
     Offset.Yaw   = int(RandYaw   * DegToUnr);
@@ -188,35 +183,39 @@ function SpawnItem()
     spawnedParticle = Spawn(GetSpawnParticle(),,,spawnLocation);
 
     if (spawnedParticle != None)
-	{
-		spawnedParticle.PlaySound(GetSpawnSound());
-	} 
-
-    spawnedActor = Spawn(listOfSpawns[currentSpawnIndex].actorToSpawn,,,spawnLocation, FinalRot);
+    {
+        spawnedParticle.PlaySound(GetSpawnSound());
+    }
 
     if (bUseGlobalSpawnSettings)
-	{
-		Dir = GetRandomizedDirection();
-		FinalRot = rotator(Dir);
-	}
-	else
-	{
-		Dir = Vector(listOfSpawns[currentSpawnIndex].spawnRotation);
-		FinalRot = listOfSpawns[currentSpawnIndex].spawnRotation;
-	}
+    {
+        Dir = GetRandomizedDirection();
+        FinalRot = rotator(Dir);
+    }
+    else
+    {
+        FinalRot = Rotation + listOfSpawns[currentSpawnIndex].spawnRotation;
+        Dir = Vector(FinalRot);
+    }
+
+    spawnedActor = Spawn(listOfSpawns[currentSpawnIndex].actorToSpawn,,,spawnLocation, FinalRot);
 
     if (bVaryVelocity)
     {
         RandAmountMult = Clamp(Rand(maxVelocityVariance),2,maxVelocityVariance);
         RandAmount = FRand() * RandAmountMult;
-        
-        RandOffset.X = RandAmount * FRand();
-        RandOffset.Y = RandAmount * FRand();
-        RandOffset.Z = RandAmount * FRand();
+
+        RandOffset.X = (FRand() * 2.0 - 1.0) * RandAmount;
+        RandOffset.Y = (FRand() * 2.0 - 1.0) * RandAmount;
+        RandOffset.Z = (FRand() * 2.0 - 1.0) * RandAmount;
+    }
+    else
+    {
+        RandOffset = vect(0,0,0);
     }
 
     Dir = Normal(Dir + RandOffset);
-    
+
     spawnedActor.Velocity = Dir * ((128 + Rand((maxVelocityVariance * 8))) * listOfSpawns[currentSpawnIndex].velocityMult);
 
     if (listOfSpawns[currentSpawnIndex].spawnProperties.Length != 0)
@@ -225,7 +224,6 @@ function SpawnItem()
         {
             if (listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyName != "" && listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyValue != "")
             {
-                Log("Setting spawned actor's property " $ listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyName $ " to " $ listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyValue);
                 spawnedActor.SetPropertyText(listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyName, listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyValue);
             }
         }
@@ -267,7 +265,6 @@ state stateDone
         if (maxLives <= 0)
         {
             sleep(5.0);
-            Log("Destroying MOCASpawner: " $ string(self));
             Destroy();
         }
         else
@@ -281,7 +278,6 @@ function ProcessSpell()
 {
     GotoState('stateSpawn');
 }
-
 
 defaultproperties
 {

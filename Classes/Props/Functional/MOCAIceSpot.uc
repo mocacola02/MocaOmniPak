@@ -4,6 +4,8 @@ var() float TimeToLive; 		// Moca: How long should ice remain? Def: 60.0
 var() float GrowthTime; 		// Moca: How long should it take for the ice to grow in seconds? Def: 5.0
 var() ESpellType ShatterSpell; 	// Moca: What spell, if any, should shatter the ice if cast on? Def: SPELL_Flipendo
 var() bool bUseMoverCollision;   // Moca: If true, model collision will not be applied and instead will send an event (based on the Event property) to trigger a mover when freezing/melting/shattering. Intended to be used with an invisible mover for special poly collision. Def: False
+var() Sound FreezeSound;
+var() Sound SmashSound;
 
 var float CurrentGrowthTime;
 var Iceberg_Grow FreezeParticles;
@@ -94,6 +96,7 @@ state stateFreeze
 
     event BeginState()
     {
+		PlaySound(FreezeSound);
         eVulnerableToSpell = SPELL_None;
         SetCollision(true,true,true);
         FreezeParticles.bEmit = true;
@@ -101,6 +104,7 @@ state stateFreeze
 
     event EndState()
     {
+		StopSound(FreezeSound);
         CurrentGrowthTime = 0;
         FreezeParticles.bEmit = false;
     }
@@ -125,6 +129,7 @@ state stateShatter
 {
     event BeginState()
     {
+		PlaySound(SmashSound);
         eVulnerableToSpell = SPELL_None;
         Spawn(class'Ice_Break',self,,Location);
         DrawScale = 0.0;
@@ -153,4 +158,6 @@ defaultproperties
     bGestureFaceHorizOnly=False
 
     PrePivot=(X=0,Y=0,Z=8)
+	FreezeSound=Sound'MocaSoundPak.ice_freeze'
+	SmashSound=Sound'MocaSoundPak.salamander_explode'
 }

@@ -89,7 +89,7 @@ state stateDone
 defaultproperties
 {
 	spawnAnims=(Spawning=None,EndSpawning=Grow,Idle=None,DoneIdle=HitIdle,FinalSpawnEnd=None)
-	visibleSpawnSounds=(Opening=Sound'MocaSoundPak.Spawners.skull_hit',Ending=Sound'MocaSoundPak.Spawners.skull_hitend')
+	visibleSpawnSounds=(Opening=Sound'MocaSoundPak.pumpkin_explode',Closing=Sound'MocaSoundPak.pumpkin_spawn',Ending=Sound'MocaSoundPak.pumpkin_explode')
 	Physics=PHYS_None
 	Mesh=SkeletalMesh'MocaModelPak.skPumpkinSpawner'
 	DrawScale=1.3
