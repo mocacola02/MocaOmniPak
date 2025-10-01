@@ -1,37 +1,38 @@
 class MOCASpawner extends MOCAPawn;
 
+// TODO: Spawn angle stuff is all out of wack
+
 struct SpawnedProperties
 {
-    var() string PropertyName;          // Moca: What property should be changed?
-    var() string PropertyValue;         // Moca: What value to set for the property?
+    var() string PropertyName;          
+    var() string PropertyValue;         
 };
 
 struct SpawnSettings
 {
-    var() Class<actor> actorToSpawn;    // Moca: What actor class to spawn
-    var() Byte spawnChance;             // Moca: How likely is it to spawn if bUseSpawnChance == true? Higher number means more likely to spawn
-    var() float spawnDelay;             // Moca: How much of a delay in seconds after spawning?
-    var() vector spawnLocationOffset;   // Moca: Location offset to set to spawned actor and particle
-    var() Rotator spawnRotation;        // Moca: Rotation of spawned actor
-    var() float velocityMult;           // Moca: How much velocity to apply in the direction the spawner is facing? 0.0 = no velocity, 1.0 = default velocity, 2.0 = double velocity, and so on.
-    var() Sound spawnSound;             // Moca: Sound to play when spawning this actor.
-    var() class<ParticleFX> spawnParticle;  // Moca: Particle to use when spawning this actor
-    var() array<SpawnedProperties> spawnProperties; // Moca: Properties to set on the spawned actor
+    var() Class<actor> actorToSpawn;    
+    var() Byte spawnChance;             
+    var() float spawnDelay;             
+    var() vector spawnLocationOffset;   
+    var() Rotator spawnRotation;        
+    var() float velocityMult;           
+    var() Sound spawnSound;             
+    var() class<ParticleFX> spawnParticle;
+    var() array<SpawnedProperties> spawnProperties; 
 };
 
-var(MOCASpawnActors) array<SpawnSettings> listOfSpawns; // Moca: What should we spawn and what settings?
-var(MOCASpawnActors) bool bRandomSpawnOrder;    // Moca: Should particles spawn in no particular order? Def: True
-var(MOCASpawnActors) bool bUseSpawnChance;   // Moca: Should spawn chance be taken into consideration? Def: False
-var(MOCASpawnActors) bool bVaryVelocity; // Moca: Should the velocity of spawn items be varied to avoid landing in the same place? Def: True
-var(MOCASpawnActors) int maxVelocityVariance; // Moca: Maximum amount of variance to apply to spawn velocity. Def = 16
+var(MOCASpawnActors) array<SpawnSettings> listOfSpawns;	// Moca: List of actors to spawn.
+var(MOCASpawnActors) bool bRandomSpawnOrder;    		// Moca: Spawn in a random order.
+var(MOCASpawnActors) bool bUseSpawnChance;   			// Moca: Apply spawn chance.
+var(MOCASpawnActors) bool bVaryVelocity; 				// Moca: Vary the velocity to avoid actors landing in similar places.
+var(MOCASpawnActors) int maxVelocityVariance;
 
-var(MOCASpawnAmount) int numberToSpawn;        // Moca: How many actors to spawn. Ignored if minAmountToSpawn and maxAmountToSpawn are set. If all are 0, this will be set to 4. Def: 4
-var(MOCASpawnAmount) int minAmountToSpawn;     // Moca: Minimum amount of items to spawn. If both min and max values are 0, we will use a set amount. Def: 0
-var(MOCASpawnAmount) int maxAmountToSpawn;     // Moca: Maximum amount of items to spawn. If both min and max values are 0, we will use a set amount. Def: 0
-var(MOCASpawnAmount) int maxLives;          // Moca: How many times can the spawner be activated? Def: 4
+var(MOCASpawnAmount) int numberToSpawn;        
+var(MOCASpawnAmount) int minAmountToSpawn;     
+var(MOCASpawnAmount) int maxAmountToSpawn;     
+var(MOCASpawnAmount) int maxLives;         
 
 var array<float> spawnWeights;
-
 var bool bNoWeights;
 
 var int maxIndex;
@@ -40,8 +41,12 @@ var int numOfSpawns;
 var int maxSpawns;
 
 var ESpellType defaultSpell;
-
 var ParticleFX particleOnSpawn;
+
+var(MOCASpawnGlobal) bool bUseGlobalSpawnSettings;		// Moca: Allows usage of the variables below. Def: False
+var(MOCASpawnGlobal) vector GlobalSpawnOffset;        	// Moca: Spawn offset set to all spawned actors. Def: 0,0,0
+var(MOCASpawnGlobal) rotator GlobalSpawnDirection;    	// Moca: Base rotation for spawn angle. Def: 0,0,0
+var(MOCASpawnGlobal) vector GlobalSpawnAngle;         	// Moca: Angle variance per axis (X=Pitch, Y=Yaw, Z=Roll in degrees). Def: 20,20,0
 
 
 event PostBeginPlay()
@@ -101,20 +106,49 @@ function DetermineSpawnWeights()
 
 function Sound GetSpawnSound()
 {
-    local Sound currentSpawnSound;
-
-    currentSpawnSound = listOfSpawns[currentSpawnIndex].spawnSound;
-
-    return currentSpawnSound;
+    return listOfSpawns[currentSpawnIndex].spawnSound;
 }
 
 function class<ParticleFX> GetSpawnParticle()
 {
-    local class<ParticleFX> currentParticle;
+    return listOfSpawns[currentSpawnIndex].spawnParticle;
+}
 
-    currentParticle = listOfSpawns[currentSpawnIndex].spawnParticle;
+function vector GetRandomizedDirection()
+{
+    local vector Dir;
+    local float u, v, theta, phi;
+    local float RandPitch, RandYaw;
+    local rotator Offset;
+    local float DegToUnr; // degrees -> Unreal rotator units
 
-    return currentParticle;
+    DegToUnr = 65536.0 / 360.0;
+
+    if (GlobalSpawnAngle.Y >= 180.0 && GlobalSpawnAngle.X >= 180.0)
+    {
+        u = FRand();
+        v = FRand();
+
+        theta = 2.0 * PI * u;        // azimuth
+        phi   = Acos(2.0 * v - 1.0); // polar
+
+        Dir.X = Sin(phi) * Cos(theta);
+        Dir.Y = Sin(phi) * Sin(theta);
+        Dir.Z = Cos(phi);
+
+        return Normal(Dir);
+    }
+
+    RandPitch = (FRand() * 2.0 - 1.0) * GlobalSpawnAngle.X; // X = pitch degrees
+    RandYaw   = (FRand() * 2.0 - 1.0) * GlobalSpawnAngle.Y; // Y = yaw degrees
+
+    Offset.Pitch = int(RandPitch * DegToUnr);
+    Offset.Yaw   = int(RandYaw   * DegToUnr);
+    Offset.Roll  = 0;
+
+    Dir = Vector(GlobalSpawnDirection + Offset);
+
+    return Normal(Dir);
 }
 
 function SpawnItem()
@@ -127,6 +161,7 @@ function SpawnItem()
     local vector RandOffset;
     local float RandAmount;
     local int RandAmountMult;
+    local rotator FinalRot;
 
     if (bRandomSpawnOrder)
     {
@@ -141,15 +176,34 @@ function SpawnItem()
         }
     }
 
-    spawnLocation = Location + listOfSpawns[currentSpawnIndex].spawnLocationOffset;
+    if (bUseGlobalSpawnSettings)
+    {
+        spawnLocation = Location + GlobalSpawnOffset + listOfSpawns[currentSpawnIndex].spawnLocationOffset;
+    }
+    else
+    {
+        spawnLocation = Location + listOfSpawns[currentSpawnIndex].spawnLocationOffset;
+    }
 
     spawnedParticle = Spawn(GetSpawnParticle(),,,spawnLocation);
 
-    spawnedParticle.PlaySound(GetSpawnSound());
+    if (spawnedParticle != None)
+	{
+		spawnedParticle.PlaySound(GetSpawnSound());
+	} 
 
-    spawnedActor = Spawn(listOfSpawns[currentSpawnIndex].actorToSpawn,,,spawnLocation, listOfSpawns[currentSpawnIndex].spawnRotation);
-    
-    Dir = Vector(Rotation);
+    spawnedActor = Spawn(listOfSpawns[currentSpawnIndex].actorToSpawn,,,spawnLocation, FinalRot);
+
+    if (bUseGlobalSpawnSettings)
+	{
+		Dir = GetRandomizedDirection();
+		FinalRot = rotator(Dir);
+	}
+	else
+	{
+		Dir = Vector(listOfSpawns[currentSpawnIndex].spawnRotation);
+		FinalRot = listOfSpawns[currentSpawnIndex].spawnRotation;
+	}
 
     if (bVaryVelocity)
     {
@@ -195,7 +249,6 @@ auto state stateDormant
     }
 }
 
-
 state stateSpawn
 {
     begin:
@@ -205,7 +258,6 @@ state stateSpawn
         {
             GotoState('stateDone');
         }
-
         goto('begin');
 }
 
@@ -244,4 +296,8 @@ defaultproperties
     bVaryVelocity=True
     maxVelocityVariance=4
     bBlockPlayers=false
+
+    GlobalSpawnOffset=(X=0,Y=0,Z=0)
+    GlobalSpawnDirection=(Pitch=0,Yaw=0,Roll=0)
+    GlobalSpawnAngle=(X=20,Y=20,Z=0)
 }

@@ -16,6 +16,8 @@ struct Animations
   var() name FinalSpawnEnd;
 };
 
+var(MOCASpawnGlobal) bool bResetGlobalOffsetWhenDone;
+
 var(MOCAVisibleSpawnAnimations) Animations spawnAnims;
 var(MOCAVisibleSounds) Sounds visibleSpawnSounds;
 
@@ -52,6 +54,11 @@ state stateSpawn
         {
             if (maxLives <= 0)
             {
+				if (bResetGlobalOffsetWhenDone)
+				{
+					GlobalSpawnOffset = vect(0,0,0);
+				}
+
                 PlayAnim(spawnAnims.FinalSpawnEnd);
                 PlaySound(visibleSpawnSounds.Ending);
             }

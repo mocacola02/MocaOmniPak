@@ -88,17 +88,20 @@ state stateDone
 
 defaultproperties
 {
-     spawnAnims=(Spawning=None,EndSpawning=Grow,Idle=None,DoneIdle=HitIdle,FinalSpawnEnd=None)
-     visibleSpawnSounds=(Opening=Sound'MocaSoundPak.Spawners.skull_hit',Ending=Sound'MocaSoundPak.Spawners.skull_hitend')
-     Physics=PHYS_None
-     Mesh=SkeletalMesh'MocaModelPak.skPumpkinSpawner'
-     DrawScale=1.3
-     AmbientGlow=32
-     CollisionRadius=21
-     CollisionHeight=14
-     CollideType=CT_OrientedCylinder
-     bBlockPlayers=True
-     bAlignBottomAlways=True
-     bBlockCamera=True
-	 PrePivot=(X=0,Y=0,Z=-96)
+	spawnAnims=(Spawning=None,EndSpawning=Grow,Idle=None,DoneIdle=HitIdle,FinalSpawnEnd=None)
+	visibleSpawnSounds=(Opening=Sound'MocaSoundPak.Spawners.skull_hit',Ending=Sound'MocaSoundPak.Spawners.skull_hitend')
+	Physics=PHYS_None
+	Mesh=SkeletalMesh'MocaModelPak.skPumpkinSpawner'
+	DrawScale=1.3
+	AmbientGlow=32
+	CollisionRadius=21
+	CollisionHeight=14
+	CollideType=CT_OrientedCylinder
+	bBlockPlayers=True
+	bAlignBottomAlways=True
+	bBlockCamera=True
+	PrePivot=(X=0,Y=0,Z=-96)
+	listOfSpawns(0)=(actorToSpawn=Class'Jellybean',spawnChance=255,spawnDelay=0.025,spawnSound=Sound'spawn_bean01',spawnParticle=Class'Spawn_flash_1',velocityMult=1.0)
+	bUseGlobalSpawnSettings=True
+	GlobalSpawnAngle=(X=360,Y=360,Z=0)
 }

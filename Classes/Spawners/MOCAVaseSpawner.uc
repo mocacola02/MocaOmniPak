@@ -17,4 +17,6 @@ defaultproperties
      bAlignBottomAlways=True
      spawnAnims=(Spawning=Jostle,EndSpawning=None,Idle=Idle,DoneIdle=BreakIdle,FinalSpawnEnd=Break)
      visibleSpawnSounds=(Opening=Sound'HPSounds.General.spawner_plant_pot',Ending=Sound'HPSounds.General.ss_Jar_Smash_0001')
+
+	 bResetGlobalOffsetWhenDone=True
 }
