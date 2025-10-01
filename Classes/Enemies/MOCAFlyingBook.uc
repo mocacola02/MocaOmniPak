@@ -20,6 +20,7 @@ var() float HomeRange;			// Moca: How far from the book's starting point will th
 var() float WakeUpRange;		// Moca: How far can the book detect Harry to wake up? Only works if WM_Proximity. Def: 384.0
 
 var() Sound FlySound;			// Moca: What sound to use as the flying sound? Def: Sound'HPSounds.Critters_sfx.PIX_wingflap_loop'
+var() Sound ShootSound;
 
 var() WakeMode WakeUpMode;		// Moca: What activates the book? WM_Always means always flying, WM_Proximity means Harry must get close enough based on WakeUpRange, WM_Trigger means it must be triggered. Def: WM_Proximity
 
@@ -68,6 +69,11 @@ function SaveStartLocation()
 exec function StopBook()
 {
 	SplineSpeed = 0;
+}
+
+function PlayFlapSound()
+{
+	PlaySound(FlySound,SLOT_None);
 }
 
 function bool CheckAttack()
@@ -190,7 +196,6 @@ state stateFly
 		bHomeCheckCooldown = False;
 		SetTimer(AttackDelay,false,'EnableAttacks');
 		LoopAnim(WalkAnimName);
-		AmbientSound = FlySound;
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
 		FollowSplinePath(FlySplineTag, [StartPointName] TargetIPoint.Name);
 	}
@@ -257,6 +262,7 @@ state stateAttack
 
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
 		PaperBall = Spawn(class'MOCAPaperBall',self,,Location,Rotation,true);
+		PlaySound(ShootSound, SLOT_Misc);
 		Spawn(class'Paper_Hit',self,,Location);
 	}
 
@@ -397,7 +403,7 @@ defaultproperties
 	
     Mesh=SkeletalMesh'MocaModelPak.skFlyingBookMesh'
 
-    SoundRadius=75
+	TransientSoundRadius=1024
 
     CollisionRadius=16.00
     CollisionHeight=24.00
@@ -415,7 +421,8 @@ defaultproperties
     DamageAmount=2.00
 	StunDurationMult=1.0
 	HomeRange=256
-	FlySound=Sound'HPSounds.Critters_sfx.PIX_wingflap_loop'
+	FlySound=Sound'MocaSoundPak.book_flap_Multi'
+	ShootSound=Sound'MocaSoundPak.book_flap_Multi'
 	WakeUpMode=WM_Proximity
 	WakeUpRange=384.0
 }

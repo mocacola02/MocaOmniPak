@@ -6,18 +6,20 @@ event PreBeginPlay()
 	
 	local int X,Y,Z;
 
-	X = Round(RandRange(20000,50000));
-	Y = Round(RandRange(20000,50000));
-	Z = Round(RandRange(20000,50000));
+	X = Round(RandRange(20000,100000));
+	Y = Round(RandRange(20000,100000));
+	Z = Round(RandRange(20000,100000));
 
 	RotationRate.Pitch = X;
 	RotationRate.Roll = Y;
 	RotationRate.Yaw = Z;
+
+	DrawScale = RandRange(0.34,0.67);
 }
 
 defaultproperties
 {
-	AmbientGlow=64
+	AmbientGlow=24
 	DrawScale=0.8
     DamageToDeal=15
     LaunchSpeed=300
@@ -26,4 +28,6 @@ defaultproperties
 	DamageName=PaperBall
 	Mesh=SkeletalMesh'MocaModelPak.skPaperBallMesh'
 	bFixedRotationDir=True
+	TargetInaccuracy=16.0
+	LandedSound=Sound'MocaSoundPak.book_flap_Multi'
 }
