@@ -4,6 +4,7 @@
 
 class MOCAPumpkinSpawner extends MOCAVisibleSpawner;
 
+var() float RegrowSpeed;
 var bool bDoFadeOut;
 
 event Tick (float DeltaTime)
@@ -76,12 +77,13 @@ state stateDone
 			bDoFadeOut = True;
 			Sleep(2.0);
 			SetCollision(true,true,true);
-            PlayAnim(spawnAnims.EndSpawning,1.34,0.0);
+            PlayAnim(spawnAnims.EndSpawning,RegrowSpeed,0.0);
             PlaySound(visibleSpawnSounds.Closing);
 			Sleep(0.2);
 			bDoFadeOut = False;
 			Opacity = 1.0;
             FinishAnim();
+			StopSound(visibleSpawnSounds.Closing);
             GotoState('stateDormant');
         }
 }
@@ -104,4 +106,5 @@ defaultproperties
 	listOfSpawns(0)=(actorToSpawn=Class'Jellybean',spawnChance=255,spawnDelay=0.025,spawnSound=Sound'spawn_bean01',spawnParticle=Class'Spawn_flash_1',velocityMult=1.0)
 	bUseGlobalSpawnSettings=True
 	GlobalSpawnAngle=(X=360,Y=360,Z=0)
+	RegrowSpeed=1.0
 }
