@@ -2,7 +2,7 @@ class MOCAStatusItemCake extends StatusItem;
 
 defaultproperties
 {
-     strHudIcon="MocaTexturePak.Menu.HP2CauldronCake"
+     strHudIcon="MocaTexturePak.Menu.NewCauldronCakeIcon"
      bDisplayCount=True
      strToolTipId="InGameMenu_0013"
 }

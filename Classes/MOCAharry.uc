@@ -144,6 +144,7 @@ exec function ShowCollectibles()
 	managerStatus.IncrementCount(Class'MOCAStatusGroupCake',Class'MOCAStatusItemCake',nCount);
 	managerStatus.IncrementCount(Class'MOCAStatusGroupEarth',Class'MOCAStatusItemEarth',nCount);
 	managerStatus.IncrementCount(Class'MOCAStatusGroupEssence',Class'MOCAStatusItemEssence',nCount);
+	managerStatus.IncrementCount(Class'MOCAStatusGroupDiscovery',Class'MOCAStatusItemDiscovery',nCount);
 	managerStatus.IncrementCount(Class'MOCAStatusGroupFire',Class'MOCAStatusItemFire',nCount);
 	managerStatus.IncrementCount(Class'MOCAStatusGroupPasty',Class'MOCAStatusItemPasty',nCount);
 	managerStatus.IncrementCount(Class'MOCAStatusGroupPotato',Class'MOCAStatusItemPotato',nCount);

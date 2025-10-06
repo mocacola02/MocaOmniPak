@@ -2,7 +2,7 @@ class MOCAStatusItemPasty extends StatusItem;
 
 defaultproperties
 {
-     strHudIcon="MocaTexturePak.Menu.PastyIcon"
+     strHudIcon="MocaTexturePak.Menu.NewPumpkinPastyIcon"
      bDisplayCount=True
      strToolTipId="InGameMenu_0013"
 }

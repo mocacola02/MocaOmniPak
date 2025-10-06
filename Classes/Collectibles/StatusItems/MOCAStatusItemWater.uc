@@ -2,7 +2,7 @@ class MOCAStatusItemWater extends StatusItem;
 
 defaultproperties
 {
-     strHudIcon="MocaTexturePak.Menu.WaterIcon"
+     strHudIcon="MocaTexturePak.Menu.WaterMedalIcon"
      bDisplayCount=True
      strToolTipId="InGameMenu_0013"
 }

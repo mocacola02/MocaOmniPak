@@ -2,7 +2,7 @@ class MOCAStatusItemShield extends StatusItem;
 
 defaultproperties
 {
-	strHudIcon="MocaTexturePak.Menu.ShieldIcon"
+	strHudIcon="MocaTexturePak.Menu.NewShieldIcon"
 	
 	bDisplayCount=True
 

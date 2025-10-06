@@ -14,7 +14,7 @@ defaultproperties
      soundBounce=Sound'HPSounds.Magic_sfx.bean_bounce'
      Physics=PHYS_Walking
      bPersistent=True
-     Mesh=SkeletalMesh'MocaModelPak.skEarthGem'
+     Mesh=SkeletalMesh'MocaModelPak.skEarthMedalMesh'
      AmbientGlow=200
      bBlockActors=False
      bBlockPlayers=False
