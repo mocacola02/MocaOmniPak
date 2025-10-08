@@ -1,5 +1,7 @@
 class MOCABasilisk extends Basilisk;
 
+// DELETEME
+
 var() int DeathHoleIndex;
 
 var array<MOCABasiliskNode> HoleMarks;
