@@ -5,7 +5,6 @@
 class MOCAPawn extends HPawn;
 
 var() bool bFloatingActor;		// Moca: Is this actor a floating actor? Use this for stuff like floating torches. Def: False
-var() bool bRotateWhenFloating;	// Moca: Whether or not to apply RotationRate while floating. Def: True
 
 var() float RotationSpeed;		// Moca: How fast should the actor rotate on its Yaw axis (aka turning left or right)? Def: 128.0
 var() float BobSpeed;			// Moca: How fast should the floating actor bob up and down? Def: 128.0
@@ -19,11 +18,6 @@ event PreBeginPlay()
 	Super.PreBeginPlay();
 
 	StartingLocation = Location;
-
-	if(bFloatingActor)
-	{
-		bFixedRotationDir = bRotateWhenFloating;
-	}
 }
 
 event Tick(float DeltaTime)
@@ -150,5 +144,4 @@ defaultproperties
 	RotationSpeed=3000.0
 	BobIntensity=8.0
 	BobSpeed=0.5
-	bRotateWhenFloating=True
 }
