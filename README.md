@@ -2,6 +2,8 @@
 Repo for all of my custom HP2 classes.
 Models, textures, and sounds are only included in Releases due to Github file size limits. The packages can be found in [Releases](https://github.com/mocacola02/MocaOmniPak/releases).
 
+**This is a compilation of various custom actors I have made over the years. The quality of code varies and is still very work-in-progress, so expect a lot of messiness. That being said, it has been bug-tested a fair bit and I will fix any reported bugs as fast as I can.**
+
 Please do not ping or message the HP2 New Engine (M212 Engine) developers regarding bugs in my content. Direct ALL bug or feature requests to this repo, or ping me in the HP Modding Discord (@moca). Preferably, you can open a ticket in [Issues](https://github.com/mocacola02/MocaOmniPak/issues).
 
 ## User Agreement
