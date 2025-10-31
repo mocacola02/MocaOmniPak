@@ -30,6 +30,20 @@ event Tick(float DeltaTime)
 	}
 }
 
+function EnableTurnTo(actor TurnTarget)
+{
+    bTurnTo_FollowActor = true;
+    TurnTo_TargetActor = TurnTarget;
+    MakeTurnToPermanentController();
+}
+
+function DisableTurnTo()
+{
+	bTurnTo_FollowActor = false;
+	TurnTo_TargetActor = None;
+	DestroyTurnToPermanentController();
+}
+
 function DoBob(float DeltaTime)
 {
 	local float Offset;

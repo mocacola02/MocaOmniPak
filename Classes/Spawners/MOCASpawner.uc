@@ -24,6 +24,7 @@ var(MOCASpawnActors) bool bRandomSpawnOrder;
 var(MOCASpawnActors) bool bUseSpawnChance;
 var(MOCASpawnActors) bool bVaryVelocity;
 var(MOCASpawnActors) int maxVelocityVariance;
+var(MOCASpawnActors) bool bTurnSpawnerTowardsHarry;
 
 var(MOCASpawnAmount) int numberToSpawn;
 var(MOCASpawnAmount) int minAmountToSpawn;
@@ -249,6 +250,22 @@ auto state stateDormant
 
 state stateSpawn
 {
+	event BeginState()
+	{
+		if (bTurnSpawnerTowardsHarry)
+		{
+			EnableTurnTo(PlayerHarry);
+		}
+	}
+
+	event EndState()
+	{
+		if (bTurnSpawnerTowardsHarry)
+		{
+			DisableTurnTo();
+		}
+	}
+
     begin:
         SpawnItem();
         sleep(listOfSpawns[currentSpawnIndex].spawnDelay);

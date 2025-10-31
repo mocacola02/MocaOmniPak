@@ -10,13 +10,21 @@ var() Sound pickUpSound;    	// Moca: What sound to play on pickup? Def: Sound'H
 var() bool bFallsToGround; 		// Moca: Should bean fall to ground? Def: True
 var() bool bAttractedToHarry; 	// Moca: Should bean move towards harry? Def: False
 var() float attractionSpeed; 	// Moca: How fast should bean move towards harry? Def: 300.0
+var() float attractionRange;	// Moca: How close does Harry have to be for attraction? Def: 128.0
 var() vector attractionOffset; 	// Moca: Position offset to be attacted to Def: (0,0,0)
 var() int IncrementAmount; // Moca: How many do you get from collecting this? Def: 1
+var() float attractionDelay; // Moca: How long to wait until attraction begins? Useful if you want it to fall to the ground or bounce first.
 
 var bool bInitialized;
 
 var float CurrentYawF;
 var float fPickupFlyTime;
+var float currentDelayTime;
+
+var bool bDefColActors;
+var bool bDefBlockActors;
+var bool bDefBlockPlayers;
+var bool bDefCollideWorld;
 
 event PreBeginPlay()
 {
@@ -75,10 +83,14 @@ auto state BounceIntoPlace
         if (bBounceIntoPlaceTiming)
             fBounceIntoPlaceTimeout -= DeltaTime;
         
-        if (bAttractedToHarry)
+        if (bAttractedToHarry && attractionDelay < currentDelayTime)
         {
             FlyToHarry(DeltaTime);
         }
+		else if (bAttractedToHarry)
+		{
+			currentDelayTime += DeltaTime;
+		}
     }
 }
 
@@ -86,13 +98,20 @@ function FlyToHarry(float DeltaTime)
 {
     local vector TargetLoc;
     local vector Dir;
-    local vector DistanceFromHarry;
+    local float DistanceFromHarry;
 
-    SetPhysics(PHYS_Flying);
+	DistanceFromHarry = VSize(Location - PlayerHarry.Location);
 
     // Make sure the player exists
-    if (PlayerHarry != None)
+    if (PlayerHarry != None && DistanceFromHarry <= attractionRange)
     {
+		if (Physics != PHYS_Flying)
+		{
+			SetPhysics(PHYS_Flying);
+			SetCollision(true,false,false);
+			bCollideWorld = False;
+		}
+
         // Get target position
         TargetLoc = PlayerHarry.Location + AttractionOffset;
 
@@ -102,12 +121,24 @@ function FlyToHarry(float DeltaTime)
         // Move this actor toward the target
         SetLocation(Location + Dir * attractionSpeed * DeltaTime);
     }
+	else
+	{
+		if (Physics != PHYS_Falling)
+		{
+			Log("Harry out of range, going back to normal physics");
+			SetPhysics(PHYS_Falling);
+			SetCollision(bDefColActors,bDefBlockActors,bDefBlockPlayers);
+			bCollideWorld = bDefCollideWorld;
+		}
+		
+	}
 }
 
 defaultproperties
 {
      bFallsToGround=True
      pickUpSound=Sound'HPSounds.Magic_sfx.pickup11'
+	 soundPickup=Sound'HPSounds.Magic_sfx.pickup11'
      bPickupOnTouch=True
      EventToSendOnPickup=EarthPickupEvent
      PickupFlyTo=FT_HudPosition
@@ -119,8 +150,8 @@ defaultproperties
      bPersistent=True
      Mesh=SkeletalMesh'MocaModelPak.skEarthGem'
      AmbientGlow=200
-     CollisionRadius=32
-     CollisionHeight=20
+     CollisionRadius=22
+     CollisionHeight=12
      bBlockActors=False
      bBlockPlayers=False
      bProjTarget=False
@@ -132,4 +163,5 @@ defaultproperties
      bCanFly=True
 	 SoundVolMult=1.0
 	 IncrementAmount=1.0
+	 attractionRange=128.0
 }
