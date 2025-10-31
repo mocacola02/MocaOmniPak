@@ -11,6 +11,7 @@ var() bool bFallsToGround; 		// Moca: Should bean fall to ground? Def: True
 var() bool bAttractedToHarry; 	// Moca: Should bean move towards harry? Def: False
 var() float attractionSpeed; 	// Moca: How fast should bean move towards harry? Def: 300.0
 var() vector attractionOffset; 	// Moca: Position offset to be attacted to Def: (0,0,0)
+var() int IncrementAmount; // Moca: How many do you get from collecting this? Def: 1
 
 var bool bInitialized;
 
@@ -20,6 +21,7 @@ var float fPickupFlyTime;
 event PreBeginPlay()
 {
     Super.PreBeginPlay();
+	nPickupIncrement = IncrementAmount;
     soundPickup = None;
 }
 
@@ -129,4 +131,5 @@ defaultproperties
      attractionSpeed=300.0
      bCanFly=True
 	 SoundVolMult=1.0
+	 IncrementAmount=1.0
 }
