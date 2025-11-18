@@ -7,6 +7,9 @@ var float YPos;    // Tile origin Y (if non-zero)
 var float TileW;   // Optional custom width (0 = auto)
 var float TileH;   // Optional custom height (0 = auto)
 
+var Color BackdropColor;
+var Color FontColor;
+
 var Font LabelFont;
 
 function Draw(Canvas C)
@@ -42,6 +45,8 @@ function Draw(Canvas C)
     Background.Alpha = 0.5;
     Background.bTransparent = true;
 
+	C.DrawColor = FontColor;
+
     if (LabelFont == None)
     {
         C.FontScale = SizeScale;
@@ -66,6 +71,8 @@ function Draw(Canvas C)
         C.Font = LabelFont;
         C.TextSize(DisplayText, TextW, TextH);
     }
+
+	C.DrawColor = BackdropColor;
 
     BoxW = TextW + 16;
     BoxH = TextH + 16;

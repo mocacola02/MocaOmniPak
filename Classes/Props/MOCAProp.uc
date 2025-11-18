@@ -68,4 +68,6 @@ defaultproperties
 {
 	DrawDistance=0.0
 	bStatic=True
+	DrawType=DT_Mesh
+	Mesh=SkeletalMesh'skSundialMesh'
 }
