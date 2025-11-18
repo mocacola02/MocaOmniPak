@@ -5,6 +5,7 @@
 class MOCAWand extends baseWand;
 
 var bool bIsAiming;
+var bool bInvisiWand;
 var MOCAharry MocaPlayerHarry;
 
 event PostBeginPlay()
@@ -13,6 +14,18 @@ event PostBeginPlay()
     if (Owner.IsA('MOCAharry'))
     {
         MocaPlayerHarry = MOCAharry(Owner);
+
+		LightRadius = MocaPlayerHarry.WandGlowRange;
+
+		Log("InvisiWand? " $ string(MocaPlayerHarry.bInvisibleWeapon));
+
+		if (MocaPlayerHarry.bInvisibleWeapon)
+		{
+			Mesh = None;
+			ThirdPersonMesh = None;
+			FireOffset = vect(0,0,0);
+			bInvisiWand = True;
+		}
     }
     else
     {
@@ -315,6 +328,106 @@ function class<baseSpell> GetMocaClassFromType(ESpellType SpellType)
     Log("No mapping found for " $ GetEnum(enum'ESpellType', SpellType));
     return None;
 }
+
+function Projectile ProjectileFire2 (Class<Projectile> ProjClass, float ProjSpeed, bool bWarn, optional bool bUseWeaponForProjRot, optional Actor aTarget)
+{
+	local Vector vStart;
+	local Vector vEnd;
+	local float fDistance;
+	local Rotator R;
+	local Projectile proj;
+
+	if (!bInvisiWand)
+	{
+		Owner.MakeNoise(Pawn(Owner).SoundDampening);
+		if ( bUsingSword )
+		{
+			vStart = Pawn(Owner).WeaponLoc - (Vec(0.0,0.0,fSwordLength * fSwordFXTime / fSwordFXTimeSpan) >> Pawn(Owner).WeaponRot);
+			vEnd = harry(Owner).SpellCursor.Location;
+			if ( bUseWeaponForProjRot )
+			{
+			R = Pawn(Owner).WeaponRot;
+			} else {
+			if ( vEnd == vect(0.00,0.00,0.00) )
+			{
+				R = harry(Owner).Cam.Rotation;
+			} else {
+				R = rotator(vEnd - vStart);
+			}
+			}
+			proj = Spawn(ProjClass,Owner,,vStart,R);
+		} else {
+			vStart = Pawn(Owner).WeaponLoc + (Vec(0.0,0.0,20.0) >> Pawn(Owner).WeaponRot);
+			if ( bUseWeaponForProjRot )
+			{
+			R = Pawn(Owner).WeaponRot;
+			} else {
+			if ( Owner.IsA('harry') )
+			{
+				R = harry(Owner).Cam.Rotation;
+			} else {
+				R = Pawn(Owner).Rotation;
+			}
+			}
+			proj = Spawn(ProjClass,Owner,,vStart,R);
+			if ( aTarget.IsA('BossRailMove') )
+			{
+			baseSpell(proj).SeekSpeed *= 0.25;
+			}
+			if ( proj == None )
+			{
+			if ( Pawn(Owner).IsA('PlayerPawn') )
+			{
+				vStart = PlayerPawn(Owner).Location + Vec(0.0,0.0,PlayerPawn(Owner).EyeHeight);
+			} else //{
+				if ( Pawn(Owner).IsA('Pawn') )
+				{
+				vStart = Pawn(Owner).Location;
+				}
+			//}
+			proj = Spawn(ProjClass,Owner,,vStart,R);
+			}
+		}
+	}
+	else
+	{
+		vStart = Pawn(Owner).WeaponLoc - (Vec(0.0,0.0,20.0) >> Pawn(Owner).WeaponRot);
+
+		if ( Owner.IsA('harry') )
+		{
+			R = harry(Owner).Cam.Rotation;
+		}
+		else
+		{
+			R = Pawn(Owner).Rotation;
+		}
+
+		proj = Spawn(ProjClass,Owner,,vStart,R);
+
+		if ( aTarget.IsA('BossRailMove') )
+		{
+			baseSpell(proj).SeekSpeed *= 0.25;
+		}
+
+		if ( proj == None )
+		{
+			if ( Pawn(Owner).IsA('PlayerPawn') )
+			{
+				vStart = PlayerPawn(Owner).Location + Vec(0.0,0.0,PlayerPawn(Owner).EyeHeight);
+			}
+			else if ( Pawn(Owner).IsA('Pawn') )
+			{
+				vStart = Pawn(Owner).Location;
+			}
+
+			proj = Spawn(ProjClass,Owner,,vStart,R);
+		}
+	}
+
+	return proj;
+}
+
+//function ToggleUseSword();
 
 defaultproperties
 {

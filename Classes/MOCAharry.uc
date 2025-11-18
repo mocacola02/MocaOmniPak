@@ -14,6 +14,8 @@ struct SpellMap
 };
 
 var() class<Weapon> DefaultWeapon;
+var() bool bInvisibleWeapon; // Moca: Makes MOCAwand invisible and spawns spells from the hand's weapon bone.
+var() float WandGlowRange; // Moca: How far does the wand glow reach? Def: 6.0
 var() bool bSaveOnLoad;
 
 var(MOCAMagic) Array<Class<baseSpell>> DefaultSpellbook;	// Moca: What default spells do we have?
@@ -21,6 +23,8 @@ var(MOCAMagic) SpellMap SpellMapping[28];					// Moca: What spells are mapped to
 // TODO: var(MOCAMagic) bool UseDynamicWandParticles;		// Moca: Use the dynamic particle colors/sprites? Def: True
 
 var Actor LastStoredBase;
+
+var travel int PreviousWeapon;
 
 var bool bWallJumped;
 var bool bDebugWeaponToggleCooldown;
@@ -38,6 +42,9 @@ var int CurrentWeapon;
 var FadeActorController mcFade;
 
 var bool bMocaDebugMode;
+
+var SpellCursor StockCursor;
+var MOCASpellCursor MOCACursor;
 
 ////////////////
 // EVENTS
@@ -67,19 +74,65 @@ event PostBeginPlay()
 
 event PreClientTravel()
 {
-	super.PreClientTravel();
-
-	SwitchWeapon(4);
+	Log("Previous weapon is " $ string(PreviousWeapon));
+	ChangeWand(4, "PreClientTravel");
+	Super.PreClientTravel();
 }
 
 // icky and gross resets!
 event TravelPostAccept()
 {
 	Super.TravelPostAccept();
+
+	Weapon = None;
+
+	local int AddedWeapons;
+
+	if (FindInventoryType(class'MOCAbaseHands') == None)
+	{
+		AddHarryWeapon(class'MOCAbaseHands');
+		AddedWeapons++;
+	}
+	if (FindInventoryType(class'MOCAWand') == None)
+	{
+		AddHarryWeapon(class'MOCAWand');
+		AddedWeapons++;
+	}
+	if (FindInventoryType(class'baseWand') == None)
+	{
+		AddHarryWeapon(class'baseWand');
+		AddedWeapons++;
+	}
+
+	local SpellCursor A;
 	
-	AddHarryWeapon(class'baseWand');
-	AddHarryWeapon(class'MOCAbaseHands');
-	AddHarryWeapon(class'MOCAWand');
+	foreach AllActors(class'SpellCursor', A)
+	{
+		if (!A.IsA('MOCASpellCursor'))
+		{
+			StockCursor = A;
+			break;
+		}
+	}
+
+	local MOCASpellCursor B;
+	
+	foreach AllActors(class'MOCASpellCursor', B)
+	{
+		MOCACursor = B;
+		break;
+	}
+
+	if (StockCursor == None)
+	{
+		StockCursor = Spawn(class'SpellCursor');
+	}
+	if (MOCACursor == None)
+	{
+		MOCACursor = Spawn(class'MOCASpellCursor');
+	}
+
+	Log("ADDED " $ string(AddedWeapons) $ " WEAPONS ON POSTACCEPT");
 
 	InitWands();
 
@@ -117,6 +170,29 @@ event BaseChanged(Actor OldBase, Actor NewBase)
 ////////////////
 // FUNCTIONS
 ////////////////
+
+function ToggleUseSword()
+{
+	bHarryUsingSword =  !bHarryUsingSword;
+	if ( bHarryUsingSword )
+	{
+		//ChangeWand(4, "ToggleUseSword True");
+		baseWand(Weapon).ToggleUseSword();
+		HarryAnimSet = HARRY_ANIM_SET_SWORD;
+	}
+	else
+	{
+		baseWand(Weapon).ToggleUseSword();
+		ChangeWand(PreviousWeapon, "ToggleUseSword False");
+		HarryAnimSet = HARRY_ANIM_SET_MAIN;
+	}	
+}
+
+exec function Reload()
+{
+	HPConsole(Player.Console).ConsoleCommand("savegame 0");
+	HPConsole(Player.Console).ConsoleCommand("loadgame 0");
+}
 
 exec function MocaMode()
 {
@@ -188,42 +264,100 @@ function PickupActor(Actor Other)
 	StopAimSoundFX();
 }
 
-exec function ChangeWand(int WeaponSlot)
+exec function ChangeWand(int WeaponSlot, optional string Source)
 {
-	if ( (WeaponSlot == 3 || WeaponSlot > 4 || WeaponSlot <= 0) || (WeaponSlot == 4 && !bMocaDebugMode) )
+	local Weapon PrevWeap;
+	PrevWeap = Weapon;
+
+	if (Source == "")
+	{
+		Source = "Unknown";
+	}
+
+	Log("ChangeWand(" $ string(WeaponSlot) $ ") was called from " $ Source);
+
+	if ( (WeaponSlot == 3 || WeaponSlot > 4 || WeaponSlot <= 0) )
 	{
 		WeaponSlot = 2;
 	}
 
-	// 1 is wandless, 2 is MOCAWand, 4 is baseWand
-	SwitchWeapon(WeaponSlot);
-	Weapon.GiveAmmo(self);
+	if (PreviousWeapon != CurrentWeapon && CurrentWeapon > 0)
+	{
+		PreviousWeapon = CurrentWeapon;
+	}
+	
+	Log("Setting previous weapon to " $ string(CurrentWeapon));
 
 	CurrentWeapon = WeaponSlot;
 
-	if (WeaponSlot == 2)
+	if (CurrentWeapon == 2)
 	{
-		Log("Creating MOCASpellCursor");
-		SpellCursor.Destroy();
-		SpellCursor = Spawn(class'MOCASpellCursor');
+		Log("SWITCHING TO MOCACURSOR$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+		SpellCursor = MOCACursor;
 	}
-	else if (WeaponSlot == 4)
+	else if (CurrentWeapon == 4)
 	{
-		Log("Created SpellCursor");
-		SpellCursor.Destroy();
-		SpellCursor = Spawn(class'SpellCursor');
+		Log("SWITCHING TO STOCKCURSOR################################");
+		SpellCursor = StockCursor;
 	}
-	else if (WeaponSlot == 1)
+	else if (CurrentWeapon == 1)
 	{
-		Log("Removing SpellCursor");
-		SpellCursor.Destroy();
+		Log("SWITCHING TO NO CURSOR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		SpellCursor = None;
+	}
+
+	// 1 is wandless, 2 is MOCAWand, 4 is baseWand
+	Log("SWITCHING WEAPON TO " $ string(CurrentWeapon));
+	SwitchWeapon(CurrentWeapon);
+	ChangedWeapon();
+	Weapon.GiveAmmo(self);	
+
+	SpellCursor.bSpellCursorAlwaysOn = False;
+	SpellCursor.EnableEmission(False);
+	TurnOffSpellCursor();
+
+	Log("Stock cursor: " $ string(StockCursor) $ " | Moca Cursor: " $ string(MOCACursor));
+
+	if (PrevWeap.IsA('baseWand'))
+	{
+		Log("Removing baseWand particles on " $ string(PrevWeap));
+		baseWand(PrevWeap).bGlowingWand = False;
+		baseWand(PrevWeap).StopGlowingWand();
+		baseWand(PrevWeap).StopChargingSpell();
 	}
 
 	Log("We are using weapon " $ string(Weapon) $ " with the cursor " $ string(SpellCursor));
 }
 
+exec function GetCurrentWeapon()
+{
+	cm("Current weapon is " $ string(Weapon) $ " with the SpellCursor " $ string(SpellCursor));
+}
+
 function InitWands()
 {
+	Log("bHarryUsingSword = " $ string(bHarryUsingSword));
+	if (bHarryUsingSword)
+	{
+		ChangeWand(4);
+		SpellCursor.Destroy();
+		SpellCursor = Spawn(class'SpellCursor');
+		SpellCursor.bInvisibleCursor = False;
+		SpellCursor.EnableEmission(true);
+		SpellCursor.bSpellCursorAlwaysOn = True;
+		SpellCursor.UpdateCursor();
+	}
+
+	Log("We currently have weapon " $ string(Weapon));
+	if (PreviousWeapon > 0)
+	{
+		Log("Our previous weapon slot was " $ string(PreviousWeapon));
+		ChangeWand(PreviousWeapon, "InitWands PreviousWeapon");
+		return;
+	}
+
+	Log("No previous weapon, using default, previous gave us " $ string(PreviousWeapon));
+
 	if (DefaultWeapon == class'MOCAbaseHands')
 	{
 		DefaultWeaponSlot = 1;
@@ -238,8 +372,7 @@ function InitWands()
 	}
 
 	Log("Default weapon slot is " $ string(DefaultWeaponSlot));
-
-	ChangeWand(DefaultWeaponSlot);
+	ChangeWand(DefaultWeaponSlot, "InitWands DefaultWeapon");
 }
 
 function MOCAHUD GetMocaHud()
@@ -248,6 +381,16 @@ function MOCAHUD GetMocaHud()
   {
     return MOCAHUD(myHUD);
   }
+}
+
+exec function ListCursors()
+{
+	local SpellCursor A;
+	
+	foreach AllActors(class'SpellCursor', A)
+	{
+		cm(string(A));
+	}
 }
 
 function AddToModdedSpellBook (Class<baseSpell> spellClass)
@@ -424,6 +567,15 @@ function PlaySpellCastSound (ESpellType SpellType)
 ////////////////
 // STATES
 ////////////////
+
+state stateLoading
+{
+	ignores  DoJump, AltFire, Fire, TakeDamage;
+
+	event BeginState()
+	{
+	}
+}
 
 state stateStomping
 {

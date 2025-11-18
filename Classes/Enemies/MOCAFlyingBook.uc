@@ -37,6 +37,14 @@ var Vector TempLocation;
 
 var InterpolationPoint TargetIPoint;
 
+var ESpellType DefVunSpell;
+
+event PostBeginPlay()
+{
+	super.PostBeginPlay();
+	DefVunSpell = eVulnerableToSpell;
+}
+
 event Trigger(Actor Other, Pawn Instigator)
 {
     if (WakeUpMode == WM_Trigger && IsInState('stateIdle'))
@@ -196,7 +204,7 @@ state stateFly
 		bHomeCheckCooldown = False;
 		SetTimer(AttackDelay,false,'EnableAttacks');
 		LoopAnim(WalkAnimName);
-		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+		eVulnerableToSpell = DefVunSpell;
 		FollowSplinePath(FlySplineTag, [StartPointName] TargetIPoint.Name);
 	}
 	
@@ -260,7 +268,7 @@ state stateAttack
 	{
 		local MOCAPaperBall PaperBall;
 
-		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+		eVulnerableToSpell = DefVunSpell;
 		PaperBall = Spawn(class'MOCAPaperBall',self,,Location,Rotation,true);
 		PlaySound(ShootSound, SLOT_Misc);
 		Spawn(class'Paper_Hit',self,,Location);

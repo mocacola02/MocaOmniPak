@@ -7,8 +7,16 @@ var(MOCAFFDispel) float DispelStrength;	// Moca: How strong is the Dispel effect
 var(MOCAFFDispel) float DispelDuration;	// Moca: How long does Dispel last? Def: 3.0
 var(MOCAFFAttraction) float Attraction;     	// Moca: Positive = pull, Negative = push, 0 = no force. Def: 256.0
 
+var float DefAttraction;
+
 var float DispelLevel;
 var vector lastHarryPos;
+
+event PostBeginPlay()
+{
+	super.PostBeginPlay();
+	DefAttraction = Attraction;
+}
 
 auto state stateDormant
 {
@@ -78,7 +86,7 @@ state stateDispel
 		Log(string(self) $ " IS DispelING!!!!!!!!!!!!");
 		Attraction = DispelStrength;
 		sleep(DispelDuration);
-		Attraction = MapDefault.Attraction;
+		Attraction = DefAttraction;
 		GotoState('stateDormant');
 }
 

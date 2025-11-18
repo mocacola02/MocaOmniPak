@@ -7,6 +7,12 @@ var() bool bUseMoverCollision;   // Moca: If true, model collision will not be a
 var() Sound FreezeSound;
 var() Sound SmashSound;
 
+var float DefColRad;
+var float DefColWid;
+var float DefColHei;
+var float DefDS;
+var ESpellType DefVunSpell;
+
 var float CurrentGrowthTime;
 var Iceberg_Grow FreezeParticles;
 var IceBerg_Spot IdleParticles;
@@ -14,6 +20,11 @@ var IceBerg_Spot IdleParticles;
 event PreBeginPlay()
 {
     super.PreBeginPlay();
+	DefColRad = CollisionRadius;
+	DefColWid = CollisionWidth;
+	DefColHei = CollisionHeight;
+	DefDS = DrawScale;
+	DefVunSpell = eVulnerableToSpell;
 }
 
 event PostBeginPlay()
@@ -47,23 +58,23 @@ function ChangeBergSize(float DeltaTime, optional bool Reverse)
     local float tempWidth;
     local float tempHeight;
 
-    tempRadius = Lerp(Alpha, 0.0, MapDefault.CollisionRadius);
-    tempWidth  = Lerp(Alpha,  0.0,  MapDefault.CollisionWidth);
-    tempHeight = Lerp(Alpha, 0.0, MapDefault.CollisionHeight);
+    tempRadius = Lerp(Alpha, 0.0, DefColRad);
+    tempWidth  = Lerp(Alpha,  0.0,  DefColWid);
+    tempHeight = Lerp(Alpha, 0.0, DefColHei);
 
     SetCollisionSize(tempRadius,tempHeight,tempWidth);
 
-    DrawScale = Lerp(Alpha, 0.0, MapDefault.DrawScale);
+    DrawScale = Lerp(Alpha, 0.0, DefDS);
 }
 
 auto state stateDormant
 {
     event BeginState()
     {
-        eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+        eVulnerableToSpell = DefVunSpell;
         DrawScale = 0.0;
         SetCollision(true,false,false);
-        SetCollisionSize(MapDefault.CollisionRadius,MapDefault.CollisionHeight,MapDefault.CollisionWidth);
+        SetCollisionSize(DefColRad,DefColHei,DefColWid);
         IdleParticles.bEmit = True;
     }
 
@@ -114,8 +125,8 @@ state stateFrozen
 {
     event BeginState()
     {
-        DrawScale = MapDefault.DrawScale;
-        SetCollisionSize(MapDefault.CollisionRadius,MapDefault.CollisionHeight,MapDefault.CollisionWidth);
+        DrawScale = DefDS;
+        SetCollisionSize(DefColRad,DefColHei,DefColWid);
         eVulnerableToSpell = ShatterSpell;
     }
 
@@ -134,7 +145,7 @@ state stateShatter
         Spawn(class'Ice_Break',self,,Location);
         DrawScale = 0.0;
         SetCollision(true,false,false);
-        SetCollisionSize(MapDefault.CollisionRadius,MapDefault.CollisionHeight,MapDefault.CollisionWidth);
+        SetCollisionSize(DefColRad,DefColHei,DefColWid);
     }
 
     begin:

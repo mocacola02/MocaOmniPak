@@ -18,6 +18,8 @@ var BundimunDeath KillEmit;
 var BundimunDig DigEmit;
 var BundimunShrink ShrinkEmit;
 
+var ESpellType DefVunSpell;
+
 function SpawnKillParticles();
 
 event PostBeginPlay()
@@ -25,6 +27,8 @@ event PostBeginPlay()
     local vector DigLocation;
     local rotator DigRotation;
     Super.PostBeginPlay();
+
+	DefVunSpell = eVulnerableToSpell;
 
     DigLocation = Location;
     DigLocation.Z -= (CollisionHeight * 0.5) + 1;
@@ -159,7 +163,7 @@ state stateSpitting
     {
 		bCanHit = True;
         AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_shoot';
-		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+		eVulnerableToSpell = DefVunSpell;
         LoopAnim('Attack');
     }
 
