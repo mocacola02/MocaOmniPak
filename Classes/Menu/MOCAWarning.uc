@@ -11,111 +11,87 @@ var Font LabelFont;
 
 function Draw(Canvas C)
 {
-	local Font OldFont;
-	local float TextW, TextH;
-	local float BoxW, BoxH;
-	local float BoxX, BoxY;
-	local float TextX, TextY;
-	local Texture Background;
+    local Font OldFont;
+    local float TextW, TextH;
+    local float BoxW, BoxH;
+    local float BoxX, BoxY;
+    local float TextX, TextY;
+    local Texture Background;
 
-	OldFont = C.Font;
+    OldFont = C.Font;
 
-	if (!bShow)
-	{
-		if (fFlashTime > 0.5)
-		{
-			bShow = true;
-			fFlashTime = 0.0;
-		}
-		C.Font = OldFont;
-		C.Reset();
-		return;
-	}
+    if (!bShow)
+    {
+        if (fFlashTime > 0.5)
+        {
+            bShow = true;
+            fFlashTime = 0.0;
+        }
+        C.Font = OldFont;
+        C.Reset();
+        return;
+    }
 
-	// Reset flash timer
-	if (fFlashTime > 1)
-	{
-		bShow = true;
-		fFlashTime = 0.0;
-	}
+    if (fFlashTime > 1)
+    {
+        bShow = true;
+        fFlashTime = 0.0;
+    }
 
-	// Background
-	Background = Texture'leftPanel';
-	Background.Alpha = 0.5;
-	Background.bTransparent = true;
+    Background = Texture'leftPanel';
+    Background.Alpha = 0.5;
+    Background.bTransparent = true;
 
-	if (LabelFont == None)
-	{
-		C.FontScale = SizeScale;
-		C.Font = baseConsole(PlayerHarry.Player.Console).LocalBigFont;
-		C.TextSize(DisplayText, TextW, TextH);
+    if (LabelFont == None)
+    {
+        C.FontScale = SizeScale;
+        C.Font = baseConsole(PlayerHarry.Player.Console).LocalBigFont;
+        C.TextSize(DisplayText, TextW, TextH);
 
-		if (TextW > C.SizeX - 32)
-		{
-			C.Font = baseConsole(PlayerHarry.Player.Console).LocalMedFont;
-			C.TextSize(DisplayText, TextW, TextH);
+        if (TextW > C.SizeX - 32)
+        {
+            C.Font = baseConsole(PlayerHarry.Player.Console).LocalMedFont;
+            C.TextSize(DisplayText, TextW, TextH);
 
-			if (TextW > C.SizeX - 32)
-			{
-				C.Font = baseConsole(PlayerHarry.Player.Console).LocalSmallFont;
-				C.TextSize(DisplayText, TextW, TextH);
-			}
-		}
-	}
-	else
-	{
-		C.FontScale = SizeScale;
-		C.Font = LabelFont;
-		C.TextSize(DisplayText, TextW, TextH);
-	}
+            if (TextW > C.SizeX - 32)
+            {
+                C.Font = baseConsole(PlayerHarry.Player.Console).LocalSmallFont;
+                C.TextSize(DisplayText, TextW, TextH);
+            }
+        }
+    }
+    else
+    {
+        C.FontScale = SizeScale;
+        C.Font = LabelFont;
+        C.TextSize(DisplayText, TextW, TextH);
+    }
 
-	if (XPos != 0 && YPos != 0)
-	{
-		local float AutoPadding;
+    BoxW = TextW + 16;
+    BoxH = TextH + 16;
 
-		AutoPadding = 8; // padding used when no explicit size set
+    BoxX = (C.SizeX - BoxW) * 0.5 + XPos;
+    BoxY = 8 + YPos;
 
-		// Determine box size
-		BoxW = (TileW > 0) ? TileW : (TextW + AutoPadding * 2);
-		BoxH = (TileH > 0) ? TileH : (TextH + AutoPadding * 2);
+    if (BoxX < 0) BoxX = 0;
+    if (BoxY < 0) BoxY = 0;
+    if (BoxX + BoxW > C.SizeX) BoxX = C.SizeX - BoxW;
+    if (BoxY + BoxH > C.SizeY) BoxY = C.SizeY - BoxH;
 
-		// Top-left origin comes from XPos/YPos
-		BoxX = XPos;
-		BoxY = YPos;
+    C.SetPos(BoxX, BoxY);
+    C.DrawTile(Background, BoxW, BoxH, 0, 0, 1, 1);
 
-		// Draw tile
-		C.SetPos(BoxX, BoxY);
-		C.DrawTile(Background, BoxW, BoxH, 0, 0, 1, 1);
+    TextX = BoxX + (BoxW - TextW) * 0.5;
+    TextY = BoxY + 8;
 
-		// Center text inside box
-		TextX = BoxX + (BoxW * 0.5) - (TextW * 0.5);
-		TextY = BoxY + (BoxH * 0.5) - (TextH * 0.5);
+    if (TextX < 0) TextX = 0;
+    if (TextY < 0) TextY = 0;
+    if (TextX + TextW > C.SizeX) TextX = C.SizeX - TextW;
+    if (TextY + TextH > C.SizeY) TextY = C.SizeY - TextH;
 
-		C.SetPos(TextX, TextY);
-		C.DrawText(DisplayText, false);
+    C.SetPos(TextX, TextY);
+    C.DrawText(DisplayText, false);
 
-		C.Font = OldFont;
-		C.Reset();
-		return;
-	}
-
-	BoxW = TextW + 16;
-	BoxH = TextH + 16;
-
-	// Center top of screen
-	BoxX = (C.SizeX - BoxW) * 0.5;
-	BoxY = 8;
-
-	C.SetPos(BoxX, BoxY);
-	C.DrawTile(Background, BoxW, BoxH, 0, 0, 1, 1);
-
-	// Text center inside tile
-	TextX = (C.SizeX - TextW) * 0.5;
-	TextY = BoxY + 8;
-
-	C.SetPos(TextX, TextY);
-	C.DrawText(DisplayText, false);
-
-	C.Font = OldFont;
-	C.Reset();
+    C.Font = OldFont;
+    C.Reset();
 }
