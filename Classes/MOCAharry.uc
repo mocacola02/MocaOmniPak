@@ -18,6 +18,7 @@ var() bool bInvisibleWeapon; // Moca: Makes MOCAwand invisible and spawns spells
 var() float WandGlowRange; // Moca: How far does the wand glow reach? Def: 6.0
 var() bool bSaveOnLoad;
 
+var(MOCAMagic) bool bUseDefaultSpellbook;					// Moca: Whether or not the custom default spellbook will be applied. Def: False
 var(MOCAMagic) Array<Class<baseSpell>> DefaultSpellbook;	// Moca: What default spells do we have?
 var(MOCAMagic) SpellMap SpellMapping[28];					// Moca: What spells are mapped to each spell slot?
 // TODO: var(MOCAMagic) bool UseDynamicWandParticles;		// Moca: Use the dynamic particle colors/sprites? Def: True
@@ -64,11 +65,14 @@ event PostBeginPlay()
 		SaveGame();
 	}
 
-	local int i;
-
-	for (i=0; i < DefaultSpellbook.Length; i++)
+	if (bUseDefaultSpellbook)
 	{
-		AddToModdedSpellBook(DefaultSpellbook[i]);
+		local int i;
+
+		for (i=0; i < DefaultSpellbook.Length; i++)
+		{
+			AddToModdedSpellBook(DefaultSpellbook[i]);
+		}
 	}
 }
 
@@ -395,15 +399,14 @@ exec function ListCursors()
 
 function AddToModdedSpellBook (Class<baseSpell> spellClass)
 {
+	local ESpellType typeToAdd;
 
-  local ESpellType typeToAdd;
+	typeToAdd = DetermineSpellType(spellClass);
 
-  typeToAdd = DetermineSpellType(spellClass);
-
-  if ( (typeToAdd < MAX_NUM_SPELLS) && (SpellBook[typeToAdd] == None) )
-  {
-    SpellBook[typeToAdd] = spellClass;
-  }
+	if ( (typeToAdd < MAX_NUM_SPELLS) && (SpellBook[typeToAdd] == None) )
+	{
+		SpellBook[typeToAdd] = spellClass;
+	}
 }
 
 function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
