@@ -1062,4 +1062,6 @@ defaultproperties
 	DefaultSpellbook(5)=class'spellDiffindo'
 	DefaultSpellbook(6)=class'spellSpongify'
     DefaultSpellbook(7)=class'MOCAspellGlacius'
+
+	WandGlowRange=6.0
 }
