@@ -47,6 +47,8 @@ var bool bMocaDebugMode;
 var SpellCursor StockCursor;
 var MOCASpellCursor MOCACursor;
 
+var MOCAJackOSpawner JackO;
+
 ////////////////
 // EVENTS
 ////////////////
@@ -196,6 +198,57 @@ exec function Reload()
 {
 	HPConsole(Player.Console).ConsoleCommand("savegame 0");
 	HPConsole(Player.Console).ConsoleCommand("loadgame 0");
+}
+
+exec function JackOMode()
+{
+	if (Mesh == SkeletalMesh'skPumpkinHarry')
+	{
+		Mesh = SkeletalMesh'MOCAharry';
+	}
+	else
+	{
+		Mesh = SkeletalMesh'skPumpkinHarry';
+	}
+}
+
+exec function ListWeapons()
+{
+	local Weapon A;
+	local int i;
+	local string S;
+
+	foreach AllActors(class'Weapon', A)
+	{
+		if (i >= 249)
+		{
+			CM("You have more than 250 weapons spawned, please run FixWeapons! Your game will likely crash if you do not.");
+			return;
+		}
+		i++;
+	}
+
+	S = "There are " $ string(i) $ " weapons spawned. ";
+	
+	if (i > 10)
+	{
+		S = S $ "Consider entering the command FixWeapons if the number is more than the number of weapons in the game (you should have 3 with MocaOmniPak alone).";
+	}
+
+	CM(S);
+	Log(S);
+}
+
+exec function FixWeapons()
+{
+	local Weapon A;
+	
+	foreach AllActors(class'Weapon', A)
+	{
+		A.Destroy();
+	}
+
+	TravelPostAccept();
 }
 
 exec function MocaMode()
