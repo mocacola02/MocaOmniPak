@@ -8,6 +8,8 @@ var bool bIsAiming;
 var bool bInvisiWand;
 var MOCAharry MocaPlayerHarry;
 
+var Color DefaultColorToUse;
+
 event PostBeginPlay()
 {
     super.PostBeginPlay();
@@ -69,8 +71,8 @@ event Tick (float fTimeDelta)
             LightBrightness = 128;
             LightSaturation = 255;
             fxChargeParticles.Textures[0] = Texture'HPParticle.hp_fx.Particles.flare4';
-            fxChargeParticles.ColorStart.Base.R = 255; fxChargeParticles.ColorStart.Base.G = 255; fxChargeParticles.ColorStart.Base.B = 255; fxChargeParticles.ColorStart.Base.A = 0;
-            fxChargeParticles.ColorEnd.Base.R = 255; fxChargeParticles.ColorEnd.Base.G = 255; fxChargeParticles.ColorEnd.Base.B = 255; fxChargeParticles.ColorEnd.Base.A = 0;
+            fxChargeParticles.ColorStart.Base = DefaultColorToUse;
+            fxChargeParticles.ColorEnd.Base = DefaultColorToUse;
         }
     }
 }
@@ -439,4 +441,6 @@ defaultproperties
     LightType=LT_None
     fxChargeParticleFXClass=Class'MocaOmniPak.MOCAWandParticles'
 	InventoryGroup=2
+
+	DefaultColorToUse=(R=255,G=255,B=255,A=0)
 }

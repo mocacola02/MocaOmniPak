@@ -21,6 +21,8 @@ var() bool bSaveOnLoad;
 var(MOCAMagic) bool bUseDefaultSpellbook;					// Moca: Whether or not the custom default spellbook will be applied. Def: False
 var(MOCAMagic) Array<Class<baseSpell>> DefaultSpellbook;	// Moca: What default spells do we have?
 var(MOCAMagic) SpellMap SpellMapping[28];					// Moca: What spells are mapped to each spell slot?
+var(MOCAMagic) class<ParticleFX> WandParticleFX;
+var(MOCAMagic) Color DefaultWandParticleColor;
 // TODO: var(MOCAMagic) bool UseDynamicWandParticles;		// Moca: Use the dynamic particle colors/sprites? Def: True
 
 var Actor LastStoredBase;
@@ -290,6 +292,12 @@ function AddHarryWeapon (class<Weapon> WeaponToSpawn)
 
 	WeaponActor = Spawn(WeaponToSpawn, self);
 	WeaponActor.BecomeItem();
+
+	if ( WeaponActor.IsA('MOCAWand'))
+	{
+		MOCAWand(WeaponActor).DefaultColorToUse = DefaultWandParticleColor;
+		MOCAWand(WeaponActor).fxChargeParticleFXClass = WandParticleFX;
+	}
 	
 	if (AddInventory(WeaponActor))
 	{
@@ -1116,5 +1124,9 @@ defaultproperties
 	DefaultSpellbook(6)=class'spellSpongify'
     DefaultSpellbook(7)=class'MOCAspellGlacius'
 
+	WandParticleFX=Class'MocaOmniPak.MOCAWandParticles'
+
 	WandGlowRange=6.0
+
+	DefaultWandParticleColor=(R=255,G=255,B=255,A=0)
 }
