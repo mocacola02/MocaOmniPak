@@ -117,7 +117,7 @@ defaultproperties
     PickupFlyTo=FT_HudPosition
     classStatusGroup=Class'MOCAStatusGroupDiscovery'
     classStatusItem=Class'MOCAStatusItemDiscovery'
-    bBounceIntoPlace=True
+    bBounceIntoPlace=False
     soundBounce=Sound'HPSounds.menu_sfx.gui_rollover3'
     Physics=PHYS_Flying
     bPersistent=True
@@ -129,7 +129,7 @@ defaultproperties
     bProjTarget=False
     bCollideWorld=False
     bBlockCamera=False
-    bBounce=True
+    bBounce=False
     attachedParticleClass(0)=Class'MocaOmniPak.DiscoveryPoint_accent'
     attachedParticleClass(1)=Class'MocaOmniPak.DiscoveryPoint_glow'
     bHidden=False
@@ -145,4 +145,5 @@ defaultproperties
     bSpriteRelativeScale=true
     minHoverTime=2.5
     maxHoverTime=5.0
+	attractionRange=99999.0
 }

@@ -35,19 +35,38 @@ event PreBeginPlay()
 
 event Touch (Actor Other)
 {
-  Super.Touch(Other);
-  if ( Other.IsA('Tut1Gnome') )
-  {
-    return;
-  }
+	Super.Touch(Other);
+	if ( Other.IsA('Tut1Gnome') )
+	{
+		return;
+	}
 
-  if (Other.IsA('harry'))
-  {
-	PlaySound(pickUpSound,,SoundVolMult);
-  }
+	if (Other.IsA('harry'))
+	{
+		PlaySound(pickUpSound,,SoundVolMult);
+	}
 }
 
-auto state BounceIntoPlace
+auto state stateIdle
+{
+	event Tick(float DeltaTime)
+	{
+		Global.Tick(DeltaTime);
+
+		if ( bAttractedToHarry )
+		{	
+			FlyToHarry(DeltaTime);
+		}
+	}
+
+	begin:
+		if ( bBounceIntoPlace || bBounce )
+		{
+			GotoState('BounceIntoPlace');
+		}
+}
+
+state BounceIntoPlace
 {
     event BeginState()
     {
