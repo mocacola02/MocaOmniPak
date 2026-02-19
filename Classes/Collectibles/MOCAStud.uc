@@ -1,6 +1,7 @@
 class MOCAStud extends MOCACollectible;
 
-enum StudType {
+enum StudType
+{
 	STUD_10,
 	STUD_100,
 	STUD_1000,
@@ -11,14 +12,6 @@ enum StudType {
 };
 
 var() StudType StudValue; // Moca: How much is the stud worth? RandomType chooses a random type from the numbered options. Fully random chooses a totally random value 1 - 10000. Custom uses the MOCACollectible increment value. Def: STUD_100
-
-/*
-var Color Color10;
-var Color Color100;
-var Color Color1000;
-var Color Color10000;
-var Color ColorRandom;
-*/
 
 var Texture Color10;
 var Texture Color100;
@@ -44,7 +37,7 @@ event PostBeginPlay()
 
 	managerStatus = PlayerHarry.managerStatus;
 
-	if (SetStudValue())
+	if ( SetStudValue() )
 	{
 		ResolveRedo();
 		SetStudValue();
@@ -86,20 +79,20 @@ function ResolveRedo()
 
 function Texture GetStudIcon(int Value)
 {
-	if (Value <= 10)
-    {
-        return SilverIcon;
-    }
-    else if (Value <= 100)
-    {
-        return BronzeIcon;
-    }
-    else if (Value <= 1000)
-    {
-        return BlueIcon;
-    }
+	if ( Value <= 10 )
+	{
+		return SilverIcon;
+	}
+	else if ( Value <= 100 )
+	{
+		return BronzeIcon;
+	}
+	else if ( Value <= 1000 )
+	{
+		return BlueIcon;
+	}
 
-    return PurpleIcon;
+	return PurpleIcon;
 }
 
 function bool SetStudValue()
@@ -136,80 +129,29 @@ function bool SetStudValue()
 
 function Texture GetTexture(int Value)
 {
-    if (Value <= 10)
-    {
-        return Color10;
-    }
-    else if (Value <= 100)
-    {
-        return Color100;
-    }
-    else if (Value <= 1000)
-    {
-        return Color1000;
-    }
+	if ( Value <= 10 )
+	{
+		return Color10;
+	}
+	else if ( Value <= 100 )
+	{
+		return Color100;
+	}
+	else if ( Value <= 1000 )
+	{
+		return Color1000;
+	}
 
-    return Color10000;
+	return Color10000;
 }
-
-/* function Color GetBlendedColor(float Value)
-{
-    local Color StartColor;
-    local Color EndColor;
-    local float Alpha;
-    local Color BlendedColor;
-
-    if (Value <= 10)
-    {
-        return Color10;
-    }
-    else if (Value < 100)
-    {
-        StartColor = Color10;
-        EndColor = Color100;
-        Alpha = (Value - 10.0) / 90.0;
-    }
-    else if (Value < 1000)
-    {
-        StartColor = Color100;
-        EndColor = Color1000;
-        Alpha = (Value - 100.0) / 900.0;
-    }
-    else if (Value < 10000)
-    {
-        StartColor = Color1000;
-        EndColor = Color10000;
-        Alpha = (Value - 1000.0) / 9000.0;
-    }
-    else
-    {
-        return Color10000;
-    }
-
-    BlendedColor.R = byte(
-        float(StartColor.R) * (1.0 - Alpha) + float(EndColor.R) * Alpha
-    );
-
-    BlendedColor.G = byte(
-        float(StartColor.G) * (1.0 - Alpha) + float(EndColor.G) * Alpha
-    );
-
-    BlendedColor.B = byte(
-        float(StartColor.B) * (1.0 - Alpha) + float(EndColor.B) * Alpha
-    );
-
-    BlendedColor.A = 255;
-
-    return BlendedColor;
-} */
 
 function Sound SetStudSound()
 {
-	if (nPickupIncrement < 60)
+	if ( nPickupIncrement < 60 )
 	{
 		pickUpSound = SoundLow;
 	}
-	else if (nPickupIncrement < 500)
+	else if ( nPickupIncrement < 500 )
 	{
 		pickUpSound = SoundMid;
 	}
@@ -248,5 +190,5 @@ defaultproperties
 	fTotalFlyTime=0.5
 
 	CollisionRadius=10
-    CollisionHeight=10
+	CollisionHeight=10
 }

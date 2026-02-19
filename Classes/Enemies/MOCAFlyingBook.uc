@@ -1,6 +1,8 @@
-class MOCAFlyingBook extends MOCAChar;
+//================================================================================
+// MOCAFlyingBook.
+//================================================================================
 
-// TODO: Clean up
+class MOCAFlyingBook extends MOCAChar;
 
 enum WakeMode
 {
@@ -9,145 +11,109 @@ enum WakeMode
 	WM_Trigger
 };
 
-var() byte SleepChance;			// Moca: How likely is the book to go back to its resting point when close to home? Higher = more likely. Only works if WM_Proximity. Def: 128
+var() WakeMode WakeUpMode;
 
-var() name FlySplineTag;
-var() float AttackDistance;		// Moca: At what distance will the book start attacking? Def: 192.0
-var() float AttackDelay;		// Moca: How long in seconds will the book wait before enabling attacking after it begins flying? Def: 5.0
-var() float DamageAmount;		// Moca: How much damage will Harry take when hit? Def: 5.0
-var() float StunDurationMult;	// Moca: How long will the book be stunned when hit? This works as a multiplier, 2.0 means twice as fast, 3.0 thrice as fast, etc. Def: 1.0
-var() float HomeRange;			// Moca: How far from the book's starting point will the book detect its home? Used for going back to home. Def: 256.0
-var() float WakeUpRange;		// Moca: How far can the book detect Harry to wake up? Only works if WM_Proximity. Def: 384.0
+var() byte SleepChance;
+var() float HomeRange;
+var() float WakeUpRange;
+var() float StunDurationMult;
+var() float AttackDelay;
 
-var() Sound FlySound;			// Moca: What sound to use as the flying sound? Def: Sound'HPSounds.Critters_sfx.PIX_wingflap_loop'
-var() Sound ShootSound;
+var(MOCAFlyingBookSFX) Sound FlySound;
+var(MOCAFlyingBookSFX) Sound ShootSound;
 
-var() WakeMode WakeUpMode;		// Moca: What activates the book? WM_Always means always flying, WM_Proximity means Harry must get close enough based on WakeUpRange, WM_Trigger means it must be triggered. Def: WM_Proximity
-
-// Not a fan of some of these bools, quick and sloppy fix for going home
-var bool bGoingHome;
-var bool bCanAttack;
 var bool bCanGoHome;
-var bool bHomeCheckCooldown;
-
-var string PrevState;
+var bool bGoingHome;
+var bool bHomeCooldown;
 
 var Vector ReturnLocation;
 var Vector TempLocation;
 
 var InterpolationPoint TargetIPoint;
 
-var ESpellType DefVunSpell;
 
-event PostBeginPlay()
-{
-	super.PostBeginPlay();
-	DefVunSpell = eVulnerableToSpell;
-}
+///////////
+// Events
+///////////
 
 event Trigger(Actor Other, Pawn Instigator)
 {
-    if (WakeUpMode == WM_Trigger && IsInState('stateIdle'))
-    {
-        GotoState('stateIdle', 'wakeup');
-    }
-	else if(WakeUpMode == WM_Trigger && !IsInState('stateIdle'))
+	if ( WakeUpMode == WM_Trigger && IsInState('stateIdle') )
+	{
+		GotoState('stateIdle','wakeup');
+	}
+	else if ( WakeUpMode == WM_Trigger && !IsInState('stateIdle') )
 	{
 		bCanGoHome = True;
 	}
 }
 
-function EnableAttacks();
-function ShootPaper();
-
-function ProcessSpell()
-{
-	if(!IsInState('stateIdle'))
-	{
-		GotoState('stateHit');
-	}	
-}
-
-function SaveStartLocation()
-{
-	ReturnLocation = Location;
-	Print(string(self) $ "'s start location saved as: " $ string(ReturnLocation));
-}
-
-exec function StopBook()
-{
-	SplineSpeed = 0;
-}
 
 function PlayFlapSound()
 {
-	PlaySound(FlySound,SLOT_None);
+	PlaySound(FlySound,SLOT_Interact);
 }
 
-function bool CheckAttack()
+function bool CanSleep()
 {
-	local float HarryDist;
-	HarryDist = GetDistanceFromHarry();
-	Print("Book's distance from Harry: " $ string(HarryDist));
+	if ( !IsInState('stateFlying') )
+	{
+		return False;
+	}
 
-	return (GetDistanceFromHarry() < AttackDistance);
-}
-
-function bool DetermineSleep()
-{
-	bHomeCheckCooldown = True;
-	if (SleepChance < 255)
+	if ( SleepChance < 255 )
 	{
 		local int RandSleep;
 		RandSleep = Rand(255);
 
-		Print("We're checking to go home: " $ string(RandSleep) $ " Vs. " $ string(SleepChance));
-
-		if (SleepChance >= RandSleep)
-		{
-			Print("Going home!");
-			return true;
-		}
+		return SleepChance > RandSleep;
 	}
 	else
 	{
-		Print("Going home!");
-		return true;
+		return True;
 	}
-	
-	Print("Not going home yet!");
-	bCanGoHome = False;
-	return false;
 }
+
+function ShootPaper()
+{
+	local MOCAPaperBall PaperBall;
+	PaperBall = Spawn(class'MOCAPaperBall',Self,,Location,Rotation,True);
+	PlaySound(ShootSound, SLOT_Talk);
+	Spawn(class'Paper_Hit',Self,,Location);
+}
+
+
+///////////
+// States
+///////////
 
 auto state stateIdle
 {
 	event BeginState()
 	{
 		eVulnerableToSpell = SPELL_None;
-		
-		if(WakeUpMode == WM_Always)
+
+		if ( WakeUpMode == WM_Always )
 		{
 			GotoState('stateFly');
 		}
+
+		LoopAnim('Idle');
 	}
 
 	begin:
-		bCanAttack = False;
-		LoopAnim(IdleAnimName);
-
-		if (isHarryNear(WakeUpRange) && WakeUpMode == WM_Proximity)
+		if ( WakeUpMode == WM_Proximity && IsHarryNear(WakeUpRange) )
 		{
 			Goto('wakeup');
 		}
 
-		sleep(0.25);
+		Sleep(0.25);
 		Goto('begin');
-
+	
 	wakeup:
-		Print("Waking up");
 		PlayAnim('takeoff',,,,'Move');
 		FinishAnim();
+		ReturnLocation = Location;
 		GotoState('stateFly');
 }
 
@@ -155,44 +121,40 @@ state stateGoHome
 {
 	event BeginState()
 	{
-		bCanAttack = False;
-		Print("Going home");
-		LoopAnim(IdleAnimName,,2.0);
+		LoopAnim('Idle',,2.0);
 		SetPhysics(PHYS_Flying);
 	}
 
-	event Tick (float DeltaTime)
+	event Tick(float DeltaTime)
 	{
-		local vector Dir;
-		local float DistanceFromStart;
-		DistanceFromStart = VSize(ReturnLocation - Location);
+		local Vector Direction;
+		local float DistanceFromReturn;
+		DistanceFromReturn = VSize(HomeLocation - Location);
 
-		if (DistanceFromStart < 3.0 || bGoingHome)
+		// When we're near the return point
+		if ( DistanceFromReturn < 2.0 && bGoingHome )
 		{
-			bGoingHome = True;
-
 			local float DistanceFromHome;
-			DistanceFromHome = VSize(vHome - Location);
+			DistanceFromHome = VSize(HomeLocation - Location);
 
-			if (DistanceFromHome < 3.0)
+			// If we're close to home
+			if ( DistanceFromHome < 2.0 )
 			{
-				SetLocation(vHome);
+				SetLocation(HomeLocation);
 				bGoingHome = False;
 				GotoState('stateIdle');
 			}
 			else
 			{
-				Dir = Normal(vHome - Location);
-
-				SetLocation(Location + Dir * AirSpeed * DeltaTime);
-			}			
+				Direction = Normal(HomeLocation - Location);
+				SetLocation(Location + Direction * AirSpeed * DeltaTime);
+			}
 		}
 		else
 		{
-			Dir = Normal(ReturnLocation - Location);
-
-			SetLocation(Location + Dir * AirSpeed * DeltaTime);
-		}		
+			Direction = Normal(ReturnLocation - Location);
+			SetLocation(Location + Direction * AirSpeed * DeltaTime);
+		}
 	}
 }
 
@@ -201,52 +163,49 @@ state stateFly
 	event BeginState()
 	{
 		bCanGoHome = False;
-		bHomeCheckCooldown = False;
-		SetTimer(AttackDelay,false,'EnableAttacks');
-		LoopAnim(WalkAnimName);
-		eVulnerableToSpell = DefVunSpell;
+		SetTimer(AttackDelay,False);
+		LoopAnim('Fly');
+		eVulnerableToSpell = Default.eVulnerableToSpell;
 		FollowSplinePath(FlySplineTag, [StartPointName] TargetIPoint.Name);
+
+		if ( LastValidState == 'stateIdle' )
+		{
+			bHomeCooldown = True;
+		}
 	}
-	
+
 	event EndState()
 	{
-		Super.EndState();
 		TempLocation = Location;
-		bCanAttack = False;
 		AmbientSound = None;
 		bCollideWorld = True;
 		bAlignBottom = False;
 		bCanGoHome = False;
-		bHomeCheckCooldown = False;
 		TargetIPoint = SplineManager.Dest;
 		DestroyControllers();
 		SetPhysics(PHYS_Flying);
 	}
 
-	event Tick (float DeltaTime)
+	event Tick(float DeltaTime)
 	{
-		Global.Tick(DeltaTime);
-
-		if (isHarryNear(AttackDistance) && bCanAttack)
+		// If Harry is near, attack
+		if ( IsHarryNear(AttackDistance) )
 		{
+			bHomeCooldown = False;
 			GotoState('stateAttack');
 		}
 
-		if (bCanGoHome && !bHomeCheckCooldown && CloseToHome(HomeRange) && DetermineSleep() && WakeUpMode == WM_Proximity && !isHarryNear(AttackDistance))
+		// If we're out of the home range, disable cooldown
+		if ( bHomeCooldown && HomeRange < VSize(HomeLocation - Location) )
+		{
+			bHomeCooldown = False;
+		}
+
+		// If we're close to home and we can sleep and we're proximity based and Harry isn't near
+		if ( !bHomeCooldown && IsCloseToHome(HomeRange) && CanSleep() && WakeUpMode == WM_Proximity && !IsHarryNear(AttackDistance) )
 		{
 			GotoState('stateGoHome');
 		}
-		else if (!CloseToHome(HomeRange) && !bCanGoHome)
-		{
-			Print("Can now go home if close");
-			bHomeCheckCooldown = False;
-			bCanGoHome = True;
-		}
-	}
-
-	function EnableAttacks()
-	{
-		bCanAttack = True;
 	}
 }
 
@@ -260,27 +219,19 @@ state stateAttack
 
 	event EndState()
 	{
-		Super.EndState();
 		DisableTurnTo();
 	}
 
-	function ShootPaper()
-	{
-		local MOCAPaperBall PaperBall;
-
-		eVulnerableToSpell = DefVunSpell;
-		PaperBall = Spawn(class'MOCAPaperBall',self,,Location,Rotation,true);
-		PlaySound(ShootSound, SLOT_Misc);
-		Spawn(class'Paper_Hit',self,,Location);
-	}
-
 	begin:
+		eVulnerableToSpell = SPELL_None;
 		PlayAnim('PrepAttack');
 		FinishAnim();
+
+		eVulnerableToSpell = Default.eVulnerableToSpell;
 		PlayAnim('attack');
 		FinishAnim();
 
-		if (CheckAttack())
+		if ( IsHarryNear(AttackDistance) )
 		{
 			Goto('begin');
 		}
@@ -292,38 +243,34 @@ state stateHit
 {
 	event BeginState()
 	{
-		bCanAttack = True;
 		eVulnerableToSpell = SPELL_None;
-		hitsTaken++;
+		HitsTaken++;
 		EnableTurnTo(PlayerHarry);
 		SetLocation(TempLocation);
 	}
 
 	event EndState()
 	{
-		Super.EndState();
 		DisableTurnTo();
 	}
 
 	begin:
-		Print("Previous state: " $ PreviousState);
-		Print("Hits taken " $ string(hitsTaken) $ " out of " $ string(hitsToKill));
-		if(PreviousState == 'stateFly')
+		if( LastValidState == 'stateFly' )
 		{
-			if (hitsTaken >= hitsToKill)
+			if ( HitsTaken >= HitsToKill )
 			{
-				GotoState('stateDie', 'fromfly');
+				GotoState('stateDie','fromfly');
 			}
 			else
 			{
 				PlayAnim('FlyStunned',StunDurationMult,,,'Move');
 			}
 		}
-		else if(PreviousState == 'stateAttack')
+		else if ( LastValidState == 'stateAttack' )
 		{
-			if (hitsTaken >= hitsToKill)
+			if ( HitsTaken >= HitsToKill )
 			{
-				GotoState('stateDie', 'fromattack');
+				GotoState('stateDie','fromattack');
 			}
 		}
 		else
@@ -333,7 +280,7 @@ state stateHit
 
 		FinishAnim();
 
-		if (CheckAttack())
+		if ( IsHarryNear(AttackDistance) )
 		{
 			GotoState('stateAttack');
 		}
@@ -348,44 +295,43 @@ state stateDie
 		SetLocation(TempLocation);
 	}
 
-	event HitWall(vector vHitNormal, Actor Wall)
+	event HitWall(Vector HitNormal, Actor Wall)
 	{
-		Print("BOOK HIT WALL, TIME TO DIE!!!!!!!!!!!!!!!!!!");
 		GotoState('stateDie','die');
 	}
 
-	event Landed(vector HitNormal)
+	event Landed(Vector HitNormal)
 	{
-		Print("BOOK LANDED, TIME TO DIE!!!!!!!!!!!!!!!!!!");
 		GotoState('stateDie','die');
 	}
 
 	event Bump(Actor Other)
 	{
-		super.Bump(Other);
-		if (Other.IsA('HPawn'))
+		Super.Bump(Other);
+
+		if ( Other.IsA('HPawn') )
 		{
-			if (HPawn(Other).bCantStandOnMe)
+			if ( HPawn(Other).bCantStandOnMe )
 			{
 				return;
 			}
 		}
 
-		Print("BOOK BUMPED, TIME TO DIE!!!!!!!!!!!!!!!!");
 		GotoState('stateDie','die');
 	}
 
 	die:
 		PlayAnim('FallDie');
 		FinishAnim();
+
 		LoopAnim('rest');
 		Sleep(1.0);
 		Destroy();
-
+	
 	fromfly:
 		PlayAnim('Fly2Die',,,,'Move');
 		Goto('fall');
-
+	
 	fromattack:
 		PlayAnim('Attack2Die',,,,'Move');
 		Goto('fall');
@@ -400,35 +346,31 @@ state stateDie
 
 defaultproperties
 {
-    AirSpeed=160.0
-	AnimSequence=Idle
-	IdleAnimName=Idle
-    WalkAnimName=Fly
-	DrawScale=2
+	AirSpeed=160.0
+	DrawScale=2.0
 	Physics=PHYS_Flying
 
 	eVulnerableToSpell=SPELL_Rictusempra
-	
-    Mesh=SkeletalMesh'MocaModelPak.skFlyingBookMesh'
 
-	TransientSoundRadius=1024
+	Mesh=SkeletalMesh'MocaModelPak.skFlyingBookMesh'
 
-    CollisionRadius=16.00
-    CollisionHeight=24.00
+	TransientSoundRadius=1024.0
+
+	CollisionRadius=16.0
+	CollisionHeight=24.0
 
 	bAlignBottom=False
-    bBlockActors=False
+	bBlockActors=False
 
-    RotationRate=(Pitch=50000,Yaw=50000,Roll=50000)
+	RotationRate=(Pitch=50000,Yaw=50000,Roll=50000)
 
-	hitsToKill=3
+	HitsToKill=3
 
 	SleepChance=128
-	AttackDistance=384
+	AttackDistance=384.0
 	AttackDelay=5.0
-    DamageAmount=2.00
 	StunDurationMult=1.0
-	HomeRange=256
+	HomeRange=256.0
 	FlySound=Sound'MocaSoundPak.book_flap_Multi'
 	ShootSound=Sound'MocaSoundPak.book_flap_Multi'
 	WakeUpMode=WM_Proximity

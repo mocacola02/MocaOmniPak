@@ -6,16 +6,16 @@ class MOCAWatcherHunter extends MOCAHunter;
 
 defaultproperties
 {
-    awakenAnim=StepDown
-    caughtAnim=StandCaught
-    caughtSound=MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks'
-    caughtTransAnim=StandIdle2Caught
+    AwakenAnim=StepDown
+    CaughtAnim=StandCaught
+    CaughtSound=MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks'
+    CaughtTransAnim=StandIdle2Caught
     CollisionHeight=58
     DrawScale=1.2
-    eVulnerableToSpell=SPELL_Flipendo
-    idleAnim=StandIdle
+    eVulnerableToSpell=SPELL_None
+    IdleAnim=StandIdle
     Mesh=SkeletalMesh'MocaModelPak.skKnightWatcher'
-    MultiSkins(1)=Texture'MocaTexturePak.Misc.transparent'
-    sleepAnim=Idle
-    walkAnim=StandWalk
+    Skins(1)=Texture'MocaTexturePak.Misc.transparent'
+    SleepAnim=Idle
+    WalkAnim=StandWalk
 }

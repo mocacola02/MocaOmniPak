@@ -1,165 +1,157 @@
+//=============================================================================
+// MOCAMusicComposer
+//=============================================================================
 class MOCAMusicComposer extends MOCAMusicActors;
 
-struct DynamicTracks
+struct DynamicTrack
 {
-    var() string SongName; 			// Moca: Name of song to play
-    var() string NextSongName;      // Moca: Name of the next song after this one
-    var() float CheckRate;          // Moca: Second intervals to check. For example, if set to 4.0, it will mark points every 4th second in the song, and activate when it hits one of those marks. If 0.0, it will wait until the end of the song to switch.
-    var() float CrossFadeLength;    // Moca: Amount of fade to use when changing from this track to the next
+	var() string Track;
+	var() string NextTrack;
+	var() float CheckInterval;
+	var() float CrossfadeDuration;
 };
 
-var() array<DynamicTracks> ListOfSongs; // Moca: List of songs.
+var() array<DynamicTrack> ListOfTracks;
+
 
 var bool bReadyToProgress;
 
-var int PrevSongIndex;
-var int SongIndex;
-var int SongHandle;
-var int SongOverride;
+var int PreviousTrack;
+var int CurrentTrack;
+var int CurrentHandle;
+var int TrackOverride;	// Moca: Set by MOCAComposerTrigger
 
-// EVENTS
+
+///////////
+// Events
+///////////
+
 event MusicTrackEnded();
 event MusicTrackLooped();
 
-function BeginComposing(optional int Override)
+
+///////////////////
+// Main Functions
+///////////////////
+
+function BeginComposing(optional int IdxOverride)
 {
-	Log(string(self) $ " is starting to compose!");
-	if (Override >= 0 && Override <= ListOfSongs.Length)
+	if ( IsValidIndex(IdxOverride) )
 	{
-		SongIndex = Override;
+		CurrentTrack = IdxOverride;
 	}
-	PlayNewSong();
+
+	PlayNewTrack();
 	GotoState('stateCounting');
 }
 
 function StopComposing(float FadeTime)
 {
-	Log(string(self) $ " is stopping their composition!");
-	StopMusic(SongHandle, FadeTime);
-	SongHandle = 0;
-	GotoState('stateDormant');
+	StopMusic(CurrentHandle,FadeTime);
+	CurrentHandle = 0;
+	GotoState('stateIdle');
 }
 
-function ReadyUp(optional int Override)
+function PlayNewTrack()
 {
-	//If not in stateCounting, just immediately progress
-	Log(string(self) $ " isn't counting, so we're ready to progress!");
-	ProgressSongs(Override);
-}
-
-function PlayNewSong()
-{
-	local string Song;
 	local float FadeTime;
-	local bool ShouldPlayOnce;
-	Song = ListOfSongs[SongIndex].SongName;
-	FadeTime = ListOfSongs[PrevSongIndex].CrossFadeLength;
+	local string NewTrack;
 
-	StopMusic(SongHandle, FadeTime);
+	NewTrack = ListOfTracks[CurrentTrack].Track;
+	FadeTime = ListOfTracks[CurrentTrack].CrossfadeDuration;
 
-	SongHandle = PlayMusic(Song, FadeTime);
+	StopMusic(CurrentHandle,FadeTime);
 
-	Log(string(self) $ " is playing new song " $ Song);
+	CurrentHandle = PlayMusic(NewTrack,FadeTime);
 }
 
-function ProgressSongs(optional int Override)
+function ProgressTrack(optional int IdxOverride)
 {
-	local int i;
-	local string TargetSong;
+	local string TargetTrack;
 
-	PrevSongIndex = SongIndex;
+	PreviousTrack = CurrentTrack;
 
-	if (Override >= 0 && Override <= ListOfSongs.Length)
+	if ( IsValidIndex(IdxOverride) )
 	{
-		TargetSong = ListOfSongs[Override].SongName;
+		TargetTrack = ListOfTracks[IdxOverride].Track;
 	}
 	else
 	{
-		TargetSong = ListOfSongs[SongIndex].NextSongName;
+		TargetTrack = ListOfTracks[IdxOverride].NextTrack;
 	}
 
-	for (i=0; i < ListOfSongs.Length; i++)
-	{
-		if (ListOfSongs[i].SongName == TargetSong)
-		{
-			SongIndex = i;
-			break;
-		}
-		else
-		{
-			SongIndex = 0;
-		}
-	}
-
-	Log("New song index for " $ string(self) $ " will be " $ string(SongIndex));
-
-	PlayNewSong();
+	CurrentTrack = GetTrackIndex(TargetTrack);
+	PlayNewTrack();
 }
 
-// STATES
 
-state stateDormant
+/////////////////////
+// Helper Functions
+/////////////////////
+
+function bool IsValidIndex(int Idx)
 {
-	event Tick (float DeltaTime)
+	return Idx >= 0 && Idx <= TrackList.Length;
+}
+
+function int GetTrackIndex(string TrackName)
+{
+	local int i;
+
+	for ( i = 0; i < ListOfTracks.Length; i++ )
 	{
-		if (SongHandle != 0)
+		if ( ListOfTracks[i].Track == TrackName )
 		{
-			GotoState('stateCounting');
+			return i;
 		}
 	}
+
+	Log(string(Self)$" could not find next track "$TrackName);
+	return 0;
 }
+
+
+///////////
+// States
+///////////
 
 state stateCounting
 {
 	event BeginState()
 	{
-		local float TimerCheckRate;
-		if (ListOfSongs[SongIndex].CheckRate > 0.0)
+		local float TimerInterval;
+		
+		TimerInterval = FClamp(ListOfTracks[CurrentTrack].CheckInterval,0.0,99999.0);
+
+		if ( TimerInterval <= 0.0 )
 		{
-			TimerCheckRate = ListOfSongs[SongIndex].CheckRate;
-		}
-		else
-		{
-			local string SongFileName;
+			local string NewTrackFile;
+			NewTrackFile = ListOfTracks[CurrentTrack].Track$".ogg";
+
+			TimerInterval = GetMusicLength(NewTrackFile);
+
 			bReadyToProgress = True;
-			SongFileName = ListOfSongs[SongIndex].SongName $ ".ogg";
-			Log(string(self) $ " is attemping to get length of file " $ SongFileName);
-			TimerCheckRate = GetMusicLength(SongFileName);
 		}
 
-		Log(string(self) $ " is resetting its timer with rate " $ string(TimerCheckRate));
-		SetTimer(TimerCheckRate, true);
+		SetTimer(TimerInterval,True);
 	}
-
-	event EndState()
-	{
-		Log(string(self) $ " is no longer counting.");
-	}
-	
 
 	event Timer()
 	{
-		if (bReadyToProgress)
+		if ( bReadyToProgress )
 		{
-			Log(string(self) $ " was ready to progress so let's do this");
 			bReadyToProgress = False;
-			ProgressSongs(SongOverride);
-			SongOverride = -1;
-			GotoState('stateDormant');
+
+			ProgressTrack(TrackOverride);
+			TrackOverride = MapDefault.TrackOverride;
+
+			GotoState('stateIdle');
 		}
 	}
-
-	function ReadyUp(optional int Override)
-	{
-		Log(string(self) $ " is counting and has ready'd up!");
-		bReadyToProgress = True;
-		SongOverride = Override;
-	}
-
-	begin:
 }
+
 
 defaultproperties
 {
-	SongOverride=-1
+	TrackOverride=-1
 }

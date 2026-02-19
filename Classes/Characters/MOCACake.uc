@@ -4,34 +4,48 @@
 
 class MOCACake extends MOCABabbler;
 
-var (MOCABabbler) int hitsUntilDeath; // Moca: How many Flipendo hits until cake dies :(  If 0, never die.  Def: 0
-var (MOCABabbler) bool randomTalkAnim; // Moca: Randomize talk animation. Def: true
-var int currentHits;
-var Color prevColor;
-var Color dieColor;
+var (MOCABabbler) bool bRandomTalkAnim; // Moca: Randomize talk animation. Def: true
+var Color PrevColor;
+var Color DieColor;
+
+
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
 	Super.PostBeginPlay();
-	prevColor = AmbientGlowColor;
+	PrevColor = AmbientGlowColor;
 }
 
-function bool HandleSpellFlipendo (optional baseSpell spell, optional Vector vHitLocation)
+
+//////////
+// Magic
+//////////
+
+function ProcessSpell()
 {
 	SavedPreBumpState = GetStateName();
-	currentHits++;
-	if ((currentHits >= hitsUntilDeath) && (hitsUntilDeath != 0))
+
+	HitsTaken++;
+
+	if ( ShouldDie() )
 	{
-		GotoState('CakeDie');
+		GotoState('stateCakeDie');
 	}
 	else
 	{
-		GotoState('CakeSpin');
+		GotoState('stateCakeSpin');
 	}
-	return True;
 }
 
-state CakeSpin
+
+///////////
+// States
+///////////
+
+state stateCakeSpin
 {
 	begin:
 		PlayAnim('EmoteTwirl');
@@ -39,7 +53,7 @@ state CakeSpin
 		GotoState(SavedPreBumpState);
 }
 
-state CakeDie
+state stateCakeDie
 {
 	begin:
 		eVulnerableToSpell = SPELL_None;
@@ -69,24 +83,27 @@ state CakeDie
 		Destroy();
 }
 
+
+////////////////////
+// Misc. Functions
+////////////////////
+
 function name GetBabbleAnim()
 {
-	if (!randomTalkAnim)
+	if ( !bRandomTalkAnim )
 	{
-		return babbleAnim;
+		return BabbleAnim;
 	}
 
-	local int randAnim;
-	randAnim = Rand(2);
+	local int RandAnim;
+	RandAnim = Rand(2);
 
-	if (randAnim == 1)
+	if ( RandAnim == 1 )
 	{
 		return 'EmoteHappy';
 	}
-	else
-	{
-		return 'EmoteNod';
-	}
+
+	return 'EmoteNod';
 }
 
 function MakeAngry()
@@ -101,26 +118,30 @@ function MakeAngry()
 
 function SpawnFire()
 {
-	local ParticleFX fire;
+	local ParticleFX Fire;
 
-	fire = spawn(class'HPParticle.FSPlantFire');
-	fire.SetOwner(self);
-	fire.AttachToOwner('Root');
+	Fire = spawn(class'HPParticle.FSPlantFire');
+	Fire.SetOwner(Self);
+	Fire.AttachToOwner('Root');
 }
+
 
 defaultproperties
 {
+	bRandomTalkAnim=True
+	DieColor=(R=255,G=26,B=26,A=255)
+
+	TimeBetweenBabble=0.1
+	BabbleAnim=Idle
+	DelayBeforeEnding=2.0
+	BabbleVoicePitch=128
+	BabbleVoiceRadius=100000.0
+	bTurnToHarry=False
+	
+	bUseBumpLine=True
+	HitsToKill=5
+
 	AmbientGlow=128
-	timeBetweenBabble=0.1
-    babbleAnim=Idle
-	delayBeforeEnding=2.0
-	bUseBumpLine=true
-	voicePitch=128
-	voiceRadius=100000.0
-	bTurnToHarry=false
-	hitsUntilDeath=5
-	randomTalkAnim=true
-	dieColor=(R=255,G=26,B=26,A=255)
 	Mesh=SkeletalMesh'MocaModelPak.skCake'
 	eVulnerableToSpell=SPELL_Flipendo
 }

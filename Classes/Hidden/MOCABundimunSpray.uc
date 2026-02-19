@@ -4,60 +4,44 @@
 
 class MOCABundimunSpray extends HiddenHPawn;
 
-var bool bTouch;
-var float fLifetime;
+var bool bCooldown;
 var float DamageToDeal;
-var Vector CurrentDir;
+
+
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-	local vector EmitLocation;
+	Super.PostBeginPlay();
 
-	SetTimer(fLifetime,False);
-
+	local Vector EmitLocation;
 	EmitLocation = Location;
 	EmitLocation.Z -= 16;
-	Spawn(Class'MocaOmniPak.BundimunMist',self,,EmitLocation,,true);
+
+	Spawn(Class'BundimunMist',Self,,EmitLocation,,True);
+}
+
+event Touch(Actor Other)
+{
+	if ( Other == PlayerHarry && !bCooldown )
+	{
+		bCooldown = True;
+		Other.TakeDamage(DamageToDeal,Self,Location,Vect(0,0,0),'BundimunSpray');
+		PlaySound(Sound'spell_hit',SLOT_Interact);
+		SetTimer(1.0);
+	}
 }
 
 event Timer()
 {
-	Destroy();
+	bCooldown = False;
 }
 
-event Touch (Actor Other)
-{
-	if ( Pawn(Other) == Instigator )
-	{
-		return;
-	}
-	if ( (Other == PlayerHarry) && (bTouch) )
-	{
-		Other.TakeDamage(DamageToDeal,None,vect(0.00,0.00,0.00),vect(0.00,0.00,0.00),'None');
-		PlaySound(Sound'spell_hit',SLOT_Interact,1.0,False,2000.0,1.0);
-		bTouch = False;
-	}
-}
-
-event Bump (Actor Other)
-{
-	Touch(Other);
-}
 
 defaultproperties
 {
-    bTouch=True
-
-    fLifetime=3.00
-
-    DrawType=DT_None
-
-    CollisionRadius=10.00
-
-    CollisionHeight=22.00
-
-    bCollideActors=True
-
-    bCollideWorld=True
-
+	LifeSpan=3.0
+	TransientRadius=2048
 }

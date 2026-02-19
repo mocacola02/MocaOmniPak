@@ -1,182 +1,226 @@
 //================================================================================
-// Watcher.
+// MOCAWatcher. One of my oldest classes finally rewritten
 //================================================================================
-
-// TODO: Rewrite this, pretty old class at this point
 
 class MOCAWatcher extends MOCAChar;
 
-var bool bLastWasRight;
-var bool bFirstLook;
-var MOCAStealthTrigger stealthTrigger;
-var int randLook;
-var bool bIsAwake;
+var const Texture TransparentTexture;
 
-var() float timeToLook;         // Moca: How long to look in a direction. Ignored if bRandomTimeToLook is true. Def: 1.0
-var() bool bRandomTimeToLook;    // Moca: Whether or not to randomize TTL. Def: True
-var() float minTime;            // Moca: Minimum time to look when determining a random TTL value. Def: 1.5
-var() float maxTime;            // Moca: Maximum time to look when determining a random TTL value. Def: 4.5
-var() bool bAsleepOnSpawn;       // Moca: Should the watcher be inactive on spawn (requires a trigger to be enabled). Def: false
+var() bool bAwakeOnSpawn;
 
-event PreBeginPlay()
-{
-	Super.PreBeginPlay();
-}
+var() float MinLookTime;
+var() float MaxLookTime;
+var() float MinTurnSpeed;
+var() float MaxTurnSpeed;
+
+var() name IdleAnim;
+var() name TurnLeftAnim;
+var() name TurnRightAnim;
+var() name CatchAnim;
+
+var() name TriggerBoneName;
+
+var() Texture BeamTexture;
+var() Sound SqueakSound;
+var() Sound ClangSound;
+var() Sound HeadTurnSound;
+
+var MOCAStealthTrigger CatchTrigger;
+
+
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-    Super.PostBeginPlay();
-    if (!ActorExistenceCheck(Class'MOCAharry'))
-    {
-      EnterErrorMode();
-    }
-    else
-    {
-      GotoState('stateIdle');
-    }
-}
+	Super.PostBeginPlay();
 
-event Bump( Actor Other )
-  {
-    Log("Touched by" $ Other);
-    if (!IsInState('asleep') && !PlayerHarry.IsInState('caught') && Other.IsA('MOCAharry'))
-    {
-      PlayerHarry.GotoState('caught');
-      GotoState('catch');
-    }
-  }
-
-event Tick(float DeltaTime)
-{
-    Super.Tick(DeltaTime);
-    local Vector LocationForTrigger;
-    LocationForTrigger = BonePos('TriggerPoint');
-    stealthTrigger.SetLocation(LocationForTrigger);
-}
-
-function determineTTL (bool lookBack)
-  {
-	if (bRandomTimeToLook)
+	if ( !PlayerHarry.IsA('MOCAharry') )
 	{
-		timeToLook = RandRange(minTime, maxTime);
+		EnterErrorMode("MOCAWatcher requires MOCAharry. Please replace harry with MOCAharry.");
 	}
-  }
-
-function playSqueak ()
-{
-	local float squeakPitch;
-	squeakPitch = RandRange(0.75, 1.25);
-	PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024, squeakPitch);
 }
 
-event Trigger (Actor Other, Pawn EventInstigator)
+event Bump(Actor Other)
 {
-	if (bIsAwake)
+	if ( CanCatchHarry() && Other == PlayerHarry )
 	{
-		bAsleepOnSpawn = False;
-		PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
-		GotoState('asleep');
+		PlayerHarry.GetCaught();
+		GotoState('stateCatch');
+	}
+}
+
+event Trigger(Actor Other, Pawn EventInstigator)
+{
+	if ( IsInState('stateAsleep') )
+	{
+		Awaken();
 	}
 	else
 	{
-		MultiSkins[1] = Texture'MocaTexturePak.Skins.beam';
-		PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
-		GotoState('stateIdle');
+		UnAwaken();
 	}
 }
 
-auto state asleep 
+
+///////////////////
+// Main Functions
+///////////////////
+
+function bool CanCatchHarry()
 {
-	begin:
-		Log("KNIGHT IS SLEEPING!!!!!!!!!!!");
-		if (stealthTrigger != None)
+	return !IsInState('stateAsleep') && !PlayerHarry.IsInState('stateCaught');
+}
+
+function float GetLookTime()
+{
+	return RandRange(MinLookTime,MaxLookTime);
+}
+
+function float GetTurnSpeed()
+{
+	return RandRange(MinTurnSpeed,MaxTurnSpeed);
+}
+
+function Awaken(optional bool bNoSound)
+{
+	ShowBeam();
+
+	if ( !bNoSound )
+	{
+		PlayArmorSound(ClangSound,0.667,1.334);
+	}
+
+	GotoState('stateIdle');
+}
+
+function UnAwaken(optional bool bNoSound)
+{
+	HideBeam();
+
+	if ( !bNoSound )
+	{
+		PlayArmorSound(ClangSound,0.667,1.334);
+	}
+
+	GotoState('stateAsleep');
+}
+
+function ShowBeam()
+{
+	Skins[1] = BeamTexture;
+	
+	if ( CatchTrigger == None )
+	{
+		CatchTrigger = Spawn(class'MOCAStealthTrigger',Self,,BonePos(TriggerBoneName));
+		CatchTrigger.AttachToBone(Self,TriggerBoneName);
+	}
+}
+
+function HideBeam()
+{
+	Skins[1] = TransparentTexture;
+
+	if ( CatchTrigger != None )
+	{
+		CatchTrigger.Destroy();
+	}
+}
+
+function PlayArmorSound(Sound SoundToPlay, float MinPitch, float MaxPitch)
+{
+	local float RandPitch;
+	RandPitch = RandRange(MinPitch,MaxPitch);
+	PlaySound(SoundToPlay,SLOT_Interact,,,,RandPitch);
+}
+
+function TurnHead(name TurnAnimation, float TweenRate)
+{
+	PlayAnim(TurnAnimation,,TweenRate);
+	PlayArmorSound(SqueakSound,0.667,1.334);
+}
+
+function Reset()
+{
+	GotoState('stateIdle');
+}
+
+
+///////////
+// States
+///////////
+
+auto state stateAsleep
+{
+	event BeginState()
+	{
+		if ( bAwakeOnSpawn )
 		{
-			stealthTrigger.Destroy();
+			Awaken(True);
 		}
-		if (!bAsleepOnSpawn)
+		else
 		{
-			GotoState('stateIdle');
+			LoopAnim('Idle');
 		}
-		MultiSkins[1] = Texture'MocaTexturePak.Misc.transparent';
-		LoopAnim('Idle');
+	}
 }
 
 state stateIdle
 {
 	begin:
-		Log("KNIGHT IS IDLE!!!!!!!!!!!!!!!!!");
-		if (stealthTrigger == None)
+		LoopAnim('Idle');
+		Sleep(GetLookTime());
+
+		if ( Rand(1) == 0 )
 		{
-			stealthTrigger = Spawn(Class'MOCAStealthTrigger',self);
-			stealthTrigger.bAttachedToKnight = True;
-		}
-		determineTTL(False);
-		randLook = RandRange(0, 1);
-		sleep(timeToLook);
-		if (randLook == 0)
-		{
-			GotoState('lookLeft');
+			TurnHead(TurnLeftAnim,GetTurnSpeed());	// IdleLeft
+			FinishAnim();
 		}
 		else
 		{
-			GotoState('lookRight');
+			TurnHead(TurnRightAnim,GetTurnSpeed()); // IdleRight
+			FinishAnim();
 		}
+		
+		Sleep(GetLookTime());
+		TurnHead(IdleAnim,0.75); // Idle
+		FinishAnim();
+		Goto('begin');
 }
 
-state lookLeft
+state stateCatch
 {
 	begin:
-		bLastWasRight = False;
-		PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-		Log("Left");
-		determineTTL(True);
-		PlayAnim('Idle2Left');
-		FinishAnim();
-		LoopAnim('IdleLeft');
-		sleep(timeToLook);
-		PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-		PlayAnim('Left2Idle');
-		FinishAnim();
-		GotoState('stateIdle'); // Transition back to idle state
+		LoopAnim(CatchAnim);
+		PlayArmorSound(ClangSound,0.667,1.334);
 }
 
-state lookRight
-{
-  begin:
-    bLastWasRight = True;
-    PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-    Log("Right");
-    determineTTL(True);
-    PlayAnim('Idle2Right');
-    FinishAnim();
-    LoopAnim('IdleRight');
-    sleep(timeToLook);
-    PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move', SLOT_Misc, 1.0, false, 1024);
-    PlayAnim('Right2Idle');
-    FinishAnim();
-    GotoState('stateIdle'); // Transition back to idle state
-}
-
-state catch
-{
-  begin:
-    Log("CAUGHT HARRY!!!!!!!!!!!!!!!!!");
-    LoopAnim('StandHit');
-    PlaySound(MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks');
-    sleep(2.0);
-    GotoState('stateIdle');
-}
 
 defaultproperties
 {
-  Mesh=SkeletalMesh'MocaModelPak.skKnightWatcher'
-  bFirstLook=True
-  timeToLook=1.0
-  bRandomTimeToLook=True
-  DrawScale=1.2
-  CollisionHeight=58
-  minTime=1.5
-  maxTime=4.5
-  ShadowScale=0.5
-  DebugErrMessage="The MOCAWatcher class requires MOCAharry, not the regular harry class.";
+	TransparentTexture=Texture'MocaTexturePak.Misc.transparent'
+
+	MinLookTime=1.5
+	MaxLookTime=5.0
+
+	MinTurnSpeed=0.334
+	MaxTurnSpeed=0.75
+
+	IdleAnim=Idle
+	TurnLeftAnim=IdleLeft
+	TurnRightAnim=IdleRight
+	CatchAnim=StandHit
+
+	TriggerBoneName=TriggerPoint
+
+	BeamTexture=Texture'MocaTexturePak.Skins.beam'
+	SqueakSound=MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move'
+	ClangSound=MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks'
+	HeadTurnSound=MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move'
+
+	Mesh=SkeletalMesh'MocaModelPak.skKnightWatcher'
+	CollisionHeight=58.0
+	ShadowScale=0.5
+	TransientSoundRadius=1024.0
 }

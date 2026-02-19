@@ -4,146 +4,141 @@
 
 class MOCADiscoveryPoint extends MOCACollectible;
 
-var() float minHoverTime;   // Moca: Minimum amount of time to circle above harry. Def: 2.5
-var() float maxHoverTime;   // Moca: Maximum amount of time to circle above harry. Def: 5.0
+var() float MinHoverTime;
+var() float MaxHoverTime;
+var() float CircleRadius;
+var() float CircleSpeed;
+var() float FlySpeed;
 
-var vector CircleCenter;     // The point to circle around
-var vector TargetPoint;      // The point to fly to after done
-var() float CircleRadius;      // Moca: Distance to keep from Harry's center while circling Harry. Def: 48.0
-var() float CircleSpeed;       // Moca: Angular speed in radians/sec while circling. Def: 400.0
-var() float FlySpeed;          // Moca: Speed when flying to target. Def: 400.0
-var bool bFlyDone;            // Switch between orbiting and flying
+var bool bFlyDone;
+var float CircleAngle;
+var Vector CircleCenter;
 
-var float CircleAngle;       // Keeps track of the orbit angle
+
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-    super.PostBeginPlay();
-    attractionSpeed += (FRand() * 10.0);
-    PlaySound(Sound'MocaSoundPak.Magic.SFX_DiscoveryPointStart',SLOT_None,,,1500);
+	Super.PostBeginPlay();
 
-    if (!bAttractedToHarry)
-    {
-        bCollideWorld = True;
-        SetPhysics(PHYS_Walking);
-    }
+	AttractionSpeed += FRand() * 10.0;
+
+	PlaySound(Sound'MocaSoundPak.Magic.SFX_DiscoveryPointStart',SLOT_None,,,1500);
+
+	bCollideWorld = !bAttractedToHarry;
 }
 
-event FellOutOfWorld()
+event FellOutOfWorld();
+
+event Touch(Actor Other)
 {
+	if ( Other.IsA('harry') && !IsInState('stateCircle') )
+	{
+		GotoState('stateCircle');
+	}
 }
 
-event Touch (Actor Other)
-{
-    if (Other.IsA('harry') && !IsInState('stateCircle'))
-    {
-        GotoState('stateCircle');
-    }  
-}
 
+///////////
+// States
+///////////
 
 state stateCircle
 {
-    event Tick(float DeltaTime)
-    {
-        local vector DesiredLocation;
-        local vector Direction;
-        local vector NewLocation;
-        local float RadSpeed;
+	event Tick(float DeltaTime)
+	{
+		local Vector DesiredLocation;
+		local Vector Direction;
+		local Vector NewLocation;
+		local float RadSpeed;
 
-        CircleCenter = PlayerHarry.Location + attractionOffset;
+		CircleCenter = PlayerHarry.Location + AttractionOffset;
 
-        if (!bFlyDone)
-        {
-            // Convert degrees/sec to radians/sec
-            RadSpeed = CircleSpeed * Pi / 180.0;
+		if ( !bFlyDone )
+		{
+			RadSpeed = CircleSpeed * Pi / 180.0;
 
-            // Update orbit angle
-            CircleAngle += RadSpeed * DeltaTime;
+			CircleAngle += RadSpeed * DeltaTime;
 
-            // Keep it from getting huge
-            if (CircleAngle > 2 * Pi)
-                CircleAngle -= 2 * Pi;
+			if ( CircleAngle > 2.0 * Pi )
+			{
+				CircleAngle -= 2.0 * Pi;
+			}
 
-            // Compute orbit location
-            DesiredLocation.X = CircleCenter.X + CircleRadius * Cos(CircleAngle);
-            DesiredLocation.Y = CircleCenter.Y + CircleRadius * Sin(CircleAngle);
-            DesiredLocation.Z = CircleCenter.Z;
+			DesiredLocation.X = CircleCenter.X + CircleRadius * Cos(CircleAngle);
+			DesiredLocation.Y = CircleCenter.Y + CircleRadius * Sin(CircleAngle);
+			DesiredLocation.Z = CircleCenter.Z;
 
-            // Interpolate manually toward desired location
-            NewLocation = Location + (DesiredLocation - Location) * FMin(DeltaTime * 5.0, 1.0);
+			NewLocation = Location + (DesiredLocation - Location) * FMin(DeltaTime * 5.0, 1.0);
 
-            SetLocation(NewLocation);
+			SetLocation(NewLocation);
 
-            // Face tangent of circle
-            Direction.X = -Sin(CircleAngle);
-            Direction.Y =  Cos(CircleAngle);
-            Direction.Z =  0;
-            SetRotation(Rotator(Direction));
-        }
-        else
-        {
-            TargetPoint = PlayerHarry.Location;
+			Direction.X = -Sin(CircleAngle);
+			Direction.Y = Cos(CircleAngle);
+			Direction.Z = 0.0;
+			SetRotation(Rotator(Direction));
+		}
+		else
+		{
+			TargetPoint = PlayerHarry.Location;
 
-            // Fly straight to target
-            Direction = Normal(TargetPoint - Location);
-            NewLocation = Location + Direction * FlySpeed * DeltaTime;
+			Direction = Normal(TargetPoint - Location);
+			NewLocation = Location + Direction * FlySpeed * DeltaTime;
 
-            SetLocation(NewLocation);
+			SetLocation(NewLocation);
+			SetRotation(Rotator(Direction));
+		}
+	}
 
-            // Instantly face flight direction
-            SetRotation(Rotator(Direction));
-        }
-    }
-
-
-    begin:
-        Log("Circling harry!");
-        sleep(FClamp(FRand() * maxHoverTime, minHoverTime, maxHoverTime));
-        bFlyDone = true;
-        sleep(0.2);
-        Super.Touch(PlayerHarry);
+	begin:
+		Sleep(RandRange(MinHoverTime,MaxHoverTime));
+		bFlyDone = True;
+		Sleep(0.2);
+		Super.Touch(PlayerHarry);
 }
+
 
 defaultproperties
 {
-    attractionOffset=(X=0.0,Y=0.0,Z=42.0)
-    DrawType=DT_Sprite
-    DrawScale=0.25
-    Texture=Texture'MocaTexturePak.Particles.TexDiscoveryPoint'
-    pickUpSound=Sound'MocaSoundPak.Magic.SFX_DiscoveryPointEnd'
-    bPickupOnTouch=True
-    EventToSendOnPickup=EssencePickupEvent
-    PickupFlyTo=FT_HudPosition
-    classStatusGroup=Class'MOCAStatusGroupDiscovery'
-    classStatusItem=Class'MOCAStatusItemDiscovery'
-    bBounceIntoPlace=False
-    soundBounce=Sound'HPSounds.menu_sfx.gui_rollover3'
-    Physics=PHYS_Flying
-    bPersistent=True
-    AmbientGlow=220
-    CollisionRadius=16.00
-    CollisionHeight=24.00
-    bBlockActors=False
-    bBlockPlayers=False
-    bProjTarget=False
-    bCollideWorld=False
-    bBlockCamera=False
-    bBounce=False
-    attachedParticleClass(0)=Class'MocaOmniPak.DiscoveryPoint_accent'
-    attachedParticleClass(1)=Class'MocaOmniPak.DiscoveryPoint_glow'
-    bHidden=False
-    AmbientSound=Sound'MocaSoundPak.Magic.SFX_DiscoveryPointFollowLoop'
-    SoundPitch=128
-    SoundRadius=64
-    SoundVolume=255
-    bAttractedToHarry=True
-    attractionSpeed=300.0
-    CircleRadius=48.0
-    CircleSpeed=400.0
-    FlySpeed=400.0
-    bSpriteRelativeScale=true
-    minHoverTime=2.5
-    maxHoverTime=5.0
-	attractionRange=99999.0
+	AttractionOffset=(X=0.0,Y=0.0,Z=42.0)
+	MinHoverTime=2.5
+	MaxHoverTime=5.0
+	AttractionRange=99999.0
+	bAttractedToHarry=True
+	AttractionSpeed=300.0
+	CircleRadius=48.0
+	CircleSpeed=400.0
+	FlySpeed=400.0
+
+	DrawType=DT_Sprite
+	DrawScale=0.25
+	Texture=Texture'MocaTexturePak.Particles.TexDiscoveryPoint'
+	PickUpSound=Sound'MocaSoundPak.Magic.SFX_DiscoveryPointEnd'
+	bPickupOnTouch=True
+	EventToSendOnPickup=EssencePickupEvent
+	PickupFlyTo=FT_HudPosition
+	classStatusGroup=Class'MOCAStatusGroupDiscovery'
+	classStatusItem=Class'MOCAStatusItemDiscovery'
+	bBounceIntoPlace=False
+	soundBounce=Sound'HPSounds.menu_sfx.gui_rollover3'
+	Physics=PHYS_Flying
+	bPersistent=True
+	AmbientGlow=220
+	CollisionRadius=16.00
+	CollisionHeight=24.00
+	bBlockActors=False
+	bBlockPlayers=False
+	bProjTarget=False
+	bCollideWorld=False
+	bBlockCamera=False
+	bBounce=False
+	attachedParticleClass(0)=Class'MocaOmniPak.DiscoveryPoint_accent'
+	attachedParticleClass(1)=Class'MocaOmniPak.DiscoveryPoint_glow'
+	AmbientSound=Sound'MocaSoundPak.Magic.SFX_DiscoveryPointFollowLoop'
+	SoundPitch=128
+	SoundRadius=64
+	SoundVolume=255
+	bSpriteRelativeScale=True
 }

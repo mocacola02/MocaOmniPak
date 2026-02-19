@@ -1,100 +1,66 @@
 class MOCAFireSpot extends HiddenHPawn;
 
-var float fLifetime;
-var int Damage;
-//var groundfire GF;
+var int DamageToDeal;
+
+var array<Sound> CloudSounds;
+
+
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-    Super.PostBeginPlay();
+	Super.PostBeginPlay();
 
-	fLifetime = RandRange(1.0,5.0);
-
-    SetTimer(fLifetime,False);
-
-    Log("Fire rotation:  " @ string(Rotation));
-    //GF = Spawn(class'groundfire',,,Location,Rotation);
-    //GF.SetOwner(self);
-
-    Damage = Clamp(Rand(15),5,15);
+	PlayCloudSound();
 }
 
-event Destroyed()
+event Touch(Actor Other)
 {
-    Super.Destroyed();
-    //GF.Destroy();
-}
-
-event Timer()
-{
-	Destroy();
-}
-
-event Touch (Actor Other)
-{
-    if (Other.IsA('harry'))
-    {
-        PlayerHarry.TakeDamage(Damage,self,Location,vect(0,0,0),'FireSpot');
-    }
-}
-
-event Bump (Actor Other)
-{
-	Touch(Other);
-}
-
-function playCloudSound()
-{
-	local Sound cloudSound;
-	local int randNum;
-
-	randNum = Rand(6);
-	switch (randNum)
+	if ( Other == PlayerHarry )
 	{
-		case 0:
-			cloudSound = Sound'ss_COS_venomland_01E';
-			break;
-		case 1:
-			cloudSound = Sound'ss_COS_venomland_02E';
-			break;
-		case 2:
-			cloudSound = Sound'ss_COS_venomland_03E';
-			break;
-		case 3:
-			cloudSound = Sound'ss_COS_venomland_04E';
-			break;
-		case 4:
-			cloudSound = Sound'ss_COS_venomland_05E';
-			break;
-		case 5:
-			cloudSound = Sound'ss_COS_venomland_06E';
-			break;
-		default:
-			cloudSound = Sound'ss_COS_venomland_01E';
-			break;
+		local int RandDamage;
+		RandDamage = Round(RandRange(5.0,15.0));
+		PlayerHarry.TakeDamage(RandDamage,Self,Location,Vect(0,0,0),'FireSpot');
 	}
-	PlaySound(cloudSound,SLOT_None,RandRange(0.6,1.0),,3000.0,RandRange(0.5,1.6),,False);
 }
 
-auto state StartHere
+
+///////////////////
+// Main Functions
+///////////////////
+
+function PlayCloudSound()
 {
-	begin:
-		playCloudSound();
+	local int RandIdx;
+	RandIdx = Rand(CloudSounds.Length);
+	
+	PlaySound(CloudSounds[RandIdx],SLOT_Interact);
 }
+
 
 defaultproperties
 {
-     fLifetime=1.5
-     attachedParticleClass(0)=Class'MocaOmniPak.groundfire'
-     bReallyDynamicLight=True
-     DrawType=DT_None
-     CollisionRadius=35
-     CollisionHeight=8
-     bCollideActors=True
-     LightType=LT_Steady
-     LightEffect=LE_FireWaver
-     LightBrightness=192
-     LightHue=18
-     LightRadius=4
-     LightSource=LD_Ambient
+	CloudSounds(0)=Sound'ss_COS_venomland_01E'
+	CloudSounds(1)=Sound'ss_COS_venomland_02E'
+	CloudSounds(2)=Sound'ss_COS_venomland_03E'
+	CloudSounds(3)=Sound'ss_COS_venomland_04E'
+	CloudSounds(4)=Sound'ss_COS_venomland_05E'
+	CloudSounds(5)=Sound'ss_COS_venomland_06E'
+
+	LifeSpan=1.5
+	TransientSoundRadius=4096.0
+	attachedParticleClass(0)=Class'MocaOmniPak.groundfire'
+	bReallyDynamicLight=True
+	DrawType=DT_None
+	CollisionRadius=35
+	CollisionHeight=8
+	bCollideActors=True
+	LightType=LT_Steady
+	LightEffect=LE_FireWaver
+	LightBrightness=192
+	LightHue=18
+	LightRadius=4
+	LightSource=LD_Ambient
 }

@@ -3,92 +3,88 @@
 //=============================================================================
 class MOCAStalkerNode extends PathNode;
 
-var() float dotMin;				// Moca: Minimum dot product that will trigger being seen. Def: 0.25
-var() float requiredDistance;	// Moca: Required distance to be triggered as seen. Def: 2000.0
+var() bool bPerformanceMode;	// Moca: Makes node check only once or twice a second instead of every tick
+var() float MinDot;				// Moca: Minimum dot product required to be seen
+var() float RequiredDistance;	// Moca: Required proximity to be triggered as seen
+
 var harry PlayerHarry;
 
-var float DefReqDist;
 
-event PreBeginPlay()
-{
-    super.PreBeginPlay();
-    DefReqDist = requiredDistance;
-}
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-    PlayerHarry = harry(Level.PlayerHarryActor);
-    local float timerRate;
-    timerRate = RandRange(0.1, 0.3);
-    SetTimer(timerRate, true);
+	Super.PostBeginPlay();
+
+	if ( bPerformanceMode )
+	{
+		local float TimerRate;
+		TimerRate = RandRange(0.334,0.667);
+		SetTimer(TimerRate,True);
+		Disable('Tick');
+	}
 }
 
-function setViewDistance(float newDistance)
+event Tick(float DeltaTime)
 {
-    if (newDistance == 0)
-    {
-        newDistance = DefReqDist;
-    }
-    requiredDistance = newDistance;
+	CheckForHarry();
 }
 
 event Timer()
 {
-    local float distToPlayer;
-    distToPlayer = Abs(VSize(Location - PlayerHarry.Location));
-
-    if (distToPlayer < requiredDistance)
-    {
-        if (IsOtherLookingAt(PlayerHarry, dotMin))
-        {
-            if (!bBlocked)
-            {
-                bBlocked = true;
-                Texture = Texture'MocaTexturePak.ICO_BrackenPath';
-            }
-        }
-        else 
-        {
-            if (bBlocked)
-            {
-                bBlocked = false;
-                Texture = Texture'MocaTexturePak.ICO_BrackenPathGreen';
-            }
-        }
-    }
-    else if (bBlocked)
-    {
-        bBlocked = false;
-        Texture = Texture'MocaTexturePak.ICO_BrackenPathGreen';
-    }
+	CheckForHarry();
 }
 
-function bool IsOtherFacing(Actor Other, float MinDot)
+
+///////////////////
+// Main Functions
+///////////////////
+
+function CheckForHarry()
 {
-    local float Dot;
-    Dot = Vector(Other.Rotation) Dot Normal(Location - Other.Location);
+	if ( MOCAHelpers.GetDistanceBetweenActors(Self,PlayerHarry) < RequiredDistance )
+	{
+		bBlocked = MOCAHelpers.IsFacingOther(PlayerHarry,Self,MinDot);
+	}
+	else
+	{
+		bBlocked = False;
+	}
 
-    if (Dot > MinDot)
-    {
-        return true;
-    }
-    return false;
+	SetTexture();
 }
 
-function bool IsOtherLookingAt(Actor Other, float minDot)
+function SetRequiredDistance(float NewDistance)
 {
-    if (IsOtherFacing(Other, minDot) && PlayerCanSeeMe())
-    {
-        return true;
-    }
-    return false;
+	if ( NewDistance <= 0.0 )
+	{
+		NewDistance = 1.0;
+	}
+
+	RequiredDistance = NewDistance;
 }
+
+function SetTexture()
+{
+	if ( bBlocked )
+	{
+		Texture = Texture'MocaTexturePak.ICO_BrackenPath';
+	}
+	else
+	{
+		Texture = Texture'MocaTexturePak.ICO_BrackenPathGreen';
+	}
+}
+
 
 defaultproperties
 {
-    bSpecialCost=true
-    Texture=Texture'MocaTexturePak.ICO_BrackenPathGreen'
-    bStatic=False
-    dotMin=0.25
-    requiredDistance=2000
+	MinDot=0.25
+	RequiredDistance=2000
+
+	bSpecialCost=True
+	bStatic=False
+	Texture=Texture'MocaTexturePak.ICO_BrackenPathGreen'
 }

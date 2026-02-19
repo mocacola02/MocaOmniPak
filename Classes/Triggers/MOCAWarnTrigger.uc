@@ -1,43 +1,52 @@
+//=============================================================================
+// MOCAWarnTrigger.
+//=============================================================================
 class MOCAWarnTrigger extends MOCATrigger;
 
-var() string WarningMessage;
-var() float Duration;
-var() float SizeMultiplier;
-var() Font WarningFont;
-var() Sound WarningSound;
-var() float WarningSoundVolume;
-var() float fXPos;	// Moca: Sets the position of the pop up. If 0, uses the default top centered position.
-var() float fYPos;	// Moca: Sets the position of the pop up. If 0, uses the default top centered position.
-var() float fWarnWidth;
-var() float fWarnHeight;
-/* var() Color BackdropColor;
-var() Color FontColor; */
+var() float Duration;				// Moca: How long will the warning pop up appear?
+var() float WarningSoundVolume;		// Moca: Volume of the sound to play when pop up is made
+var() float SizeMultiplier;			// Moca: Size multiplier of pop up
+var() float XPosition;				// Moca: Optional X (left & right) position of pop up. If 0.0, it centers to the screen.
+var() float YPosition;				// Moca: Optional Y (up & down) position of pop up. If 0.0, it appears at the top of the screen.
 
-event Activate (Actor Other,Pawn Instigator)
+var() string WarningMessage;		// Moca: Message to display on the pop up
+var() Font WarningFont;				// Moca: Font to use for message text
+
+event Activate(Actor Other, Pawn Instigator)
 {
-	PlaySound(WarningSound,SLOT_None,WarningSoundVolume);
+	local MOCAWarning PopUp;
+	
+	// Get ref to pop up
 	baseHUD(PlayerHarry.myHUD).ShowPopup(Class'MOCAWarning');
-	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).LabelFont = WarningFont;
-	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).XPos = fXPos;
-	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).YPos = fYPos;
-	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).TileW = fWarnWidth;
-	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).TileH = fWarnHeight;
-/* 	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).BackdropColor = BackdropColor;
-	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).FontColor = FontColor; */
-	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).SizeScale = SizeMultiplier;
-	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).DisplayText = WarningMessage;
-	MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup).LifeSpan = Duration;
+	PopUp = MOCAWarning(baseHUD(PlayerHarry.myHUD).curPopup);
 
+	// Set font
+	PopUp.LabelFont = WarningFont;
+
+	// Set position
+	PopUp.XPos = XPosition;
+	PosUp.YPos = YPosition;
+
+	// Set scale, text, & duration
+	PopUp.SizeScale = SizeMultiplier;
+	PopUp.DisplayText = WarningMessage;
+	PopUp.LifeSpan = Duration;
+
+	// Play pop up sound
+	PlaySound(WarningSound,SLOT_None,WarningSoundVolume,,,,True);
+
+	// If bTriggerOnceOnly, don't allow this event to trigger again
 	if ( bTriggerOnceOnly )
 	{
 		Disable('Activate');
 	}
 }
 
+
 defaultproperties
 {
-  WarningMessage="Edit message in the properties."
-  Duration=5.0
-  SizeMultiplier=2.0
-  WarningSoundVolume=1.0
+	Duration=5.0
+	WarningSoundVolume=1.0
+	SizeMultiplier=2.0
+	WarningMessage="Edit message in the properties."
 }

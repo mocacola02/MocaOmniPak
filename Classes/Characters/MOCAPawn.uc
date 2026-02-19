@@ -4,42 +4,148 @@
 
 class MOCAPawn extends HPawn;
 
-var() bool bFloatingActor;		// Moca: Is this actor a floating actor? Use this for stuff like floating torches. Def: False
-
-var() float RotationSpeed;		// Moca: How fast should the actor rotate on its Yaw axis (aka turning left or right)? Def: 128.0
-var() float BobSpeed;			// Moca: How fast should the floating actor bob up and down? Def: 128.0
-var() float BobIntensity;		// Moca: How intense should the bobbing be? Aka how far up and down does it go? Def: 1.0
+var(MOCAFloating) bool bFloatingActor;	// Moca: Is this actor a floating actor? Use this for stuff like floating torches. Uses RotationSpeed, BobSpeed, & BobIntensity.
+var(MOCAFloating) float RotationSpeed;	// Moca: How fast to rotate if bFloatingActor
+var(MOCAFloating) float BobSpeed;		// Moca: How fast to bob up and down if bFloatingActor
+var(MOCAFloating) float BobIntensity;	// Moca: How deep to bob up and down if bFloatingActor
 
 var float BobTime;
-var Vector StartingLocation;
+var Vector HomeLocation;
+
+
+///////////
+// Events
+///////////
 
 event PreBeginPlay()
 {
 	Super.PreBeginPlay();
-
-	StartingLocation = Location;
+	HomeLocation = Location;
 }
 
 event Tick(float DeltaTime)
 {
-	super.Tick(DeltaTime);
+	Super.Tick(DeltaTime);
 
-	if(bFloatingActor)
+	// If we should float, do bob
+	if ( bFloatingActor )
 	{
 		DoBob(DeltaTime);
 	}
 }
 
+
+//////////
+// Magic
+//////////
+
+function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDiffindo (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellEcto (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellFlipendo (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellLumos (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellSkurge (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellSpongify (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelRictusempra (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelMimblewimble (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelExpelliarmus (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpell(optional baseSpell Spell, optional Vector HitLocation)
+{
+	// If we're using MOCAharry (required for new spell system) AND we're vulnerable to the matching spell class
+	if ( PlayerHarry.IsA('MOCAharry') && eVulnerableToSpell == DetermineSpellType(Spell.Class) )
+	{
+		// React to spell
+		ProcessSpell();
+		return True;
+	}
+
+	return False;
+}
+
+function ESpellType DetermineSpellType(class<baseSpell> TestSpell)
+{
+	local int i;
+	local MOCAharry MocaPlayer;
+
+	MocaPlayer = MOCAharry(PlayerHarry);
+
+	// For each spell in our spell map
+	for ( i = 0; i < MocaPlayer.SpellMapping.Length; i++ )
+	{
+		// If our spell class matches the spell map entry
+		if ( MocaPlayer.SpellMapping[i].SpellToAssign == TestSpell )
+		{
+			// Return the proper spell slot
+			return MocaPlayer.SpellMapping[i].SpellSlot;
+		}
+	}
+
+	// Default to no spell otherwise
+	return SPELL_None;
+}
+
+function ProcessSpell(); // Define in child classes.
+
+
+////////////////////
+// Misc. Functions
+////////////////////
+
 function EnableTurnTo(actor TurnTarget)
 {
-    bTurnTo_FollowActor = true;
-    TurnTo_TargetActor = TurnTarget;
-    MakeTurnToPermanentController();
+	bTurnTo_FollowActor = True;
+	TurnTo_TargetActor = TurnTarget;
+	MakeTurnToPermanentController();
 }
 
 function DisableTurnTo()
 {
-	bTurnTo_FollowActor = false;
+	bTurnTo_FollowActor = False;
 	TurnTo_TargetActor = None;
 	DestroyTurnToPermanentController();
 }
@@ -49,109 +155,19 @@ function DoBob(float DeltaTime)
 	local float Offset;
 	local Rotator NewRotation;
 
+	// Determine our bob time so we can calculate our offset
 	BobTime += DeltaTime * BobSpeed * 2 * Pi;
-	Offset = sin(BobTime) * BobIntensity;
+	// Set offset multiplied by the intensity
+	Offset = Sin(BobTime) * BobIntensity;
 
+	// Set our target rotation
 	NewRotation.Yaw = Rotation.Yaw + (RotationSpeed * DeltaTime);
 
-	SetLocation(StartingLocation + vect(0,0,1) * Offset);
+	// Set bob location & rotation
+	SetLocation(Home + Vect(0,0,1) * Offset);
 	SetRotation(NewRotation);
 }
 
-function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellDiffindo (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellEcto (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellFlipendo (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellLumos (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellSkurge (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellSpongify (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellDuelRictusempra (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellDuelMimblewimble (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpellDuelExpelliarmus (optional baseSpell spell, optional Vector vHitLocation)
-{
-  return HandleSpell(spell,vHitLocation);
-}
-
-function bool HandleSpell (optional baseSpell spell, optional Vector vHitLocation)
-{
-    if (PlayerHarry.IsA('MOCAharry'))
-    {
-        if (eVulnerableToSpell == DetermineSpellType(spell.Class))
-        {
-            Log("Spell hit and match on " $ string(self));
-            ProcessSpell();
-            return true;
-        }
-    }
-
-    return false;
-}
-
-function ProcessSpell()
-{
-    //Define in child classes.
-}
-
-function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
-{
-    local int i;
-    local MOCAharry MocaPlayerHarry;
-
-    MocaPlayerHarry = MOCAharry(PlayerHarry);
-
-    for (i = 0; i < ArrayCount(MocaPlayerHarry.SpellMapping); i++)
-    {
-        if (MocaPlayerHarry.SpellMapping[i].SpellToAssign == TestSpell)
-        {
-            Log("Found mapping at index " $ i $ " with slot " $ MocaPlayerHarry.SpellMapping[i].SpellSlot);
-            return MocaPlayerHarry.SpellMapping[i].SpellSlot;
-        }
-    }
-
-    Log("No mapping found for " $ string(TestSpell));
-    return SPELL_None;
-}
 
 defaultproperties
 {

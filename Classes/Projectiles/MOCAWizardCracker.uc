@@ -1,4 +1,5 @@
 // cracker without the barrel
+// TODO: Clean me
 class MOCAWizardCracker extends MOCAPawn;
 
 var() float SwellRate; 				//Moca: How long does it take for the cracker to swell up? 1.0 is regular speed, 2.0 is 2x speed, etc. Def: 1.5
@@ -34,8 +35,8 @@ function float DetermineDamage(float Distance);
 event PostBeginPlay()
 {
 	Super.PostBeginPlay();
-	
-	if (WCSoundRadius == 9)
+
+	if ( WCSoundRadius == 9 )
 	{
 		WCSoundRadius = BurstRadius * 0.5;
 	}
@@ -43,9 +44,9 @@ event PostBeginPlay()
 
 event FellOutOfWorld()
 {
-    local vector HandPos;
-    HandPos = PlayerHarry.BonePos('bip01 R Hand');
-    SetLocation(HandPos);
+	local vector HandPos;
+	HandPos = PlayerHarry.BonePos('bip01 R Hand');
+	SetLocation(HandPos);
 }
 
 function float GetRandomPitch(float fMin, float fMax)
@@ -55,191 +56,191 @@ function float GetRandomPitch(float fMin, float fMax)
 
 function PrepareTimer()
 {
-    local float FinalWaitTime;
-    if (bWaitForSwell)
-    {
-        FinalWaitTime = BurstDelay + (3.0 * SwellRate);
-    }
-    else
-    {
-        FinalWaitTime = BurstDelay;
-    }
+	local float FinalWaitTime;
+	if ( bWaitForSwell )
+	{
+		FinalWaitTime = BurstDelay + (3.0 * SwellRate);
+	}
+	else
+	{
+		FinalWaitTime = BurstDelay;
+	}
 
-    SetTimer(FinalWaitTime,false,'DoBurst');
+	SetTimer(FinalWaitTime,False,'DoBurst');
 }
 
 function DoBurst()
 {
-    GotoState('stateBurst');
+	GotoState('stateBurst');
 }
 
 auto state stateDormant
 {
-    event BeginState()
-    {
-        LoopAnim('idle');
+	event BeginState()
+	{
+		LoopAnim('idle');
 
-        if (bExplodeOnTouch)
-        {
-            bObjectCanBePickedUp = False;
-        }
-    }
+		if ( bExplodeOnTouch )
+		{
+			bObjectCanBePickedUp = False;
+		}
+	}
 
-    event EndEvent()
-    {
-        bObjectCanBePickedUp = False;
-    }
+	event EndEvent()
+	{
+		bObjectCanBePickedUp = False;
+	}
 
-    event Touch (Actor Other)
-    {
-        if (bExplodeOnTouch && (Other.IsA('HChar') || Other.IsA('harry')))
-        {
-            Log(string(self) $ " hit HChar " $ string(Other));
-            bDirectHit = Other.IsA('harry');
-            GotoState('stateBurst');
-        }
-    }
+	event Touch (Actor Other)
+	{
+		if ( bExplodeOnTouch && (Other.IsA('HChar') || Other.IsA('harry')) )
+		{
+			Log(string(Self)$" hit HChar "$string(Other));
+			bDirectHit = Other.IsA('harry');
+			GotoState('stateBurst');
+		}
+	}
 }
 
 state stateBeingThrown
 {
-    event BeginState()
-    {
-        PlayerHarry.ActorToCarry = None;
-        bCanHitHarry = false;
-        SetCollision(true,false,false);
-    }
+	event BeginState()
+	{
+		PlayerHarry.ActorToCarry = None;
+		bCanHitHarry = False;
+		SetCollision(True,False,False);
+	}
 
-    event Touch (Actor Other)
-    {
-        if (Other.IsA('HChar') || (Other.IsA('harry') && bCanHitHarry))
-        {
-            Log(string(self) $ " hit HChar " $ string(Other));
-            bDirectHit = Other.IsA('harry');
-            GotoState('stateBurst');
-        }
-    }
+	event Touch (Actor Other)
+	{
+		if (Other.IsA('HChar') || (Other.IsA('harry') && bCanHitHarry))
+		{
+			Log(string(Self)$" hit HChar "$string(Other));
+			bDirectHit = Other.IsA('harry');
+			GotoState('stateBurst');
+		}
+	}
 
-    event Landed(vector HitNormal)
-    {
+	event Landed(vector HitNormal)
+	{
 		PlaySound(LandSound,SLOT_Interact,,,WCSoundRadius);
-        GotoState('stateSwell');
-    }
+		GotoState('stateSwell');
+	}
 
-    begin:
-        sleep(0.25);
-        bCanHitHarry = true;
+begin:
+	sleep(0.25);
+	bCanHitHarry = True;
         
 }
 
 state stateSwell
 {
-    begin:
-        SetCollision(true,false,false);
-        bObjectCanBePickedUp = True;
-        if (!bIsSwelling)
-        {
-            bIsSwelling = True;
-            PrepareTimer();
-			PlaySound(SwellSound,SLOT_Misc,,,WCSoundRadius);
-            PlayAnim('swell',SwellRate);
-            FinishAnim();
-			PlaySound(PulseSound,SLOT_Misc,,,WCSoundRadius,,,true);
-            LoopAnim('shake');
-        }
+begin:
+	SetCollision(True,False,False);
+	bObjectCanBePickedUp = True;
+	if (!bIsSwelling)
+	{
+		bIsSwelling = True;
+		PrepareTimer();
+		PlaySound(SwellSound,SLOT_Misc,,,WCSoundRadius);
+		PlayAnim('swell',SwellRate);
+		FinishAnim();
+		PlaySound(PulseSound,SLOT_Misc,,,WCSoundRadius,,,True);
+		LoopAnim('shake');
+	}
 }
 
 state stateBurst
 {
-    event BeginState()
-    {
-        if (PlayerHarry.ActorToCarry == Self)
-        {
-            PlayerHarry.DropCarryingActor(True);
-        }
-        
-        Burst();
-    }
+	event BeginState()
+	{
+		if (PlayerHarry.ActorToCarry == Self)
+		{
+			PlayerHarry.DropCarryingActor(True);
+		}
+		
+		Burst();
+	}
 
-    function Burst()
-    {
-        local float DistanceFromHarry;
+	function Burst()
+	{
+		local float DistanceFromHarry;
 
 		StopSound(PulseSound);
 
-        if (bActAsSpell)
-        {
-            PlayerHarry.AutoHitAreaEffect(BurstRadius);
-        }
+		if (bActAsSpell)
+		{
+			PlayerHarry.AutoHitAreaEffect(BurstRadius);
+		}
 
-        DistanceFromHarry = VSize(Location - PlayerHarry.Location);
+		DistanceFromHarry = VSize(Location - PlayerHarry.Location);
 
-        if (DistanceFromHarry < BurstRadius)
-        {
-            local float DamageToDeal;
-            local float ShakeAmount;
-            DamageToDeal = DetermineDamage(DistanceFromHarry);
-            PlayerHarry.TakeDamage(DamageToDeal,self,Location,Velocity,'MOCAWizardCracker');
+		if (DistanceFromHarry < BurstRadius)
+		{
+			local float DamageToDeal;
+			local float ShakeAmount;
+			DamageToDeal = DetermineDamage(DistanceFromHarry);
+			PlayerHarry.TakeDamage(DamageToDeal,Self,Location,Velocity,'MOCAWizardCracker');
 
-            ShakeAmount = DamageToDeal / BurstDamage;
-            ShakeAmount *= CameraShakeIntensity;
-            PlayerHarry.ShakeView(0.2,ShakeAmount,ShakeAmount);
-        }
+			ShakeAmount = DamageToDeal / BurstDamage;
+			ShakeAmount *= CameraShakeIntensity;
+			PlayerHarry.ShakeView(0.2,ShakeAmount,ShakeAmount);
+		}
 
 		PlaySound(PopSound,SLOT_Interact,,,WCSoundRadius,GetRandomPitch(MinPopPitch,MaxPopPitch));
 
-        Spawn(class'Firecracker_Burst',,,Location);
+		Spawn(class'Firecracker_Burst',,,Location);
 
-        GotoState('stateKill');
-    }
+		GotoState('stateKill');
+	}
 
-    function float DetermineDamage(float Distance)
-    {
-        if (bDirectHit)
-        {
-            return bDirectHitDamage;
-        }
+	function float DetermineDamage(float Distance)
+	{
+		if (bDirectHit)
+		{
+			return bDirectHitDamage;
+		}
 
-        if (!bBurstFalloff)
-        {
-            return BurstDamage;
-        }
+		if (!bBurstFalloff)
+		{
+			return BurstDamage;
+		}
 
-        return BurstDamage * ((BurstRadius - Distance) / BurstRadius);
-    }
+		return BurstDamage * ((BurstRadius - Distance) / BurstRadius);
+	}
 }
 
 state stateKill
 {
-    begin:
-        SleepForTick();
-        Destroy();
+begin:
+	SleepForTick();
+	Destroy();
 }
 
 defaultproperties
 {
-    attachedParticleClass(0)=Class'HPParticle.WizCrackSparkle'
-    bBlockActors=False
-    bBlockPlayers=False
-    bBlockCamera=False
-    bObjectCanBePickedUp=True
-    CollideType=CT_Box
-    CollisionHeight=6
-    CollisionRadius=6
-    CollisionWidth=20
-    Mesh=SkeletalMesh'MocaModelPak.skwizardcrackerMesh'
+	attachedParticleClass(0)=Class'HPParticle.WizCrackSparkle'
+	bBlockActors=False
+	bBlockPlayers=False
+	bBlockCamera=False
+	bObjectCanBePickedUp=True
+	CollideType=CT_Box
+	CollisionHeight=6
+	CollisionRadius=6
+	CollisionWidth=20
+	Mesh=SkeletalMesh'MocaModelPak.skwizardcrackerMesh'
 
-    SwellRate=1.5
-    BurstDelay=2.0
-    BurstRadius=128.0
-    BurstDamage=15.0
-    bDirectHitDamage=20.0
-    CameraShakeIntensity=100.0
-    CameraShakeDuration=0.75
-    
-    bBurstFalloff=True
-    bWaitForSwell=True
-	
+	SwellRate=1.5
+	BurstDelay=2.0
+	BurstRadius=128.0
+	BurstDamage=15.0
+	bDirectHitDamage=20.0
+	CameraShakeIntensity=100.0
+	CameraShakeDuration=0.75
+
+	bBurstFalloff=True
+	bWaitForSwell=True
+
 	SwellSound=MultiSound'wizard_cracker_swell_multi'
 	PopSound=Sound'wizard_cracker_pop'
 	LandSound=MultiSound'wizard_cracker_land_multi'

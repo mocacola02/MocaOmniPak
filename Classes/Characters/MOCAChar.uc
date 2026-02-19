@@ -1,408 +1,261 @@
+//================================================================================
+// MOCAChar
+//================================================================================
+
 class MOCAChar extends HChar;
 
-var() bool bAffectAmbience;	// Moca: Does this actor affect MOCAAmbiencePlayer? Not yet implemented. Def: False
-var() bool bBypassErrorMode;	// Moca: Bypass the error message that happens if you are missing a necessary component. Not recommended in most cases. Def: False
-var(MOCACharHealth) int hitsToKill;             // Moca: How many hits does it take to die? If 0, cannot die. Def: 0
-var(MOCACharMovement) float maxTravelDistance;  // Moca: How far can the actor travel from its initial location? Def: 150
-var(MOCACharMovement) bool tiltOnMovement;      // Moca: Should this actor lean into its movement direction (like Harry)? Def: true
+var(MOCAMovement) bool bTiltOnMovement;
+var(MOCAMovement) float MaxTravelDistance;
 
-var bool bInErrorMode;
-var bool bMocaDebugMode;
+var(MOCACombat) int HitsToKill;
 
-var int hitsTaken;
+var int HitsTaken;
 
-var name PreviousState;
-var string DebugErrMessage;
+var Vector HomeLocation;
+var Vector LastHarryLocation;
 
-var Vector lastHarryDirection;
-var Vector lastHarryPos;
-var Vector vHome;
-var Vector vNewPos;
 
-var NavigationPoint prevNavP;
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-    Super.PostBeginPlay();
-    prevNavP = Level.NavigationPointList;
-    vHome = Location;
+	Super.PostBeginPlay();
+
+	// Get a default prevNavP
+	prevNavP = Level.NavigationPointList;
+
+	// Set HomeLocation
+	HomeLocation = Location;
 }
 
 event AlterDestination()
 {
-    Super.AlterDestination();
-    //Spawn(Class'DebugSprite');
-    if (!tiltOnMovement)
-    {
-        DesiredRotation.Pitch = 0.0;
-    }
-}
+	Super.AlterDestination();
 
-event EndState()
-{
-	PreviousState = GetStateName();
-}
-
-function Print(string LogMessage)
-{
-	if (bMocaDebugMode)
+	// If not bTiltOnMovement, disable the rotation causing tilts
+	if ( !bTiltOnMovement )
 	{
-		Log(LogMessage);
+		DesiredRotation.Pitch = 0.0;
 	}
 }
 
-function bool ActorExistenceCheck(Class<Actor> ActorToCheck)
-{
-    local Actor A;
 
-    if (bBypassErrorMode)
-    {
-        return true;
-    }
-    
-    Log("OOOOOOOOOOOOOOOOOOOOOO Checking for actor " @ string(ActorToCheck));
-    foreach AllActors(ActorToCheck, A)
-    {
-        Log("Actor is real!!!!!");
-        return true;
-    }
-    Log("actor is not real :(");
-    return false;
+/////////////
+// Distance
+/////////////
+
+function bool IsCloseToHome(float DistanceThreshold)
+{
+	return VSize(Location - HomeLocation ) < DistanceThreshold;
 }
 
-function bool CloseToHome(float distanceAllowance)
+function bool IsHarryNear(optional float TargetDistance)
 {
-  if ( VSize(Location - vHome) < distanceAllowance )
-  {
-    return True;
-  }
-  return False;
-}
-
-function EnterErrorMode()
-{
-	/*
-    DrawType = DT_Sprite;
-    DrawScale = 0.25;
-    Texture = Texture'MocaTexturePak.ICO_ActorErrorBubble';
-    Log("IIIIIIIIIIIIIIIIIIIII start printing error");
-    bInErrorMode = True;
-	*/
-
-	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: " $ DebugErrMessage);
-}
-
-function EnableTurnTo(actor TurnTarget)
-{
-    bTurnTo_FollowActor = true;
-    TurnTo_TargetActor = TurnTarget;
-    MakeTurnToPermanentController();
-}
-
-function DisableTurnTo()
-{
-	bTurnTo_FollowActor = false;
-	TurnTo_TargetActor = None;
-	DestroyTurnToPermanentController();
+	return GetDistanceFromHarry() <= TargetDistance;
 }
 
 function float GetDistanceFromHarry()
 {
-    return VSize(Location - PlayerHarry.Location);
+	return MOCAHelpers.GetDistanceBetweenActors(Self,PlayerHarry);
 }
 
-function rotator GetRotationFacingActor(Actor Other)
+function float GetDistanceFromSelf(Actor ActorToCheck)
 {
-    local vector ToTarget;
-
-    if (Other == None)
-        return Rotation;
-
-    ToTarget = Other.Location - Location;
-
-    return Rotator(ToTarget);
+	return MOCAHelpers.GetDistanceBetweenActors(Self, ActorToCheck);
 }
 
-
-function NavigationPoint GetFurthestNavPoint(actor actorToCheck)
+function Vector GetNearbyNavPInView(float MaxRange)
 {
-    local NavigationPoint Nav;
-    local NavigationPoint FurthestNav;
-    local float currentDistance;
-    local float maxDistance;
-    local vector actorLocation;
+	local NavigationPoint TestNav, BestNav;
+	local Vector DirectionToNav, ForwardDirection;
+	local float Distance, DotProduct, ClosestDist;
 
-    actorLocation = actorToCheck.Location;
+	// Default to something high
+	ClosestDist = 999999.0;
 
-    maxDistance = 0;
+	// Get forward direction
+	ForwardDirection = Vector(Rotation);
+	
+	// For each NavigationPoint in level
+	foreach AllActors(class'NavigationPoint', TestNav)
+	{
+		// Get direction to the tested navigation point
+		DirectionToNav = Normal(TestNav.Location - Location);
+		// Get distance between self and tested nav p
+		Distance = GetDistanceFromSelf(TestNav);
+		// Get dot product from direction to nav & forward direction
+		DotProduct = DirectionToNav Dot ForwardDirection;
 
-    Nav = Level.NavigationPointList;
+		// If our tested distance doesn't exceed MaxRange AND distance is larger than our recorded ClosestDist AND we're facing the test nav p
+		if ( Distance <= MaxRange && Distance < ClosestDist && DotProduct > 0.0 )
+		{
+			// Set new distance and best nav
+			ClosestDist = Distance;
+			BestNav = TestNav;
+		}
+	}
 
-    while (Nav != None)
-    {
-        currentDistance = VSize(Nav.Location - actorLocation);
-
-        if (currentDistance > maxDistance)
-        {
-            maxDistance = currentDistance;
-            FurthestNav = Nav;
-        }
-
-        Nav = Nav.nextNavigationPoint;
-    }
-    Log("Furthest navP: " @ string(FurthestNav));
-
-    return FurthestNav;
+	// Return our best nav
+	return BestNav;
 }
 
-function vector GetNearbyNavPointInView()
+
+//////////
+// Sight
+//////////
+
+function bool CanHarrySeeMe(float MinDot)
 {
-    local NavigationPoint Nav;
-    local vector DirToNav, Forward;
-    local float Distance, DotProduct, ClosestDist;
-    local vector BestLocation;
-
-    ClosestDist = 1000.0; // max distance
-    BestLocation = Location; // fallback if none found
-
-    Forward = vector(Rotation); // actor's forward direction
-
-    foreach AllActors(class'NavigationPoint', Nav)
-    {
-        DirToNav = Normal(Nav.Location - Location);
-        Distance = VSize(Nav.Location - Location);
-        DotProduct = DirToNav Dot Forward;
-
-        // Check distance and that it's in front (~90 degrees FOV)
-        if (Distance <= 1000 && DotProduct > 0.0)
-        {
-            if (Distance < ClosestDist)
-            {
-                ClosestDist = Distance;
-                BestLocation = Nav.Location;
-            }
-        }
-    }
-
-    return BestLocation;
+	return MOCAHelpers.IsFacingOther(PlayerHarry,Self,MinDot) && PlayerCanSeeMe();
 }
 
-function bool isHarryNear(optional float requiredDistance)
+function bool CanISeeHarry(float MinDot, optional bool bRememberLocation)
 {
-    local float Size;
-    local float distToCheck;
-    distToCheck = SightRadius;
-    Size = VSize(PlayerHarry.Location - Location);
-    //PlayerHarry.ClientMessage("Distance" @ string(Size));
+	if ( PlayerCanSeeMe() && MOCAHelpers.IsFacingOther(Self,PlayerHarry,MinDot) && Abs(PlayerHarry.Location.Z - Location.Z) <= 50.0 )
+	{
+		if ( bRememberLocation )
+		{
+			// If we want to remember his location, set it
+			LastHarryLocation = PlayerHarry.Location;
+		}
 
-    if (requiredDistance != 0)
-    {
-        distToCheck = requiredDistance;
-    }
+		return True;
+	}
 
-    if (VSize(PlayerHarry.Location - Location) < distToCheck)
-    {
-        //Log("is close: " $ string(VSize(PlayerHarry.Location - Location) < distToCheck));
-        lastHarryPos = PlayerHarry.Location;
-        return True;
-    }
-    //Log("not close");
-    return False;
+	return False;
 }
 
-function bool IsFacing(Actor Other, float MinDot)  //Courtesy of Omega
-{
-    local float DotProduct;
-    DotProduct = Vector(Rotation) Dot Normal(Other.Location - Location);
 
-    if (DotProduct > MinDot)
-    {
-        return true;
-    }
-    return false;
-}
-
-function bool IsOtherFacing(Actor Other, float MinDot)
-{
-    local float DotProduct;
-
-    // Calculate the direction the 'Other' actor is facing
-    DotProduct = Vector(Other.Rotation) Dot Normal(Location - Other.Location);
-
-    // Check if the current actor is within 'Other's view range based on the MinDot threshold
-    if (DotProduct > MinDot)
-    {
-        return true;
-    }
-    return false;
-}
-
-function bool IsOtherLookingAt(Actor Other, float minDot)
-{
-    if (IsOtherFacing(Other, minDot) && PlayerCanSeeMe())
-    {
-        return true;
-    }
-    return false;
-}
-
-function bool SeesHarry()
-{
-    if (PlayerCanSeeMe())
-        {
-            if (IsFacing(PlayerHarry, 0.25))
-            {
-                if (Abs(PlayerHarry.Location.Z - Location.Z) <= 50)
-                {
-                    lastHarryPos = PlayerHarry.Location;
-                    return true;
-                }
-            }
-        }
-    return false;
-}
-
-function ScreenFade (float fadeOpacity, float fadeOutTime)
-{
-  local FadeViewController mcCamFade;
-  mcCamFade = Spawn(Class'FadeViewController');
-  mcCamFade.Init (fadeOpacity, 0, 0, 0, fadeOutTime);
-}
-
-state stateError
-{
-    begin:
-        EnterErrorMode();
-        Goto 'loop';
-    
-    loop:
-        PlayerHarry.ClientMessage(string(self) @ " : " @ DebugErrMessage);
-        sleep (15.0);
-        goto 'loop';
-}
-
-function FaceActor(Actor Target)
-{
-	if (Target == None)
-		return;
-
-	local vector Dir;
-	Dir = Target.Location - Location;
-
-	local rotator NewRotation;
-	NewRotation = Rotator(Dir);
-
-	NewRotation.Pitch = Rotation.Pitch;
-	NewRotation.Roll = Rotation.Roll;
-
-	// Apply the new rotation
-	SetRotation(NewRotation);
-}
+//////////
+// Magic
+//////////
 
 function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellDiffindo (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellEcto (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellFlipendo (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellLumos (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellSkurge (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellSpongify (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellDuelRictusempra (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellDuelMimblewimble (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
 function bool HandleSpellDuelExpelliarmus (optional baseSpell spell, optional Vector vHitLocation)
 {
-  return HandleSpell(spell,vHitLocation);
+	return HandleSpell(spell,vHitLocation);
 }
 
-function bool HandleSpell (optional baseSpell spell, optional Vector vHitLocation)
+function bool HandleSpell(optional baseSpell Spell, optional Vector HitLocation)
 {
-    if (PlayerHarry.IsA('MOCAharry'))
-    {
-        if (eVulnerableToSpell == DetermineSpellType(spell.Class))
-        {
-            Log("Spell hit and match on " $ string(self));
-            ProcessSpell();
-            return true;
-        }
-        else
-        {
-            return False;
-        }
-    }
-    else
-    {
-        return false;
-    }
+	// If we're using MOCAharry (required for new spell system) AND we're vulnerable to the matching spell class
+	if ( PlayerHarry.IsA('MOCAharry') && eVulnerableToSpell == DetermineSpellType(Spell.Class) )
+	{
+		// React to spell
+		ProcessSpell();
+		return True;
+	}
+
+	return False;
 }
 
-function ProcessSpell()
+function ESpellType DetermineSpellType(class<baseSpell> TestSpell)
 {
-    //Define in child classes.
+	local int i;
+	local MOCAharry MocaPlayer;
+
+	MocaPlayer = MOCAharry(PlayerHarry);
+
+	// For each spell in our spell map
+	for ( i = 0; i < MocaPlayer.SpellMapping.Length; i++ )
+	{
+		// If our spell class matches the spell map entry
+		if ( MocaPlayer.SpellMapping[i].SpellToAssign == TestSpell )
+		{
+			// Return the proper spell slot
+			return MocaPlayer.SpellMapping[i].SpellSlot;
+		}
+	}
+
+	// Default to no spell otherwise
+	return SPELL_None;
 }
 
-function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
+function ProcessSpell(); // Define in child classes.
+
+
+////////////////////
+// Misc. Functions
+////////////////////
+
+function EnterErrorMode(string ErrorMessage)
 {
-    local int i;
-    local MOCAharry MocaPlayerHarry;
-
-    MocaPlayerHarry = MOCAharry(PlayerHarry);
-
-    for (i = 0; i < ArrayCount(MocaPlayerHarry.SpellMapping); i++)
-    {
-        if (MocaPlayerHarry.SpellMapping[i].SpellToAssign == TestSpell)
-        {
-            Log("Found mapping at index " $ i $ " with slot " $ MocaPlayerHarry.SpellMapping[i].SpellSlot);
-            return MocaPlayerHarry.SpellMapping[i].SpellSlot;
-        }
-    }
-
-    Log("No mapping found for " $ string(TestSpell));
-    return SPELL_None;
+	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: "$ErrorMessage);
 }
+
+function EnableTurnTo(Actor TurnTarget)
+{
+	bTurnTo_FollowActor = True;
+	TurnTo_TargetActor = TurnTarget;
+	MakeTurnToPermanentController();
+}
+
+function DisableTurnTo()
+{
+	bTurnTo_FollowActor = False;
+	TurnTo_TargetActor = None;
+	DestroyTurnToPermanentController();
+}
+
+function bool ShouldDie()
+{
+	return HitsTaken >= HitsToKill && HitsToKill > 0;
+}
+
 
 defaultproperties
 {
-     maxTravelDistance=150
-     tiltOnMovement=True
-	 DebugErrMessage="No debug message provided. Please complain to Moca about this!"
+	MaxTravelDistance=1024.0
+	bTiltOnMovement=True
 }

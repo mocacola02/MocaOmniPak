@@ -1,136 +1,158 @@
+//================================================================================
+// MOCAFireseedPlant. Not amazing but better than the pre-3.0 version
+//================================================================================
+
 class MOCAFireseedPlant extends MOCAChar;
 
-// This actor needs to be rewritten.
+var() bool bAlwaysAttack;
 
-var() float DistanceToAttack; 		// Moca: Required distance to attack Harry, Def: 500
-var() float FireballLaunchSpeed; 	// Moca: How high should fireballs be shot, Def: 700
-//var() float RangeMult;			// Moca: Multiplier for range. Def: 1.0
-var() float FireCooldown; 			// Moca: Required time between firing, may cause issues if too low, Def: 2
-var() bool bAlwaysAttack; 			// Moca: Should plants always spit fire, def: False
-var() vector fireballOffset; 		// Moca: Spawn location offset for spawning fireballs, def: 0,0,0
-var float cooldown;
+var() float AttackDistance;
+var() float FireCooldown;
+var() float FireLaunchSpeed;
+
+var() Vector FireOffset;
+
+
+var bool bIsAttacking;
+var float CurrentCooldown;
 var float RangeIntensity;
+
+
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-    Super.PostBeginPlay();
-    cooldown = FireCooldown;
+	Super.PostBeginPlay();
+	CurrentCooldown = FireCooldown;
 }
 
-event Tick (float DeltaTime)
-{
-	if (isHarryNear(DistanceToAttack))
-	{
-		RangeIntensity = GetDistanceFromHarry() / 200;
 
-		if (bMocaDebugMode)
-		{
-			Log("Range intensity: " $ string(RangeIntensity));
-		}	
-	}
-}
+////////////////////
+// Spawn Functions
+////////////////////
 
 function SpawnSmoke()
 {
-    Spawn(Class'SmokePuff');
-    Spawn(Class'SmokeShoot');
+	Spawn(Class'SmokePuff');
+	Spawn(Class'SmokeShoot');
 }
 
 function SpawnFire()
 {
-	local Rotator SpawnRot;
-	local MOCAFireBall SpawnedFireball;
-	SpawnRot = Rotation;
-	SpawnRot.Pitch += 16384;
+	local Rotator FireRotation;
+	local MOCAFireBall NewFireBall;
 
-    Spawn(Class'SmokePuff');
-    SpawnedFireball = Spawn(Class'MOCAFireBall',self,,Location + fireballOffset,SpawnRot);
-	SpawnedFireball.LaunchSpeed = FireballLaunchSpeed;
-	//SpawnedFireball.HomingStrength *= RangeMult;
-	SpawnedFireball.HomingStrength *= RangeIntensity;
+	FireRotation = Rotation;
+	FireRotation.Pitch += 16384;
+
+	Spawn(Class'SmokePuff');
+	NewFireBall = Spawn(Class'MOCAFireBall',Self,,Location + FireOffset,FireRotation);
+	NewFireBall.LaunchSpeed = FireLaunchSpeed;
+
+	RangeIntensity = GetDistanceFromHarry() / 200;
+	NewFireBall.HomingStrength *= RangeIntensity;
 }
+
+
+///////////
+// States
+///////////
 
 auto state stateIdle
 {
-    event BeginState()
-    {
-        if(bAlwaysAttack)
-        {
-            gotostate('stateFireLoop');
-        }
-        LoopAnim('Idle');
-        SetTimer(0.5,true);
-    }
+	event BeginState()
+	{
+		if ( bAlwaysAttack )
+		{
+			GotoState('stateFire');
+		}
 
-    event Timer()
-    {
-        if (GetDistanceFromHarry() < DistanceToAttack)
-        {
-            GotoState('stateFire');
-        }
-    }
+		LoopAnim('Idle');
+		SetTimer(0.5,True);
+	}
 
-    begin:
-        Sleep(RandRange(2.0,16.0));
-        GotoState('statePuff');
+	event Timer()
+	{
+		if ( GetDistanceFromHarry() < DistanceToAttack )
+		{
+			GotoState('stateFire');
+		}
+	}
+
+	begin:
+		Sleep(RandRange(2.0,16.0));
+		GotoState('statePuff');
 }
 
 state statePuff
 {
-    begin:
-        PlayAnim('gasventstart');
-        Sleep(0.2);
-        SpawnSmoke();
-        FinishAnim();
-        PlayAnim('gasventend');
-        FinishAnim();
-        GotoState('stateIdle');
+	begin:
+		PlayAnim('gasventstart');
+		Sleep(0.2);
+		SpawnSmoke();
+		FinishAnim();
+
+		PlayAnim('gasventend');
+		FinishAnim();
+
+		GotoState('stateIdle');
 }
 
 state stateFire
 {
-    event Timer()
-    {
-        Log(string(cooldown));
-        if (cooldown < 0)
-        {
-            cooldown = FireCooldown;
-            GotoState('stateIdle');
-        }
+	event BeginState()
+	{
+		bIsAttacking = True;
+	}
 
-        cooldown = cooldown - 0.1;
-    }
+	event EndState()
+	{
+		bIsAttacking = False;
+		CurrentCooldown = 0.0;
+	}
 
-    begin:
-        PlayAnim('explodestart');
-        FinishAnim();
-        PlayAnim('explodeend');
-        SpawnFire();
-        SetTimer(0.1,true);
-        FinishAnim();
-        LoopAnim('Idle');
-}
+	event Tick(float DeltaTime)
+	{
+		CurrentCooldown += DeltaTime;
+	}
 
-state stateFireLoop
-{
-    begin:
-        PlayAnim('explodestart');
-        FinishAnim();
-        PlayAnim('explodeend');
-        SpawnFire();
-        SetTimer(0.1,true);
-        FinishAnim();
-        LoopAnim('Idle');
-        Sleep(RandRange(0.01,1.0));
-        goto 'begin';
+	begin:
+		if ( CurrentCooldown < FireCooldown )
+		{
+			SleepForTick();
+			Goto('begin');
+		}
+		else
+		{
+			CurrentCooldown = 0.0;
+		}
+
+		PlayAnim('explodestart');
+		FinishAnim();
+
+		PlayAnim('explodeend');
+		SpawnFire();
+		FinishAnim();
+
+		LoopAnim('Idle');
+
+		if ( !IsHarryNear(AttackDistance) && !bAlwaysAttack )
+		{
+			GotoState('stateIdle');
+		}
+
+		Goto('begin');
 }
 
 defaultproperties
 {
-     DistanceToAttack=350
-     FireballLaunchSpeed=100
-     FireCooldown=0.25
-     fireballOffset=(Z=70)
-     Mesh=SkeletalMesh'MocaModelPak.skfireseedplantMesh'
-	 //RangeMult=1.0
+	AttackDistance=350.0
+	FireCooldown=0.25
+	FireLaunchSpeed=100.0
+
+	FireOffset=(Z=70.0)
+
+	Mesh=SkeletalMesh'MocaModelPak.skfireseedplantMesh'
 }

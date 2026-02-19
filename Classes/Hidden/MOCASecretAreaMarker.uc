@@ -4,48 +4,45 @@
 
 class MOCASecretAreaMarker extends SecretAreaMarker;
 
-var(SecretAreaMarker) array<Sound> soundPool; // Moca: List of possible reveal sounds
-var(SecretAreaMarker) float FoundSoundVolume; // Moca: Volume of sound
+var() array<Sound> SoundPool; // Moca: List of possible reveal sounds
+var() float FoundSoundVolume; // Moca: Volume of sound
 
 
-event PostBeginPlay()
+///////////////////
+// Main Functions
+///////////////////
+
+function Sound GetRandomSound()
 {
-    if (soundPool.Length <= 0)
-    {
-        Log("No sound set to " $ string(self) $ ", defaulting to stock sound");
-        FoundSound = Sound'HPSounds.Music_Events.Found_Secret_Music';
-        return;
-    }
-
-    if (soundPool.Length == 1)
-    {
-        FoundSound = soundPool[0];
-        return;
-    }
-
-    local int randomIndex;
-
-    randomIndex = Rand(soundPool.Length);
-    FoundSound = soundPool[randomIndex];
+	if ( SoundPool.Length > 0 )
+	{
+		local int RandIdx;
+		RandIdx = Rand(SoundPool.Length);
+		return SoundPool[RandIdx];
+	}
+	else
+	{
+		return Sound'HPSounds.Music_Events.Found_Secret_Music';
+	}
 }
 
 function OnFound()
 {
-	if (  !bFound )
+	if ( !bFound )
 	{
+		bFound = True;
+
 		cm("Secret Area Found!  Oh most glorious delight and joy!!!");
-		if ( FoundSound != None )
-		{
-			PlaySound(FoundSound,,FoundSoundVolume);
-		}
+
+		FoundSound = GetRandomSound();
+		PlaySound(FoundSound,,FoundSoundVolume);
 	}
-	bFound = True;
 }
 
 defaultproperties
 {
-    soundPool(0)=Sound'HPSounds.Music_Events.Found_Secret_Music'
-    soundPool(1)=Sound'MocaSoundPak.Magic.found_secret_window'
-    soundPool(2)=Sound'MocaSoundPak.Magic.lumos_passthrough_sparkle'
-    FoundSoundVolume=1.0
+	SoundPool(0)=Sound'HPSounds.Music_Events.Found_Secret_Music'
+	SoundPool(1)=Sound'MocaSoundPak.Magic.found_secret_window'
+	SoundPool(2)=Sound'MocaSoundPak.Magic.lumos_passthrough_sparkle'
+	FoundSoundVolume=1.0
 }

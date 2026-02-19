@@ -1,77 +1,82 @@
 class MOCAbaseSpell extends baseSpell;
 
-var WetTexture SpellWetTexture; // What wet texture to use when aiming over a compatible actor?
-var byte AimLightBrightness;    // What brightness to use for the wand light when selecting a compatible actor?
-var byte AimLightHue;   // What hue to use for the wand light when selecting a compatible actor?
-var byte AimLightSaturation;    // What saturation to use for the wand light when selecting a compatible actor?
-var Color AimParticleStartColor; // What color to use for the wand particle when selecting a compatible actor?
+var byte AimLightBrightness;
+var byte AimLightHue;
+var byte AimLightSaturation;
+
+var Color AimParticleStartColor;
 var Color AimParticleEndColor;
-var Texture AimParticleTexture; // What particle texture to use for the wand particle when selecting a compatible actor?
-var MOCAharry MocaPlayerHarry;
 
-var ESpellType SpellToActAsRef;
+var Texture AimParticleTexture;
+var WetTexture SpellWetTexture;
 
-function bool OnSpellHitHPawn (Actor aHit, Vector vHitLocation)
+var MOCAharry MocaPlayer;
+
+var ESpellType SpellToActAs;
+
+
+///////////
+// Events
+///////////
+
+event PostBeginPlay()
 {
-	Log("Hit HPawn " $ string(aHit));
+	Super.PostBeginPlay();
 
-	if (aHit.IsA('MOCAPawn'))
+	MocaPlayer = MOCAharry(PlayerHarry);
+	SpellToActAs = MocaPlayer.DetermineSpellType(Self.Class);
+}
+
+
+///////////////////
+// Main Functions
+///////////////////
+
+function bool OnSpellHitHPawn(Actor HitActor, Vector HitLocation)
+{
+	if ( HitActor.IsA('MOCAPawn') )
 	{
-		Log("Spell " $ string(self) $ " hit a MOCAPawn " $ string(aHit));
-		return MOCAPawn(aHit).HandleSpell(self,vHitLocation);
+		return MOCAPawn(HitActor).HandleSpell(Self,HitLocation);
 	}
-
-	else if (aHit.IsA('MOCAChar'))
+	else if ( HitActor.IsA('MOCAChar') )
 	{
-		Log("Spell " $ string(self) $ " hit a MOCAChar " $ string(aHit));
-		return MOCAChar(aHit).HandleSpell(self,vHitLocation);
+		return MOCAChar(HitActor).HandleSpell(Self,HitLocation);
 	}
-
 	else
 	{
-		Log("Spell " $ string(self) $ " did not hit MOCAPawn or MOCAChar, probably hit a stock actor");
-		switch (SpellToActAsRef)
+		switch (SpellToActAs)
 		{
-			case SPELL_None:			return false;
-			case SPELL_Flipendo:		return HPawn(aHit).HandleSpellFlipendo(self,vHitLocation);
-			case SPELL_Lumos:			return HPawn(aHit).HandleSpellLumos(self,vHitLocation);
-			case SPELL_Alohomora:		return HPawn(aHit).HandleSpellAlohomora(self,vHitLocation);
-			case SPELL_Skurge:			return HPawn(aHit).HandleSpellSkurge(self,vHitLocation);
-			case SPELL_Rictusempra:		return HPawn(aHit).HandleSpellRictusempra(self,vHitLocation);
-			case SPELL_Diffindo:		return HPawn(aHit).HandleSpellDiffindo(self,vHitLocation);
-			case SPELL_Spongify:		return HPawn(aHit).HandleSpellSpongify(self,vHitLocation);
-			default:					return HPawn(aHit).HandleSpellFlipendo(self,vHitLocation);
+			case SPELL_None:			return False;
+			case SPELL_Flipendo:		return HPawn(aHit).HandleSpellFlipendo(Self,HitLocation);
+			case SPELL_Lumos:			return HPawn(aHit).HandleSpellLumos(Self,HitLocation);
+			case SPELL_Alohomora:		return HPawn(aHit).HandleSpellAlohomora(Self,HitLocation);
+			case SPELL_Skurge:			return HPawn(aHit).HandleSpellSkurge(Self,HitLocation);
+			case SPELL_Rictusempra:		return HPawn(aHit).HandleSpellRictusempra(Self,HitLocation);
+			case SPELL_Diffindo:		return HPawn(aHit).HandleSpellDiffindo(Self,HitLocation);
+			case SPELL_Spongify:		return HPawn(aHit).HandleSpellSpongify(Self,HitLocation);
+			default:					return HPawn(aHit).HandleSpellFlipendo(Self,HitLocation);
 		}
 	}
 }
 
-auto state stateIdle
+
+///////////
+// States
+///////////
+
+auto state StateFlying
 {
-begin:
-	MocaPlayerHarry = MOCAharry(PlayerHarry);
-
-	SpellToActAsRef = MocaPlayerHarry.DetermineSpellToActAs(self.Class);
-
-	SpellType = MocaPlayerHarry.DetermineSpellType(self.Class);
-	
-	GotoState('StateFlying');
-}
-
-state StateFlying
-{
-	event BeginState()
+	event Tick(float DeltaTime)
 	{
-		Velocity = vector(Rotation) * Speed;
-	}
-	
-	event Tick (float fTimeDelta)
-	{
-		Super.Tick(fTimeDelta);
-		UpdateRotationWithSeeking(fTimeDelta);
+		Super.Tick(DeltaTime);
+		UpdateRotationWithSeeking(DeltaTime);
+
 		if ( fxFlyParticleEffect != None )
 		{
-		fxFlyParticleEffect.SetLocation(Location);
+			fxFlyParticleEffect.SetLocation(Location);
 		}
 	}
+
 	begin:
+		Velocity = Vect(Rotation) * Speed;
 }

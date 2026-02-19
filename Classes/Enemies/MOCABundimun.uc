@@ -4,66 +4,60 @@
 
 class MOCABundimun extends MOCAChar;
 
-var() bool bStayAboveGround; // Moca: Should it always be above ground? Def: False
-var() float BumpDamage; // Moca: How much damage from bumping into its body? Def: 15.0
-var() float StunDuration; // Moca: How long should it stay stunned from Rictu? Def: 5.0
-var() float PukeDistance; // Moca: How far should the poison reach? Def: 10.0
-var() float TriggerDistance; // Moca: How far can the bundi detect Harry? Def: 500.0
-var() float pukeDamage; // Moca: How much damage should puke do? Def: 10.0
-var Rotator NewRot;
-var float Forward;
-//var float ShadowScaleIncrement;
+var() bool bStayAboveGround;
+var() float TriggerDistance;
+var() float StunDuration;
+var() float SpinRate;
+var() float BumpDamage;
+var() float PukeDamage;
+
 var bool bCanHit;
+
 var BundimunDeath KillEmit;
 var BundimunDig DigEmit;
 var BundimunShrink ShrinkEmit;
 
-var ESpellType DefVunSpell;
-
-function SpawnKillParticles();
 
 event PostBeginPlay()
 {
-    local vector DigLocation;
-    local rotator DigRotation;
-    Super.PostBeginPlay();
+	Super.PostBeginPlay();
 
-	DefVunSpell = eVulnerableToSpell;
+	local Vector DigLocation;
+	local Rotator DigRotation;
 
-    DigLocation = Location;
-    DigLocation.Z -= (CollisionHeight * 0.5) + 1;
-    DigRotation.Pitch = 16384;
-    DigEmit = Spawn(Class'BundimunDig',self,,DigLocation,DigRotation);
+	DigLocation = Location;
+	DigLocation.Z -= (CollisionHeight * 0.5) + 1;
+	DigRotation.Pitch = 16384;
 
-    if (!ActorExistenceCheck(Class'MOCAharry'))
-    {
-        EnterErrorMode();
-    }
+	DigEmit = Spawn(Class'BundimunDig',Self,,DigLocation,DigRotation);
+
+	if ( !PlayerHarry.IsA('MOCAharry') )
+	{
+		EnterErrorMode("MOCABundimun requires MOCAharry. Please replace harry with MOCAharry.");
+	}
 }
 
-event Bump (Actor Other)
+event Bump(Actor Other)
 {
-	if ( PlayerHarry == Other && IsInState('stateSpitting'))
+	if ( Other == PlayerHarry && IsInState('stateSpitting') )
 	{
-		Log("DEALING BUMP DAMAGE TO HARRY!!!!!!!!!!!!!!!!!!");
-		DoBumpDamage(Location, 'BundiBody');
+		DoBumpDamage(Location,'BundiBody');
 	}
 }
 
 function ProcessStomp()
 {
-    Log('Processing stomp');
-    GotoState('stateDie');
+	GotoState('stateDie');
 }
 
-function DoBumpDamage (Vector vDamageLoc, name nameDamage)
+function DoBumpDamage(Vector DamageLocation, name DamageName)
 {
-    if (bCanHit)
-    {
-        PlayerHarry.TakeDamage(BumpDamage,self,vDamageLoc,vect(0.00,0.00,0.00),nameDamage);
-        bCanHit = False;
-		SetTimer(1.0,false,'ResetBumpHit');
-    }
+	if ( bCanHit )
+	{
+		PlayerHarry.TakeDamage(BumpDamage,Self,DamageLocation,Velocity,DamageName);
+		bCanHit = False;
+		SetTimer(1.0,False,'ResetBumpHit');
+	}
 }
 
 function ResetBumpHit()
@@ -73,50 +67,61 @@ function ResetBumpHit()
 
 function ProcessSpell()
 {
-  GotoState('stateStunned');
+	GotoState('stateStunned');
 }
 
 function Puke()
 {
-    local Vector SpawnLocation;
-    local Rotator SpawnRotation;
-    local MOCABundimunSpit NewActor;
+	local Vector PukeLocation;
+	local MOCABundimunSpit NewSpit;
 
-    SpawnLocation = BonePos('SnoutEnd');
-    SpawnRotation = Rotation;
-
-    NewActor = Spawn(Class'MocaOmniPak.MOCABundimunSpit',self,, SpawnLocation, self.Rotation);
-    NewActor.DamageToDeal = pukeDamage;
+	PukeLocation = BonePos('SnoutEnd');
+	
+	NewSpit = Spawn(Class'MocaOmniPak.MOCABundimunSpit',Self,,PukeLocation,Rotation);
+	NewSpit.DamageToDeal = PukeDamage;
 }
 
-auto state determineState
+function SpawnKillParticles()
 {
-    begin:
-        if (bStayAboveGround)
-		{
-            GotoState('stateDig','rise');
-        }
-        else
-		{
-            GotoState('stateUnderGround');
-        }
+	local Rotator SpawnRotation;
+
+	SpawnRotation.Pitch = 16384;
+	SpawnRotation.Yaw = 0;
+	SpawnRotation.Roll = 0;
+	KillEmit = Spawn(class'MocaOmniPak.BundimunDeath',Self,,Location,SpawnRotation,True);
 }
 
-state stateUnderground
+auto state stateIdle
+{
+	event BeginState()
+	{
+		if ( bStayAboveGround )
+		{
+			GotoState('stateDig','rise');
+		}
+		else
+		{
+			GotoState('stateUnderGround');
+		}
+	}
+}
+
+state stateUnderGround
 {
 	event BeginState()
 	{
 		LoopAnim('Underground');
-		Opacity = 0.0;
+		bHidden = True;
 	}
-    
-	event Tick (float DeltaTime)
+
+	event Tick(float DeltaTime)
 	{
 		Global.Tick(DeltaTime);
-        if (isHarryNear(triggerDistance))
-        {
-            GotoState('stateDig','rise');
-        }
+
+		if ( IsHarryNear(TriggerDistance) )
+		{
+			GotoState('stateDig','rise');
+		}
 	}
 }
 
@@ -125,7 +130,7 @@ state stateDig
 	event BeginState()
 	{
 		DigEmit.bEmit = True;
-		Opacity = 1.0;
+		bHidden = False;
 	}
 
 	event EndState()
@@ -133,119 +138,98 @@ state stateDig
 		DigEmit.bEmit = False;
 	}
 
-	event Tick (float DeltaTime)
-	{
-		Global.Tick(DeltaTime);
-		//Shadow.Opacity = FClamp(Shadow.Opacity + ShadowScaleIncrement, 0.0, 1.0);
-		//Log("Bundimun shadow size" $ string(Shadow.Opacity));
-	}
-
 	rise:
-		//ShadowScaleIncrement = 0.008;
-		SetCollision(true,true,true);
+		SetCollision(True,True,True);
 		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_rise');
-        PlayAnim('Rise');
+		PlayAnim('Rise');
 		FinishAnim();
 		GotoState('stateSpitting');
-
+	
 	sink:
-		//ShadowScaleIncrement = -0.008;
-		SetCollision(false,false,false);
+		SetCollision(False,False,False);
 		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_sink');
 		PlayAnim('Sink');
 		FinishAnim();
-		GotoState('stateUnderground');
+		GotoState('stateUnderGround');
 }
 
 state stateSpitting
 {
-    event BeginState()
-    {
+	event BeginState()
+	{
 		bCanHit = True;
-        AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_shoot';
-		eVulnerableToSpell = DefVunSpell;
-        LoopAnim('Attack');
-    }
+		AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_shoot';
+		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+		LoopAnim('Attack');
+	}
 
 	event EndState()
 	{
 		AmbientSound = None;
-		eVulnerableToSpell = SPELL_None;
+		eVulnerableToSpell = None;
 	}
 
-    event Tick (float DeltaTime)
-    {
-		if (!isHarryNear(triggerDistance) && !bStayAboveGround)
-        {
-            GotoState('stateDig','sink');
-        }
+	event Tick(float DeltaTime)
+	{
+		if ( !IsHarryNear(TriggerDistance) && !bStayAboveGround )
+		{
+			GotoState('stateDig','sink');
+		}
 
-        //SPEEN
-        DesiredRotation = Rotation;
-        DesiredRotation.Yaw += (5500 * DeltaTime);
-        SetRotation(DesiredRotation);
-        SetLocation(Location);
-    }
+		//SPEEN
+		DesiredRotation = Rotation;
+		DesiredRotation.Yaw += (SpinRate * DeltaTime);
+		SetRotation(DesiredRotation);
+	}
 }
 
 state stateStunned
 {
-    event BeginState()
-    {
+	event BeginState()
+	{
 		DigEmit.bEmit = False;
-        bCantStandOnMe = False;
-        PlaySound(Sound'MocaSoundPak.Creatures.bundimun_hit');
-        AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_dazed';
-        LoopAnim('Dazed');
-    }
+		bCantStandOnMe = False;
+		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_hit');
+		AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_dazed';
+		LoopAnim('Dazed');
+	}
 
 	event EndState()
 	{
 		bCantStandOnMe = True;
 	}
 
-    begin:
-        sleep(StunDuration);
-        GotoState('stateSpitting');
+	begin:
+		Sleep(StunDuration);
+		GotoState('stateSpitting');
 }
 
 state stateDie
 {
-    event BeginState()
-    {
+	event BeginState()
+	{
 		Disable('Tick');
-		ShrinkEmit = Spawn(class'BundimunShrink',self,,Location,,true);
-        PlaySound(Sound'MocaSoundPak.Creatures.bundimun_smash');
-        PlayAnim('Bounce');
-        SpawnKillParticles();
-    }
+		ShrinkEmit = Spawn(class'BundimunShrink',Self,,Location,,True);
+		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_smash');
+		PlayAnim('Bounce');
+		SpawnKillParticles();
+	}
 
 	event Tick (float DeltaTime)
 	{
-		Global.Tick(DeltaTime);
 		DrawScale -= (1.0 * DeltaTime);
 	}
 
-    function SpawnKillParticles()
-    {
-        local Rotator SpawnRotation;
-
-        SpawnRotation.Pitch = 16384;
-        SpawnRotation.Yaw = 0;
-        SpawnRotation.Roll = 0;
-        Log("spawning kill particles");
-        KillEmit = Spawn(class'MocaOmniPak.BundimunDeath',self,,Location,SpawnRotation,true);
-    }
-
-    begin:
-        Sleep(2.0);
-        bCantStandOnMe=True;
-        KillEmit.bEmit = False;
-        FinishAnim();
+	begin:
+		Sleep(2.0);
+		bCantStandOnMe = True;
+		KillEmit.bEmit = False;
+		FinishAnim();
 		Goto('shrink');
 
 	shrink:
 		Enable('Tick');
+
 		if (DrawScale <= 0.0)
 		{
 			Goto('kill');
@@ -254,6 +238,7 @@ state stateDie
 		{
 			ShrinkEmit.bEmit = False;
 		}
+
 		SleepForTick();
 		Goto('shrink');
 
@@ -261,25 +246,25 @@ state stateDie
 		ShrinkEmit.Destroy();
 		KillEmit.Destroy();
 		DigEmit.Destroy();
-        Destroy();
+		Destroy();
 }
 
 defaultproperties
 {
+	TriggerDistance=500.0
+	StunDuration=5.0
+	SpinRate=5500.0
+	BumpDamage=15.0
+	PukeDamage=75.0
+
+	bCantStandOnMe=True
 	ShadowScale=0.0
-    bCantStandOnMe=True
-    pukeDamage=7.0
-    PukeDistance=75
-    eVulnerableToSpell=SPELL_Rictusempra
-    BumpDamage=15
-    StunDuration=5
-    triggerDistance=500
-    Mesh=SkeletalMesh'MocaModelPak.skBundimun'
-    DrawType=DT_Mesh
-    DrawScale=0.6
-    SoundRadius=12
-    SoundVolMult=1.3
-    CollisionHeight=18
-    CollisionRadius=30
-    DebugErrMessage="The MOCABundimun class requires MOCAharry, not the regular harry class.";
+	DrawScale=0.6
+	SoundRadius=12
+	SoundVolMult=1.3
+	CollisionHeight=18
+	CollisionRadius=30
+	
+	Mesh=SkeletalMesh'MocaModelPak.skBundimun'
+	eVulnerableToSpell=SPELL_Rictusempra
 }

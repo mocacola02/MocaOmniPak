@@ -1,152 +1,98 @@
 //================================================================================
-// MOCAharry. because regular harry is BUSTED and so will mine be
+// MOCAharry. because regular harry is BUSTED and so will mine be. now slightly less bad in v3.0
 //================================================================================
 
-// NOTE: yes this code is a mess yes i am aware
 class MOCAharry extends harry;
 
 struct SpellMap
 {
-  var() const editconst ESpellType SpellSlot; 				// What spell slot to assign the spell to?
-  var() class<baseSpell> SpellToAssign; 					// What custom spell class to assign to the slot?
-  var() ESpellType SpellToActAs;  							// What spell to act as? For example, if you set this as SPELL_Rictusempra, it will activate actors designed for Rictusempra.
-  															// By default, it will act as the assigned spell slot if blank.
+	var() const editconst ESpellType SpellSlot; 				// What spell slot to assign the spell to?
+	var() class<baseSpell> SpellToAssign; 					// What custom spell class to assign to the slot?
+	var() ESpellType SpellToActAs;  							// What spell to act as? For example, if you set this as SPELL_Rictusempra, it will activate actors designed for Rictusempra.
+																// By default, it will act as the assigned spell slot if blank.
 };
 
-var() class<Weapon> DefaultWeapon;
-var() bool bInvisibleWeapon; // Moca: Makes MOCAwand invisible and spawns spells from the hand's weapon bone.
-var() float WandGlowRange; // Moca: How far does the wand glow reach? Def: 6.0
 var() bool bSaveOnLoad;
 
+var(MOCAMagic) bool bLoadWithAllSpells;						// Moca: Add all spells to spellbook on load
 var(MOCAMagic) bool bUseDefaultSpellbook;					// Moca: Whether or not the custom default spellbook will be applied. Def: False
 var(MOCAMagic) Array<Class<baseSpell>> DefaultSpellbook;	// Moca: What default spells do we have?
 var(MOCAMagic) SpellMap SpellMapping[28];					// Moca: What spells are mapped to each spell slot?
-var(MOCAMagic) class<ParticleFX> WandParticleFX;
-var(MOCAMagic) Color DefaultWandParticleColor;
-// TODO: var(MOCAMagic) bool UseDynamicWandParticles;		// Moca: Use the dynamic particle colors/sprites? Def: True
 
-var Actor LastStoredBase;
+var(MOCAMagic) class<ParticleFX> WandParticleFX;			// Moca: Particle class to use for wand
+var(MOCAMagic) Color DefaultWandParticleColor;				// Moca: Default color of wand particles
 
-var travel int PreviousWeapon;
+var(MOCAMagic) bool bInvisibleWeapon;						// Moca: Makes MOCAwand invisible and spawns spells from the hand's weapon bone.
+var(MOCAMagic) float WandGlowRange;							// Moca: How far does the wand glow reach? Def: 6.0
 
-var bool bWallJumped;
-var bool bDebugWeaponToggleCooldown;
-var bool bInWater;
-// TODO: var bool bIsInvisible;
+var Weapon PreviousWeapon;		// Previous weapon actor equipped
+var travel byte PreviousSlot;	// Previous weapon slot
 
-var vector HitNormal;
+var Vector RespawnLocation;		// Location to "respawn" harry at
+var Rotator RespawnRotation;	// Rotation to set on "respawn"
 
-var Vector respawnLoc;
-var Rotator respawnRot;
+var SpellCursor StockCursor;	// Ref to stock SpellCursor
+var MOCASpellCursor MocaCursor;	// Ref to MOCASpellCursor
 
-var int DefaultWeaponSlot;
-var int CurrentWeapon;
+var MOCAChar CaughtByActor;
 
-var FadeActorController mcFade;
 
-var bool bMocaDebugMode;
-
-var SpellCursor StockCursor;
-var MOCASpellCursor MOCACursor;
-
-var MOCAJackOSpawner JackO;
-
-////////////////
-// EVENTS
-////////////////
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-	super.PostBeginPlay();
+	Super.PostBeginPlay();
 
-	respawnLoc = Location;
-	respawnRot = Rotation;
+	// Set default respawn position (aka starting position)
+	SetRespawnPosition(Location,Rotation);
 
-	HUDType = class'MOCAHUD';
-
-	if (bSaveOnLoad)
+	// If we're set to save on load, then save
+	if ( bSaveOnLoad )
 	{
 		SaveGame();
 	}
 
-	if (bUseDefaultSpellbook)
+	if ( bUseDefaultSpellbook )
 	{
 		local int i;
 
-		for (i=0; i < DefaultSpellbook.Length; i++)
+		for ( i = 0; i < DefaultSpellbook.Length; i++ )
 		{
 			AddToModdedSpellBook(DefaultSpellbook[i]);
 		}
 	}
+
+	bNoSpellBookCheck = bLoadWithAllSpells;
 }
 
 event PreClientTravel()
 {
-	Log("Previous weapon is " $ string(PreviousWeapon));
-	ChangeWand(4, "PreClientTravel");
+	// To prevent issues with switching to a map with stock Harry, switch back to baseWand
+	SetWeaponBySlot(4);
 	Super.PreClientTravel();
 }
 
-// icky and gross resets!
 event TravelPostAccept()
 {
 	Super.TravelPostAccept();
 
-	Weapon = None;
+	// Set up weapons after travel (aka switch back to our pre-travel weapon)
+	SetupWeapons();
+}
 
-	local int AddedWeapons;
+event BaseChanged(Actor OldBase, Actor NewBase)
+{
+	Super.BaseChanged(OldBase, NewBase);
 
-	if (FindInventoryType(class'MOCAbaseHands') == None)
+	if ( NewBase.IsA('MOCABundimun') )
 	{
-		AddHarryWeapon(class'MOCAbaseHands');
-		AddedWeapons++;
-	}
-	if (FindInventoryType(class'MOCAWand') == None)
-	{
-		AddHarryWeapon(class'MOCAWand');
-		AddedWeapons++;
-	}
-	if (FindInventoryType(class'baseWand') == None)
-	{
-		AddHarryWeapon(class'baseWand');
-		AddedWeapons++;
-	}
+		local MOCABundimun Bundi;
+		Bundi = MOCABundimun(NewBase);
 
-	local SpellCursor A;
-	
-	foreach AllActors(class'SpellCursor', A)
-	{
-		if (!A.IsA('MOCASpellCursor'))
-		{
-			StockCursor = A;
-			break;
-		}
+		DoBundiJump(Bundi);
 	}
-
-	local MOCASpellCursor B;
-	
-	foreach AllActors(class'MOCASpellCursor', B)
-	{
-		MOCACursor = B;
-		break;
-	}
-
-	if (StockCursor == None)
-	{
-		StockCursor = Spawn(class'SpellCursor');
-	}
-	if (MOCACursor == None)
-	{
-		MOCACursor = Spawn(class'MOCASpellCursor');
-	}
-
-	Log("ADDED " $ string(AddedWeapons) $ " WEAPONS ON POSTACCEPT");
-
-	InitWands();
-
-	MOCAHUD(myHUD).bIsLoading = False;
-	HPConsole(Player.Console).bLockMenus = false;
-	HPConsole(Player.Console).LoadingBackground = Texture'HGame.LoadingScreen.FELoadingScreen';
 }
 
 event Touch(Actor Other)
@@ -155,56 +101,357 @@ event Touch(Actor Other)
 	PickupActor(Other);
 }
 
-event BaseChanged(Actor OldBase, Actor NewBase)
+
+////////////////////
+// Weapon Handling
+////////////////////
+
+// Not the cleanest but I feel like it's much better than the previous version
+
+function SetupWeapons()
 {
-	Super.BaseChanged(OldBase, NewBase);
-	if (NewBase.IsA('MOCABundimun'))
+	// Create SpellCursor & MOCASpellCursor if we don't have them
+	CreateCursors();
+
+	if ( PreviousSlot == 0 || ( PreviousSlot == 4 && !bHarryUsingSword ) ) // If we don't know our previous weapon or we're using baseWand, switch to MOCAWand for feature compatibility
 	{
-		local MOCABundimun Bundi;
-		Bundi = MOCABundimun(NewBase);
-		if (Bundi.IsInState('stateStunned'))
+		SetWeaponByClass( class'MOCAWand', True );
+	}
+	else	// Otherwise, use our previous weapon
+	{
+		SetWeaponBySlot(PreviousSlot);
+	}
+}
+
+function SetWeaponByClass(class<Weapon> DesiredWeapon, bool bForceSet)	// If bForceSet, create the weapon before setting
+{
+	// Store previous weapon actor
+	SetPreviousWeaponActor(Weapon);
+
+	local Weapon NewWeapon;
+	NewWeapon = GetWeaponActorByClass(DesiredWeapon,bForceSet);
+
+	if ( NewWeapon != None )
+	{
+		// Get target weapon slot
+		local byte NewSlot;
+		NewSlot = NewWeapon.InventoryGroup;
+
+		// Set our weapon using the slot
+		SetWeaponBySlot(NewSlot);
+	}
+	else
+	{
+		Log("Could not set weapon as we do not have it in our inventory.");
+	}
+}
+
+function SetWeaponBySlot(byte DesiredSlot)
+{
+	// Store previous weapon slot
+	SetPreviousSlot(Weapon.InventoryGroup);
+
+	Log("Switching to Weapon "$string(DesiredWeapon)$" in slot "$string(DesiredSlot));
+
+	// Switch our weapon and give ammo
+	SwitchWeapon(DesiredSlot);
+	ChangedWeapon();
+	Weapon.GiveAmmo(Self);
+
+	// If we were using a Wand, make sure it is inactive
+	if ( PreviousWeapon.IsA('baseWand') )
+	{
+		DeactivateWand(baseWand(PreviousWeapon));
+	}
+
+	// Make sure our SpellCursors are in order
+	ValidateCursor();
+}
+
+function Weapon GetWeaponActorByClass(class<Weapon> DesiredWeapon, optional bool bForceGet) //bForceGet will create the weapon if it doesn't exist
+{
+	// Get the weapon from our inventory
+	local Weapon FoundWeapon;
+	FoundWeapon = FindInventoryType(DesiredWeapon);
+
+	// If we didn't find it and we're force getting, spawn the weapon
+	if ( FoundWeapon == None && bForceGet )
+	{
+		FoundWeapon = SpawnWeaponActor(DesiredWeapon);
+	}
+
+	return FoundWeapon;
+}
+
+function Weapon SpawnWeaponActor(class<Weapon> WeaponToSpawn)
+{
+	// Create weapon actor and make it an item
+	local Weapon WeaponActor;
+	WeaponActor = Spawn((WeaponToSpawn, Self));
+	WeaponActor.BecomeItem();
+
+	if ( AddInventory(WeaponActor) )	// If successfully added, return the weapon
+	{
+		Log("Added Weapon "$string(WeaponActor)$" to Inventory");
+		return WeaponActor;
+	}
+	else	// Otherwise, destroy what we made and return nothing
+	{
+		Log("Could not add Weapon"$string(WeaponActor)$"to Inventory. It may already exist");
+		WeaponActor.Destroy();
+		return None;
+	}
+}
+
+function SetPreviousWeaponActor(Weapon DesiredWeapon)
+{
+	// Set our previous weapon
+	PreviousWeapon = DesiredWeapon;
+}
+
+function SetPreviousSlot(byte DesiredSlot)
+{
+	// Set our previous weapon slot
+	PreviousSlot = DesiredSlot;
+}
+
+function ValidateCursor()
+{
+	// "Reset" the cursor. We don't want it active or visible.
+	SpellCursor.bSpellCursorAlwaysOn = False;
+	SpellCursor.EnableEmission(False);
+	TurnOffSpellCursor();
+
+	// Set the correct cursor
+	SetCursor(Weapon.Class);
+}
+
+function CreateCursors()
+{
+	local bool FoundCursor;
+
+	if ( StockCursor == None )	// If we don't have our StockCursor
+	{
+		local SpellCursor A;
+		
+		// Find SpellCursor
+		foreach AllActors(class'SpellCursor', A)
 		{
-			fTimeInAir=0.0;
-			Bundi.ProcessStomp();
-			GotoState('stateStomping');
+			if ( !A.IsA('MOCASpellCursor') )	// If not a MOCASpellCursor
+			{
+				// Set StockCursor to found SpellCursor
+				StockCursor = A;
+				FoundCursor = True;
+				break;
+			}
 		}
-		else if (Bundi.IsInState('stateSpitting'))
+
+		if ( !FoundCursor )	// If we didn't find it
 		{
-			Bundi.DoBumpDamage(Location,'BundiJumpDamage');
+			// Spawn new SpellCursor
+			StockCursor = Spawn(class'SpellCursor');
+		}
+	}
+
+	FoundCursor = False;
+
+	if ( MocaCursor == None )	// If we don't have our MocaCursor
+	{
+		local MOCASpellCursor B;
+		
+		// Find MOCACursor
+		foreach AllActors(class'MOCASpellCursor', B)
+		{
+			// Set MocaCursor to found MOCASpellCursor
+			MocaCursor = B;
+			FoundCursor = True;
+		}
+
+		if ( !FoundCursor )	// If we didn't find it
+		{
+			// Spawn new MOCASpellCursor
+			MocaCursor = Spawn(class'MOCASpellCursor');
 		}
 	}
 }
 
-////////////////
-// FUNCTIONS
-////////////////
+function SetCursor(name WeaponClass) // Breaking this into its own function so it can easily be extended with new classes
+{
+	// Assign the correct cursor, if any
+	switch (WeaponClass)
+	{
+		case 'baseWand':
+			SpellCursor = StockCursor;
+		case 'MOCAWand':
+			SpellCursor = MocaCursor;
+			// Throwing these in here just cuz its convenient
+			MOCAWand(WeaponActor).DefaultColorToUse = DefaultWandParticleColor;
+			MOCAWand(WeaponActor).fxChargeParticleFXClass = WandParticleFX;
+		default:
+			SpellCursor = None;
+	}
+}
+
+function DeactivateWand(baseWand DesiredWand)
+{
+	// Disable wand and particles
+	DesiredWand.bGlowingWand = False;
+	DesiredWand.StopGlowingWand();
+	DesiredWand.StopChargingSpell();
+}
 
 function ToggleUseSword()
 {
-	bHarryUsingSword =  !bHarryUsingSword;
+	bHarryUsingSword = !bHarryUsingSword;
+
 	if ( bHarryUsingSword )
 	{
-		//ChangeWand(4, "ToggleUseSword True");
+		SetWeaponBySlot(4);
 		baseWand(Weapon).ToggleUseSword();
 		HarryAnimSet = HARRY_ANIM_SET_SWORD;
 	}
 	else
 	{
 		baseWand(Weapon).ToggleUseSword();
-		ChangeWand(PreviousWeapon, "ToggleUseSword False");
+		SetWeaponBySlot(PreviousSlot);
 		HarryAnimSet = HARRY_ANIM_SET_MAIN;
-	}	
+	}
 }
 
-exec function Reload()
+
+//////////////
+// Magic
+//////////////
+
+// I'm keeping spellbook stuff as is for now. You can't make me improve this game's awful spell system through a harry extension
+function AddToModdedSpellBook (Class<baseSpell> spellClass)
 {
-	HPConsole(Player.Console).ConsoleCommand("savegame 0");
-	HPConsole(Player.Console).ConsoleCommand("loadgame 0");
+	local ESpellType typeToAdd;
+
+	typeToAdd = DetermineSpellType(spellClass);
+
+	if ( ( typeToAdd < MAX_NUM_SPELLS ) && ( SpellBook[typeToAdd] == None ) )
+	{
+		SpellBook[typeToAdd] = spellClass;
+	}
 }
+
+function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
+{
+	local int i;
+
+	for ( i = 0; i < ArrayCount(SpellMapping); i++ )
+	{
+		if ( SpellMapping[i].SpellToAssign == TestSpell )
+		{
+			Log("Found mapping at index "$i$" with slot "$SpellMapping[i].SpellSlot);
+			return SpellMapping[i].SpellToActAs;
+		}
+	}
+
+	Log("No mapping found for "$string(TestSpell));
+	return SPELL_None;
+}
+
+function AddToMocaSpellbook(class<baseClass> SpellToAdd)
+{
+	if ( !IsSpellInMocaSpellbook(SpellToAdd) )
+	{
+		MocaSpellbook.AddItem(SpellToAdd);
+	}
+}
+
+function ClearMocaSpellbook()
+{
+	MocaSpellbook.Empty();
+}
+
+function bool IsSpellInMocaSpellbook(class<baseClass> SpellToTest)
+{
+	local int i;
+
+	for ( i = 0; i < MocaSpellbook.Length; i++ )
+	{
+		if ( MocaSpellbook[i] == SpellToTest )
+		{
+			return True;
+		}
+	}
+
+	return False;
+}
+
+function StartAimSoundFX()
+{
+	if ( bInDuelingMode && (CurrentDuelSpell == 2) )
+	{
+		return;
+	}
+
+	PlaySound(Sound'Spell_aim',SLOT_Misc);
+
+	if ( bInDuelingMode && (CurrentDuelSpell == 1) )
+	{
+		PlaySound(Sound'Dueling_MIM_buildup',SLOT_Interact);
+	}
+	else
+	{
+		PlaySound(Sound'spell_loop_nl',SLOT_Interact,,,,,,True);
+	}
+}
+
+function StopAimSoundFX()
+{
+	if ( bInDuelingMode && (CurrentDuelSpell == 1) )
+	{
+		StopSound(Sound'Dueling_MIM_buildup',SLOT_Interact);
+	}
+	else
+	{
+		StopSound(Sound'Spell_aim',SLOT_Misc,2.5);
+		StopSound(Sound'spell_loop_nl',SLOT_Interact,0.75);
+	}
+}
+
+function PlaySpellCastSound (ESpellType SpellType)
+{
+	Super.PlaySpellCastSound(SpellType);
+
+	local Sound SpellSound;
+
+	if ( SpellSound == None )
+	{
+		local class curSpell;
+		curSpell = baseWand(Weapon).CurrentSpell;
+		SpellSound = class<baseSpell>(curSpell).Default.CastSound;
+	}
+
+	if ( SpellSound != None )
+	{
+		PlaySound(SpellSound,SLOT_None);
+	}
+}
+
+
+////////////
+// Respawn
+////////////
+
+function SetRespawnPosition(Vector NewLocation, Rotator NewRotation)
+{
+	// Set respawn location and rotation
+	RespawnLocation = NewLocation;
+	RespawnRotation = NewRotation;
+}
+
+
+///////////////////
+// Exec Functions
+///////////////////
 
 exec function JackOMode()
 {
-	if (Mesh == SkeletalMesh'skPumpkinHarry')
+	if ( Mesh == SkeletalMesh'skPumpkinHarry' )
 	{
 		Mesh = SkeletalMesh'MOCAharry';
 	}
@@ -214,62 +461,7 @@ exec function JackOMode()
 	}
 }
 
-exec function ListWeapons()
-{
-	local Weapon A;
-	local int i;
-	local string S;
-
-	foreach AllActors(class'Weapon', A)
-	{
-		if (i >= 249)
-		{
-			CM("You have more than 250 weapons spawned, please run FixWeapons! Your game will likely crash if you do not.");
-			return;
-		}
-		i++;
-	}
-
-	S = "There are " $ string(i) $ " weapons spawned. ";
-	
-	if (i > 10)
-	{
-		S = S $ "Consider entering the command FixWeapons if the number is more than the number of weapons in the game (you should have 3 with MocaOmniPak alone).";
-	}
-
-	CM(S);
-	Log(S);
-}
-
-exec function FixWeapons()
-{
-	local Weapon A;
-	
-	foreach AllActors(class'Weapon', A)
-	{
-		A.Destroy();
-	}
-
-	TravelPostAccept();
-}
-
-exec function MocaMode()
-{
-	local MOCAChar A;
-	local int ActorCount;
-
-	bMocaDebugMode = !bMocaDebugMode;
-	Log("MocaMode = " $ string(bMocaDebugMode));
-
-	foreach AllActors(class'MOCAChar', A)
-	{
-		A.bMocaDebugMode = bMocaDebugMode;
-		ActorCount++;
-	}
-
-	Log("MocaMode set on " $ string(ActorCount) $ " MOCAChars.");
-}
-
+// I don't like this, if possible I want to find a cleaner way to show all instead of a set list
 exec function ShowCollectibles()
 {
 	local int nCount;
@@ -286,360 +478,136 @@ exec function ShowCollectibles()
 	managerStatus.IncrementCount(Class'MOCAStatusGroupWater',Class'MOCAStatusItemWater',nCount);
 }
 
-function AddHarryWeapon (class<Weapon> WeaponToSpawn)
+exec function AltFire (optional float f)
 {
-	local Weapon WeaponActor;
+	local Vector TraceStart;
+	local Vector TraceDirection;
+	local Vector TraceEnd;
 
-	WeaponActor = Spawn(WeaponToSpawn, self);
-	WeaponActor.BecomeItem();
+	if ( HarryAnimChannel.IsCarryingActor() )
+	{
+		if ( bThrow == False && IsInState('PlayerWalking') )
+		{
+			ClientMessage("Throw!");
+			HarryAnimChannel.GotoStateThrow();
+			bThrow = True;
+		}
+	} 
+	else 
+	{
+		if ( Weapon.IsA('baseWand') && (CarryingActor == None) && !bIsAiming )
+		{
+			Weapon.bPointing = True;
+			StartAiming(bHarryUsingSword);
+		}
 
-	if ( WeaponActor.IsA('MOCAWand'))
-	{
-		MOCAWand(WeaponActor).DefaultColorToUse = DefaultWandParticleColor;
-		MOCAWand(WeaponActor).fxChargeParticleFXClass = WandParticleFX;
+		if ( (Weapon.IsA('MOCAbaseHands')) )
+		{
+			InteractTrace(250.0);
+		}
 	}
-	
-	if (AddInventory(WeaponActor))
-	{
-		Log("Add Weapon " $ string(WeaponToSpawn)  $ " to inventory");
-	}
-	else
-	{
-		Log("Could not add new weapon " $ string(WeaponActor) $"! Is it already in our inventory?");
-	}
+}
+
+
+////////////////////
+// Misc. Functions
+////////////////////
+
+function InteractTrace(float TraceDistance)
+{
+	local Vector TraceStart;
+	local Vector TraceDirection;
+	local Vector TraceEnd;
+
+	TraceStart = Cam.Location;
+	TraceDirection = vector(Cam.Rotation);
+	TraceEnd = TraceStart + TraceDirection * TraceDistance;
+
+	MOCAbaseHands(Weapon).TraceForInteracts(TraceEnd, TraceStart);
 }
 
 function SetNewMesh()
 {
-	if ( bIsGoyle && (Mesh == SkeletalMesh'MOCAharry') )
+	if ( bIsGoyle && Mesh == SkeletalMesh'MOCAharry' )
 	{
 		Mesh = SkeletalMesh'skGoyleMesh';
 		DrawScale = 1.15;
 	}
-	if (  !bIsGoyle && (Mesh == SkeletalMesh'skGoyleMesh') )
+	
+	if ( !bIsGoyle && Mesh == SkeletalMesh'skGoyleMesh' )
 	{
 		Mesh = SkeletalMesh'MOCAharry';
 		DrawScale = 1.0;
 	}
 }
 
+
+// TODO: Check if this is actually needed
 function PickupActor(Actor Other)
 {
 	Super.PickupActor(Other);
 	StopAimSoundFX();
 }
 
-exec function ChangeWand(int WeaponSlot, optional string Source)
+function DoBundiJump(MOCABundimun Bundi)
 {
-	local Weapon PrevWeap;
-	PrevWeap = Weapon;
-
-	if (Source == "")
+	if ( Bundi.IsInState('stateStunned') )
 	{
-		Source = "Unknown";
-	}
-
-	Log("ChangeWand(" $ string(WeaponSlot) $ ") was called from " $ Source);
-
-	if ( (WeaponSlot == 3 || WeaponSlot > 4 || WeaponSlot <= 0) )
-	{
-		WeaponSlot = 2;
-	}
-
-	if (PreviousWeapon != CurrentWeapon && CurrentWeapon > 0)
-	{
-		PreviousWeapon = CurrentWeapon;
-	}
-	
-	Log("Setting previous weapon to " $ string(CurrentWeapon));
-
-	CurrentWeapon = WeaponSlot;
-
-	if (CurrentWeapon == 2)
-	{
-		Log("SWITCHING TO MOCACURSOR$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-		SpellCursor = MOCACursor;
-	}
-	else if (CurrentWeapon == 4)
-	{
-		Log("SWITCHING TO STOCKCURSOR################################");
-		SpellCursor = StockCursor;
-	}
-	else if (CurrentWeapon == 1)
-	{
-		Log("SWITCHING TO NO CURSOR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		SpellCursor = None;
-	}
-
-	// 1 is wandless, 2 is MOCAWand, 4 is baseWand
-	Log("SWITCHING WEAPON TO " $ string(CurrentWeapon));
-	SwitchWeapon(CurrentWeapon);
-	ChangedWeapon();
-	Weapon.GiveAmmo(self);	
-
-	SpellCursor.bSpellCursorAlwaysOn = False;
-	SpellCursor.EnableEmission(False);
-	TurnOffSpellCursor();
-
-	Log("Stock cursor: " $ string(StockCursor) $ " | Moca Cursor: " $ string(MOCACursor));
-
-	if (PrevWeap.IsA('baseWand'))
-	{
-		Log("Removing baseWand particles on " $ string(PrevWeap));
-		baseWand(PrevWeap).bGlowingWand = False;
-		baseWand(PrevWeap).StopGlowingWand();
-		baseWand(PrevWeap).StopChargingSpell();
-	}
-
-	Log("We are using weapon " $ string(Weapon) $ " with the cursor " $ string(SpellCursor));
-}
-
-exec function GetCurrentWeapon()
-{
-	cm("Current weapon is " $ string(Weapon) $ " with the SpellCursor " $ string(SpellCursor));
-}
-
-function InitWands()
-{
-	Log("bHarryUsingSword = " $ string(bHarryUsingSword));
-	if (bHarryUsingSword)
-	{
-		ChangeWand(4);
-		SpellCursor.Destroy();
-		SpellCursor = Spawn(class'SpellCursor');
-		SpellCursor.bInvisibleCursor = False;
-		SpellCursor.EnableEmission(true);
-		SpellCursor.bSpellCursorAlwaysOn = True;
-		SpellCursor.UpdateCursor();
-	}
-
-	Log("We currently have weapon " $ string(Weapon));
-	if (PreviousWeapon > 0)
-	{
-		Log("Our previous weapon slot was " $ string(PreviousWeapon));
-		ChangeWand(PreviousWeapon, "InitWands PreviousWeapon");
-		return;
-	}
-
-	Log("No previous weapon, using default, previous gave us " $ string(PreviousWeapon));
-
-	if (DefaultWeapon == class'MOCAbaseHands')
-	{
-		DefaultWeaponSlot = 1;
-	}
-	else if (DefaultWeapon == class'MOCAWand')
-	{
-		DefaultWeaponSlot = 2;
-	}
-	else
-	{
-		DefaultWeaponSlot = 4;
-	}
-
-	Log("Default weapon slot is " $ string(DefaultWeaponSlot));
-	ChangeWand(DefaultWeaponSlot, "InitWands DefaultWeapon");
-}
-
-function MOCAHUD GetMocaHud()
-{
-  if (myHUD.IsA('MOCAHUD'))
-  {
-    return MOCAHUD(myHUD);
-  }
-}
-
-exec function ListCursors()
-{
-	local SpellCursor A;
-	
-	foreach AllActors(class'SpellCursor', A)
-	{
-		cm(string(A));
+		fTimeInAir = 0.0;
+		Bundi.HandleStomp();
+		GotoState('stateStomping');
 	}
 }
 
-function AddToModdedSpellBook (Class<baseSpell> spellClass)
+function SetAnimSet(enumHarryAnimSet NewSet)
 {
-	local ESpellType typeToAdd;
-
-	typeToAdd = DetermineSpellType(spellClass);
-
-	if ( (typeToAdd < MAX_NUM_SPELLS) && (SpellBook[typeToAdd] == None) )
-	{
-		SpellBook[typeToAdd] = spellClass;
-	}
-}
-
-function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
-{
-    local int i;
-
-    for (i = 0; i < ArrayCount(SpellMapping); i++)
-    {
-        if (SpellMapping[i].SpellToAssign == TestSpell)
-        {
-            Log("Found mapping at index " $ i $ " with slot " $ SpellMapping[i].SpellSlot);
-            return SpellMapping[i].SpellSlot;
-        }
-    }
-
-    Log("No mapping found for " $ string(TestSpell));
-    return SPELL_None;
-}
-
-function ESpellType DetermineSpellToActAs (class<baseSpell> TestSpell)
-{
-    local int i;
-
-    for (i = 0; i < ArrayCount(SpellMapping); i++)
-    {
-        if (SpellMapping[i].SpellToAssign == TestSpell)
-        {
-            Log("Found mapping at index " $ i $ " with slot " $ SpellMapping[i].SpellToActAs);
-            return SpellMapping[i].SpellToActAs;
-        }
-    }
-
-    Log("No mapping found for " $ string(TestSpell));
-    return SPELL_None;
-}
-
-function PlayIdle()
-{
-  if ( Mesh == None )
-  {
-    return;
-  }
-  CurrIdleAnimName = GetCurrIdleAnimName();
-  LoopAnim(CurrIdleAnimName,0.8,0.5,,HarryAnimType);
-}
-
-function StartAimSoundFX()
-{
-	if ( bInDuelingMode && (CurrentDuelSpell == 2) )
-	{
-		return;
-	}
-	PlaySound(Sound'Spell_aim',SLOT_Misc);
-	if ( bInDuelingMode && (CurrentDuelSpell == 1) )
-	{
-		PlaySound(Sound'Dueling_MIM_buildup',SLOT_Interact);
-	} else {
-		PlaySound(Sound'spell_loop_nl',SLOT_Interact,,,,,,true);
-	}
-}
-
-function StopAimSoundFX()
-{
-	if ( bInDuelingMode && (CurrentDuelSpell == 1) )
-	{
-		StopSound(Sound'Dueling_MIM_buildup',SLOT_Interact);
-	} else {
-		StopSound(Sound'Spell_aim',SLOT_Misc,2.5);
-		StopSound(Sound'spell_loop_nl',SLOT_Interact,0.75);
-	}
-}
-
-function SetAnimSet(int newSet)
-{
-  Log("Changing anim set to " $ string(newSet));
-  HarryAnimSet = enumHarryAnimSet(newSet);
+	Log("Changing anim set to "$string(NewSet));
+	HarryAnimSet = NewSet;
 }
 
 function name GetCurrIdleAnimName()
 {
-  local string AnimName;
-  local name nm;
-  local int iIndex;
-  if (CurrentWeapon == 1)
-  {
-      AnimName = "IdleWandless";
-      nm = StringToAnimName(AnimName);
-      return nm;
-  }
-  else {
-      iIndex = 1 + Rand(IdleNums);
-      AnimName = "idle_" $iIndex;
-      nm = StringToAnimName(AnimName);
-      return nm;
-  }
-}
-
-function ScreenFade (float fadeOpacity, float fadeOutTime)
-{
-  local FadeViewController CamFade;
-  CamFade = Spawn(Class'FadeViewController');
-  CamFade.Init(fadeOpacity, 0, 0, 0, fadeOutTime);
-}
-
-exec function AltFire (optional float f)
-{
-  local Vector V;
-  local Rotator R;
-  local Vector TraceStart;
-  local Vector TraceDirection;
-  local Vector TraceEnd;
-  
-  //Log(string(bDebugWeaponToggleCooldown));
-  bDebugWeaponToggleCooldown=False;
-  //Log(string(bDebugWeaponToggleCooldown));
-
-  if ( HarryAnimChannel.IsCarryingActor() )
-  {
-    if ( bThrow == False && IsInState('PlayerWalking') )
-    {
-      ClientMessage("Throw!");
-      HarryAnimChannel.GotoStateThrow();
-      bThrow = True;
-    }
-  } 
-  else 
-  {
-    if ( Weapon.IsA('baseWand') && (CarryingActor == None) && !bIsAiming)
-    {
-      Weapon.bPointing = True;
-      StartAiming(bHarryUsingSword);
-    }
-  if ((Weapon.Class == class'MOCAbaseHands'))
-  {
-    TraceStart = Cam.Location;
-    TraceDirection = vector(Cam.Rotation);
-    TraceEnd = TraceStart + TraceDirection * 250.0;
-    MOCAbaseHands(weapon).TraceForInteracts(TraceEnd, TraceStart);
-  }
-  }
-}
-
-function PlaySpellCastSound (ESpellType SpellType)
-{
-  local Sound SpellSound;
-  Super.PlaySpellCastSound(SpellType);
-
-  if ( SpellSound == None )
-  {
-    local class curSpell;
-    curSpell = baseWand(Weapon).CurrentSpell;
-    SpellSound = class<baseSpell>(curSpell).Default.CastSound;
-  }
-
-  if ( SpellSound != None )
-  {
-    PlaySound(SpellSound,SLOT_None);
-  }
-}
-
-////////////////
-// STATES
-////////////////
-
-state stateLoading
-{
-	ignores  DoJump, AltFire, Fire, TakeDamage;
-
-	event BeginState()
+	local string AnimName;
+	local name nm;
+	local int iIndex;
+	if ( Weapon.IsA('MOCAbaseHands') )
 	{
+		AnimName = "IdleWandless";
+		nm = StringToAnimName(AnimName);
+		return nm;
+	}
+	else
+	{
+		iIndex = 1 + Rand(IdleNums);
+		AnimName = "idle_"$iIndex;
+		nm = StringToAnimName(AnimName);
+		return nm;
 	}
 }
+
+function ScreenFade(float TargetOpacity, float FadeOutTime)
+{
+	local FadeViewController CamFade;
+	CamFade = Spawn(Class'FadeViewController');
+	CamFade.Init(TargetOpacity,0,0,0,FadeOutTime);
+}
+
+function TeleportHarry(Vector TPLocation, Rotator TPRotation)
+{
+	SetLocation(TPLocation);
+	SetRotation(TPRotation);
+}
+
+function GetCaught(Actor Catcher)
+{
+	CaughtByActor = Catcher;
+	GotoState('stateCaught');
+}
+
+
+///////////
+// States
+///////////
 
 state stateStomping
 {
@@ -652,481 +620,87 @@ state stateStomping
 		GotoState('PlayerWalking');
 }
 
-state stateBroomFlying
+state stateInteract
+{
+	begin:
+		PlayAnim('PickBitOfGoyle',3,3);
+		Sleep(0.667);
+		GotoState('PlayerWalking');
+}
+
+state stateCaught
 {
 	event BeginState()
 	{
-		local BroomQudditch broomstickHandle; //OBJECTS I'VE SHOVED UP MY ARSE
-		SetPhysics(PHYS_Flying);
-	}
-}
-
-state stateInteract
-{
-  begin:
-    PlayAnim('PickBitOfGoyle',3,3);
-    sleep(0.6);
-    GotoState('PlayerWalking');
-}
-
-state caught
-{
-  event BeginState()
-  {
-    PlayAnim('webmove');
-    PlaySound(Sound'MocaSoundPak.Music_Cues.stealthCaught_hp3', SLOT_None);
-    PlaySound(Sound'HPSounds.Magic_sfx.Dueling_MIM_self_lucky', SLOT_Misc);
-    bKeepStationary = True;
-  }
-
-  begin:
-    sleep(1.0);
-    ScreenFade(1.0, 2.0);
-    sleep(2.5);
-    TeleportHarry(respawnLoc,respawnRot);
-    sleep(0.5);
-    ScreenFade(0.0, 2.0);
-    bKeepStationary = False;
-    GotoState('PlayerWalking');
-}
-
-function TeleportHarry(Vector TPLocation, Rotator TPRotation)
-{
-  SetLocation(TPLocation);
-  SetRotation(TPRotation);
-}
-
-state PlayerSwimming
-{
-  ignores SeePlayer, HearNoise;
-  
-  event Touch( Actor Other )
-  {
-	if ( Director != None )
-		Director.OnTouchEvent( Self, Other );
-
-	Global.Touch( Other );
-  }
-
-  event UnTouch( Actor Other )
-  {
-	if ( Director != None )
-		Director.OnUnTouchEvent( Self, Other );
-
-	Global.UnTouch( Other );
-  }
-
-  event Bump( Actor Other )
-  {
-	if ( Director != None )
-		Director.OnBumpEvent( Self, Other );
-
-	Global.Bump( Other );
-  }
-  
-  event HitWall( vector vHitNormal, Actor Wall )
-  {
-	if ( Director != None )
-		Director.OnHitEvent( Self );
-
-	Global.HitWall( vHitNormal, Wall );
-  }
-  
-  event TakeDamage (int Damage, Pawn InstigatedBy, Vector HitLocation, Vector Momentum, name DamageType)
-  {
-	if ( Director != None )
-	{
-		Director.OnTakeDamage( Self, Damage, InstigatedBy, DamageType );
-	}
-	
-	Global.TakeDamage(Damage, InstigatedBy, HitLocation, Momentum, DamageType);
-  }
-  
-  function ZoneChange (ZoneInfo NewZone)
-  {
-    /*
-    if ( !NewZone.bWaterZone )
-    {
-      SetPhysics(PHYS_Walking);
-      GotoState('PlayerWalking');
-    }
-    */
-  }
-  
-  event PlayerTick( float DeltaTime )
-  {
-	local actor a;
-	local float d;
-	local actor ca;
-
-	Global.PlayerTick( DeltaTime );
-
-	LoopAnim('Spongify');
-
-	if (  !IsA('BroomHarry') && Physics == PHYS_Walking )
-	{
-		DesiredRotation.Pitch = 0;
-	}
-	
-	if( GetHealthCount() <= 0 
-		&& !IsInState('stateDead'))
-	{
-		KillHarry(true);
-		return;
+		PlayAnim('webmove');
+		PlaySound(Sound'MocaSoundPak.Music_Cues.stealthCaught_hp3', SLOT_None);
+		PlaySound(Sound'HPSounds.Magic_sfx.Dueling_MIM_self_lucky', SLOT_Misc);
+		bKeepStationary = True;
 	}
 
-	if ( NoFallingDamageTimer > 0 )
-    {
-       NoFallingDamageTimer -= DeltaTime;
-	   
-	   if ( NoFallingDamageTimer < 0 )
-	   {
-		  NoFallingDamageTimer = 0.0;
-	   }
-	}
+	begin:
+		Sleep(1.0);
+		ScreenFade(1.0, 2.0);
+		Sleep(2.5);
+		TeleportHarry(RespawnLocation,RespawnRotation);
+		Sleep(0.5);
 
-	PlayerMove(DeltaTime);
-
-	if( CarryingActor != none )
-	{
-		//r = weaponRot;
-		//v = vect(0,0,1);
-		//v = v >> r;
-		CarryingActor.setLocation( weaponLoc );//- vect(0,0,1 );
-		CarryingActor.SetRotation( weaponRot );
-
-		//Also, look for a spacebar throw
-		if( hpconsole(player.console).bSpacePressed )
+		if ( CaughtByActor.IsA('MOCAWatcher') )
 		{
-			hpconsole(player.console).bSpacePressed = false;
-			AltFire(0);
-		}
-	}
-		
-	// If we landed on a spongify pad then bounce harry
-	if( HitSpongifyPad != None && HitSpongifyPad.IsEnabled() )
-	{
-		DoJump(0);
-		HitSpongifyPad.OnBounce( self );
-		AnimFalling = SpongifyFallAnim;
-		PlayinAir();
-		cam.SetPitch(-8000);
-		HitSpongifyPad = None;
-		CreateSpongifyEffects();
-	}
-		
-	// HP2 cam
-	if( cam.IsInState('StateStandardCam') )//|| cam.IsInState('StateBossCam') )
-	{
-		// Force our desired Yaw to what the camera's yaw is, in this way harry will
-		// always "lookAt" what the camera is looking at.
-			DesiredRotation.Yaw = cam.rotation.Yaw & 0xFFFF;
-	}
-}
-  
-  function JumpOffPawn()
-  {
-    fTimeInAir = 0.0;
-    Super.JumpOffPawn();
-  }
-  
-  function PlayerMove (float DeltaTime)
-  {
-    local Vector X;
-    local Vector Y;
-    local Vector Z;
-    local Vector NewAccel;
-    local EDodgeDir OldDodge;
-    local EDodgeDir DodgeMove;
-    local Rotator OldRotation;
-    local Rotator CamRot;
-    local float Speed2D;
-    local bool bSaveJump;
-    local name AnimGroupName;
-  
-	//log("Player move!");
-  
-    if ( bReverseInput )
-    {
-      aForward = Abs(aForward * 2);
-      aTurn =  -aTurn;
-      aStrafe =  -aStrafe;
-    }
-    aForward *= 0.08;
-    if ( Physics == PHYS_Falling || bLockedOnTarget || bFixedFaceDirection ) 
-    {
-      aStrafe *= 0.08;
-      aTurn = 0.0;
-    } 
-	else 
-	{
-      aStrafe *= 0.08;
-      aTurn *= 0.24;
-    }
-    aLookUp *= 0;
-    aSideMove *= 0.1;
-    if ( Adv1TutManager != None )
-    {
-      if ( aForward > 0 )
-      {
-        Adv1TutManager.ForwardPushed();
-      }
-      if ( aForward < 0 )
-      {
-        Adv1TutManager.BackwardPushed();
-      }
-      if ( aStrafe < 0 )
-      {
-        Adv1TutManager.StrafeLeftPushed();
-      }
-      if ( aStrafe > 0 )
-      {
-        Adv1TutManager.StrafeRightPushed();
-      }
-    }
-    if ( bKeepStationary )
-    {
-      aForward = 0.0;
-      aStrafe = 0.0;
-    }
-    if ( bLockOutForward && (aForward > 0) || bLockOutBackward && (aForward < 0) )
-    {
-      aForward = 0.0;
-    }
-    if ( bLockOutStrafeLeft && (aStrafe < 0) || bLockOutStrafeRight && (aStrafe > 0) )
-    {
-      aStrafe = 0.0;
-    }
-    if ( bLockedOnTarget || bFixedFaceDirection )
-    {
-      NewAccel = ProcessAccel();
-    } 
-	else 
-	{
-      GetAxes(Rotation,X,Y,Z);
-      if ( bScreenRelativeMovement )
-      {
-        GetAxes(Cam.Rotation,X,Y,Z);
-        NewAccel = aForward * X + aSideMove * Y;
-        if ( NewAccel != vect(0.00,0.00,0.00) )
-        {
-          CamRot = Cam.Rotation;
-          CamRot.Pitch = 0;
-          ScreenRelativeMovementYaw = (rotator(NewAccel)).Yaw;
-        }
-      } 
-	  else 
-	  {
-        NewAccel = aForward * X + aStrafe * Y;
-        if ( bInDuelingMode )
-        {
-          NewAccel *= 1000000;
-        }
-      }
-    }
-    if ( bHarryUsingSword )
-    {
-      GroundSpeed = GroundRunSpeed * (1.0 - 0.9 * baseWand(Weapon).ChargingLevel());
-    }
-    if ( (aForward != 0) &&  !bIsAiming )
-    {
-      bHarryMovingNotAiming = True;
-    } 
-	else 
-	{
-      bHarryMovingNotAiming = False;
-    }
-    NewAccel.Z = 0.0;
-    AnimGroupName = GetAnimGroup(AnimSequence);
-    OldRotation = Rotation;
-    ProcessMove(DeltaTime,NewAccel,DodgeMove,OldRotation - Rotation);
-    if ( Cam.IsInState('StateStandardCam') )
-    {
-      DesiredRotation.Yaw = Cam.Rotation.Yaw & 0xFFFF;
-      if ( bHarryMovingNotAiming && bAutoCenterCamera &&  !bInDuelingMode )
-      {
-        if ( AnimFalling != SpongifyFallAnim )
-        {
-          Cam.SetPitch(-1500.0);
-        }
-      }
-    }
-  }
-  
-  function ProcessMove(float DeltaTime, vector NewAccel, eDodgeDir DodgeMove, rotator DeltaRot)	
-  {
-		local vector OldAccel;
-		local float  Speed;
-		
-		//log("ProcessMove!");
-
-		OldAccel = Acceleration;
-		Acceleration = NewAccel;
-		bIsTurning = ( Abs(DeltaRot.Yaw/DeltaTime) > 5000 );
-
-		if(bJustAltFired || bJustFired)
-		{
-			Velocity = vect(0,0,0);
-			return;
+			CaughtByActor.Reset();
 		}
 
-		if ( bPressedJump )
-		{
-//			ClientMessage("Jump pressed");
-			DoJump();			// jumping
-			bPressedJump = false;
-		}
-
-		if ( (Physics == PHYS_Walking)  )
-		{
-			Speed = VSize2d( Velocity ) * 3;
-
-			if(   (!bAnimTransition || (AnimFrame > 0))
-			   && !( AnimSequence == HarryAnims[HarryAnimSet].Land && (Speed < 5 || VSize2D(acceleration)==0) )  //You need to NOT be (landing and not-moving)    //(GetAnimGroup(AnimSequence) != 'Landing') )
-			  )
-			{
-				//ClientMessage("AnimSequence:"$AnimSequence$" AnimGroup:"$GetAnimGroup(AnimSequence)$" Speed:"$Speed);
-
-				if( Speed > 5 )
-					fTimeWalking += DeltaTime;
-				else
-					fTimeWalking = 0;
-
-				if(   Acceleration != vect(0,0,0)
-				   && Speed > 1 //you need a little bit of motion 
-				   //&& (    bMovingBackwards   && Speed > 30
-				   //    || !bMovingBackwards   && Speed > 65
-				   //    ||  fTimeWalking > 0.5 && Speed > 15
-				   //   )
-				  )
-				{
-						bAnimTransition = true;
-						TweenToRunning(0.4);
-				}
-			 	else
-			 	{
-						bAnimTransition = true;
-						TweenToWaiting(0.4);
-				}
-			}
-		}
-  }
-  
-  function BeginState()
-  {
-    DebugState();
-    if ( Mesh == None )
-    {
-      SetMesh();
-    }
-    HarryAnims[0].Idle        = 'SwimIdle';
-    HarryAnims[0].Walk        = 'Walk';
-    HarryAnims[0].run         = 'SwimIdle';
-    HarryAnims[0].WalkBack    = 'SwimIdle';
-    HarryAnims[0].StrafeRight = 'Spongify';
-    HarryAnims[0].StrafeLeft  = 'Spongify';
-    HarryAnims[0].Jump        = 'Jump';
-    HarryAnims[0].Jump2       = 'Jump2';
-    HarryAnims[0].Fall        = 'Fall';
-    HarryAnims[0].Land        = 'Land';
-    Log("Changing to swim anims");
-    SetAnimSet(0);
-    GroundSpeed = 600.00;
-    AirSpeed = 600.00;
-    AirControl = 1.0;
-    bInWater = true;
-    WalkBob = vect(0.00,0.00,0.00);
-    DodgeDir = DODGE_None;
-    bIsCrouching = False;
-    bIsTurning = False;
-    bPressedJump = False;
-    SetPhysics(PHYS_Swimming);
-	LoopAnim(CurrIdleAnimName,,[TweenTime]0.40,,[Type]HarryAnimType);
-    if (  !IsAnimating() )
-    {
-      PlayWaiting();
-    }
-    foreach AllActors(Class'BaseCam',Cam)
-    {
-	  break;
-    }
-  }
-  
-  function EndState()
-  {
-    HarryAnims[0].Idle        = 'Idle';
-    HarryAnims[0].Walk        = 'Walk';
-    HarryAnims[0].run         = 'Run';
-    HarryAnims[0].WalkBack    = 'RunBack';
-    HarryAnims[0].StrafeRight = 'StrafeRight';
-    HarryAnims[0].StrafeLeft  = 'StrafeLeft';
-    HarryAnims[0].Jump        = 'Jump';
-    HarryAnims[0].Jump2       = 'Jump2';
-    HarryAnims[0].Fall        = 'Fall';
-    HarryAnims[0].Land        = 'Land';
-    SetAnimSet(0);
-    bInWater = false;
-    WalkBob = vect(0.00,0.00,0.00);
-    bIsCrouching = False;
-    StopAiming();
-    Acceleration = vect(0.00,0.00,0.00);
-    Velocity = vect(0.00,0.00,0.00);
-    CurrIdleAnimName = GetCurrIdleAnimName();
-    LoopAnim(CurrIdleAnimName,,[TweenTime]0.40,,[Type]HarryAnimType);
-    Log("NOT LONGER SWIMMING!!!!!!!!!!!!!!!!!!!!!");
-  }
+		ScreenFade(0.0, 2.0);
+		bKeepStationary = False;
+		GotoState('PlayerWalking');
 }
 
 defaultproperties
 {
-    DefaultWeapon=class'MocaOmniPak.MOCAWand'
-    Mesh=SkeletalMesh'MocaModelPak.MOCAHarry'
-    Cutname="harry"
-    AirControl=0.5
-    RotationRate=(Pitch=20000,Yaw=100000,Roll=3072)
-    Buoyancy=200.0
+	DefaultWeapon=class'MOCAWand'
+	Mesh=SkeletalMesh'MOCAHarry'
+	Cutname="harry"
+	RotationRate=(Pitch=20000,Yaw=100000,Roll=3072)
 
-    SpellMapping(0)=(SpellSlot=SPELL_None,SpellToAssign=None)
-    SpellMapping(1)=(SpellSlot=SPELL_Alohomora,SpellToAssign=class'spellAlohomora')
-    SpellMapping(2)=(SpellSlot=SPELL_Incendio,SpellToAssign=None)
-    SpellMapping(3)=(SpellSlot=SPELL_LocomotorWibbly,SpellToAssign=class'MOCAspellGlacius')
-    SpellMapping(4)=(SpellSlot=SPELL_Lumos,SpellToAssign=class'spellLumos')
-    SpellMapping(5)=(SpellSlot=SPELL_Nox,SpellToAssign=None)
-    SpellMapping(6)=(SpellSlot=SPELL_PetrificusTotalus,SpellToAssign=None)
-    SpellMapping(7)=(SpellSlot=SPELL_WingardiumLeviosa,SpellToAssign=None)
-    SpellMapping(8)=(SpellSlot=SPELL_Verdimillious,SpellToAssign=None)
-    SpellMapping(9)=(SpellSlot=SPELL_Vermillious,SpellToAssign=None)
-    SpellMapping(10)=(SpellSlot=SPELL_Flintifores,SpellToAssign=None)
-    SpellMapping(11)=(SpellSlot=SPELL_Reparo,SpellToAssign=None)
-    SpellMapping(12)=(SpellSlot=SPELL_MucorAdNauseum,SpellToAssign=None)
-    SpellMapping(13)=(SpellSlot=SPELL_Flipendo,SpellToAssign=class'spellFlipendo')
-    SpellMapping(14)=(SpellSlot=SPELL_Ectomatic,SpellToAssign=None)
-    SpellMapping(15)=(SpellSlot=SPELL_Avifores,SpellToAssign=None)
-    SpellMapping(16)=(SpellSlot=SPELL_FireCracker,SpellToAssign=None)
-    SpellMapping(17)=(SpellSlot=SPELL_Transfiguration,SpellToAssign=None)
-    SpellMapping(18)=(SpellSlot=SPELL_WingSustain,SpellToAssign=None)
-    SpellMapping(19)=(SpellSlot=SPELL_Diffindo,SpellToAssign=class'spellDiffindo')
-    SpellMapping(20)=(SpellSlot=SPELL_Skurge,SpellToAssign=class'spellSkurge')
-    SpellMapping(21)=(SpellSlot=SPELL_Spongify,SpellToAssign=class'spellSpongify')
-    SpellMapping(22)=(SpellSlot=SPELL_Rictusempra,SpellToAssign=class'spellRictusempra')
-    SpellMapping(23)=(SpellSlot=SPELL_Ecto,SpellToAssign=None)
-    SpellMapping(24)=(SpellSlot=SPELL_Fire,SpellToAssign=None)
-    SpellMapping(25)=(SpellSlot=SPELL_DuelRictusempra,SpellToAssign=class'spellDuelRictusempra')
-    SpellMapping(26)=(SpellSlot=SPELL_DuelMimblewimble,SpellToAssign=class'spellDuelMimblewimble')
-    SpellMapping(27)=(SpellSlot=SPELL_DuelExpelliarmus,SpellToAssign=class'spellDuelExpelliarmus')
-    
-    DefaultSpellbook(0)=class'spellFlipendo'
-    DefaultSpellbook(1)=class'spellAlohomora'
-    DefaultSpellbook(2)=class'spellLumos'
+	SpellMapping(0)=(SpellSlot=SPELL_None,SpellToAssign=None)
+	SpellMapping(1)=(SpellSlot=SPELL_Alohomora,SpellToAssign=class'spellAlohomora')
+	SpellMapping(2)=(SpellSlot=SPELL_Incendio,SpellToAssign=None)
+	SpellMapping(3)=(SpellSlot=SPELL_LocomotorWibbly,SpellToAssign=class'MOCAspellGlacius')
+	SpellMapping(4)=(SpellSlot=SPELL_Lumos,SpellToAssign=class'spellLumos')
+	SpellMapping(5)=(SpellSlot=SPELL_Nox,SpellToAssign=None)
+	SpellMapping(6)=(SpellSlot=SPELL_PetrificusTotalus,SpellToAssign=None)
+	SpellMapping(7)=(SpellSlot=SPELL_WingardiumLeviosa,SpellToAssign=None)
+	SpellMapping(8)=(SpellSlot=SPELL_Verdimillious,SpellToAssign=None)
+	SpellMapping(9)=(SpellSlot=SPELL_Vermillious,SpellToAssign=None)
+	SpellMapping(10)=(SpellSlot=SPELL_Flintifores,SpellToAssign=None)
+	SpellMapping(11)=(SpellSlot=SPELL_Reparo,SpellToAssign=None)
+	SpellMapping(12)=(SpellSlot=SPELL_MucorAdNauseum,SpellToAssign=None)
+	SpellMapping(13)=(SpellSlot=SPELL_Flipendo,SpellToAssign=class'spellFlipendo')
+	SpellMapping(14)=(SpellSlot=SPELL_Ectomatic,SpellToAssign=None)
+	SpellMapping(15)=(SpellSlot=SPELL_Avifores,SpellToAssign=None)
+	SpellMapping(16)=(SpellSlot=SPELL_FireCracker,SpellToAssign=None)
+	SpellMapping(17)=(SpellSlot=SPELL_Transfiguration,SpellToAssign=None)
+	SpellMapping(18)=(SpellSlot=SPELL_WingSustain,SpellToAssign=None)
+	SpellMapping(19)=(SpellSlot=SPELL_Diffindo,SpellToAssign=class'spellDiffindo')
+	SpellMapping(20)=(SpellSlot=SPELL_Skurge,SpellToAssign=class'spellSkurge')
+	SpellMapping(21)=(SpellSlot=SPELL_Spongify,SpellToAssign=class'spellSpongify')
+	SpellMapping(22)=(SpellSlot=SPELL_Rictusempra,SpellToAssign=class'spellRictusempra')
+	SpellMapping(23)=(SpellSlot=SPELL_Ecto,SpellToAssign=None)
+	SpellMapping(24)=(SpellSlot=SPELL_Fire,SpellToAssign=None)
+	SpellMapping(25)=(SpellSlot=SPELL_DuelRictusempra,SpellToAssign=class'spellDuelRictusempra')
+	SpellMapping(26)=(SpellSlot=SPELL_DuelMimblewimble,SpellToAssign=class'spellDuelMimblewimble')
+	SpellMapping(27)=(SpellSlot=SPELL_DuelExpelliarmus,SpellToAssign=class'spellDuelExpelliarmus')
+
+	DefaultSpellbook(0)=class'spellFlipendo'
+	DefaultSpellbook(1)=class'spellAlohomora'
+	DefaultSpellbook(2)=class'spellLumos'
 	DefaultSpellbook(3)=class'spellRictusempra'
 	DefaultSpellbook(4)=class'spellSkurge'
 	DefaultSpellbook(5)=class'spellDiffindo'
 	DefaultSpellbook(6)=class'spellSpongify'
-    DefaultSpellbook(7)=class'MOCAspellGlacius'
+	DefaultSpellbook(7)=class'MOCAspellGlacius'
 
 	WandParticleFX=Class'MocaOmniPak.MOCAWandParticles'
-
 	WandGlowRange=6.0
-
 	DefaultWandParticleColor=(R=255,G=255,B=255,A=0)
 }

@@ -1,97 +1,105 @@
+//=============================================================================
+// MOCAWarning.
+//=============================================================================
 class MOCAWarning extends baseWarning;
 
-var float SizeScale;
+var float SizeScale;	// Text size scale (which in turn increases overall scale)
 
-var float XPos;    // Tile origin X (if non-zero)
-var float YPos;    // Tile origin Y (if non-zero)
-var float TileW;   // Optional custom width (0 = auto)
-var float TileH;   // Optional custom height (0 = auto)
+var float XPos;    		// Tile origin X (if non-zero)
+var float YPos;   		// Tile origin Y (if non-zero)
+var float TileW;   		// Optional custom width (0 = auto)
+var float TileH;   		// Optional custom height (0 = auto)
 
-var Font LabelFont;
+var float TextPadding;	// How many pixels to extend the box beyond the space the text requires
+
+var float LabelOpacity;	// Opacity of label.	TODO: Add a fade in/out and maybe a smooth flicker in and out option
+
+var Texture LabelTexture;	// Texture to use for background
+var Font LabelFont;			// Font to use
 
 function Draw(Canvas C)
 {
-    local Font OldFont;
-    local float TextW, TextH;
-    local float BoxW, BoxH;
-    local float BoxX, BoxY;
-    local float TextX, TextY;
-    local Texture Background;
+	local float TextW,TextH;
+	local float BoxW,BoxH;
+	local float BoxX,BoxY;
+	local float TextX,TextY;
+	local Texture Background;
 
-    OldFont = C.Font;
+	// Prep the background texture & opacity
+	Background = LabelTexture;
+	Background.Alpha = LabelOpacity;
+	Background.bTransparent = True;
 
-    if (!bShow)
-    {
-        if (fFlashTime > 0.5)
-        {
-            bShow = true;
-            fFlashTime = 0.0;
-        }
-        C.Font = OldFont;
-        C.Reset();
-        return;
-    }
+	// If we don't have a font, use the console big font. I don't think we need to bother with the smaller font options but we'll see
+	if ( LabelFont == None )
+	{
+		C.Font = baseConsole(PlayerHarry.Player.Console).LocalBigFont;
+	}
 
-    if (fFlashTime > 1)
-    {
-        bShow = true;
-        fFlashTime = 0.0;
-    }
+	// Set font & font scale
+	C.FontScale = SizeScale;
+	C.Font = LabelFont;
+	C.TextSize(DisplayText,TextW,TextH);
 
-    Background = Texture'leftPanel';
-    Background.Alpha = 0.5;
-    Background.bTransparent = true;
+	// Set box width/height to our text width/height + padding
+	BoxW = TextW + TextPadding;
+	BoxH = TextH + TextPadding;
 
-    if (LabelFont == None)
-    {
-        C.FontScale = SizeScale;
-        C.Font = baseConsole(PlayerHarry.Player.Console).LocalBigFont;
-        C.TextSize(DisplayText, TextW, TextH);
+	// Set box position based on Width/Height & Canvas size
+	BoxX = (C.SizeX - BoxW) * 0.5 + XPos;
+	BoxY = (TextPadding * 0.5) + YPos;
 
-        if (TextW > C.SizeX - 32)
-        {
-            C.Font = baseConsole(PlayerHarry.Player.Console).LocalMedFont;
-            C.TextSize(DisplayText, TextW, TextH);
+	// Make sure box position isn't negative
+	BoxX = FClamp(BoxX,0.0,99999.0);
+	BoxY = FClamp(BoxY,0.0,99999.0);
 
-            if (TextW > C.SizeX - 32)
-            {
-                C.Font = baseConsole(PlayerHarry.Player.Console).LocalSmallFont;
-                C.TextSize(DisplayText, TextW, TextH);
-            }
-        }
-    }
-    else
-    {
-        C.FontScale = SizeScale;
-        C.Font = LabelFont;
-        C.TextSize(DisplayText, TextW, TextH);
-    }
+	// If box X position is off screen, push it back in
+	if ( (BoxX + BoxW) > C.SizeX )
+	{
+		BoxX = C.SizeX - BoxW;
+	}
 
-    BoxW = TextW + 16;
-    BoxH = TextH + 16;
+	// If box X position is off screen, push it back in
+	if ( (BoxY + BoxH) > C.SizeY )
+	{
+		BoxY = C.SizeY - BoxH;
+	}
 
-    BoxX = (C.SizeX - BoxW) * 0.5 + XPos;
-    BoxY = 8 + YPos;
+	// Set box position
+	C.SetPos(BoxX,BoxY);
+	// Draw our background
+	C.DrawTile(Background,BoxW,BoxH,0,0,1,1);
 
-    if (BoxX < 0) BoxX = 0;
-    if (BoxY < 0) BoxY = 0;
-    if (BoxX + BoxW > C.SizeX) BoxX = C.SizeX - BoxW;
-    if (BoxY + BoxH > C.SizeY) BoxY = C.SizeY - BoxH;
+	// Get text position based on text & box size
+	TextX = BoxX + (BoxW - TextW) * 0.5;
+	TextY = BoxY + (TextPadding * 0.5);
 
-    C.SetPos(BoxX, BoxY);
-    C.DrawTile(Background, BoxW, BoxH, 0, 0, 1, 1);
+	// Make sure text position isn't negative
+	TextX = FClamp(TextX,0.0,99999.0);
+	TextY = FClamp(TextY,0.0,99999.0);
 
-    TextX = BoxX + (BoxW - TextW) * 0.5;
-    TextY = BoxY + 8;
+	// If text X position is off screen, push it back in (maybe I should change this to use box size and not canvas?)
+	if ( (TextX + TextW ) > C.SizeX )
+	{
+		TextX = C.SizeX - TextW;
+	}
 
-    if (TextX < 0) TextX = 0;
-    if (TextY < 0) TextY = 0;
-    if (TextX + TextW > C.SizeX) TextX = C.SizeX - TextW;
-    if (TextY + TextH > C.SizeY) TextY = C.SizeY - TextH;
+	// If text Y position is off screen, push it back in
+	if ( ( TextY + TextH ) > C.SizeY )
+	{
+		TextY = C.SizeY - TextH;
+	}
 
-    C.SetPos(TextX, TextY);
-    C.DrawText(DisplayText, false);
+	// Set text position
+	C.SetPos(TextX,TextY);
+	// Draw text
+	C.DrawText(DisplayText);
+}
 
-    C.Font = OldFont;
-    C.Reset();
+defaultproperties
+{
+	SizeScale=2.0
+	TextPadding=16.0
+	LabelOpacity=0.5
+	LabelTexture=Texture'leftPanel'
 }

@@ -4,182 +4,178 @@
 
 class MOCAProjectile extends Projectile;
 
-var() class<ParticleFX> ParticleClass;    	// Moca: What effect to spawn (e.g. fireball trail)
-var() class<ParticleFX> DespawnEmitter; 	// Moca: Particles to spawn on destroy
+var bool bNoDespawnEmit;
+var class<ParticleFX> ParticleClass;
+var class<ParticleFX> DespawnEmitter;
+var ParticleFX ParticleActor;
 
-var() class<Actor> LandedClass;				// Moca: What class to spawn when the particle lands on the ground?
-var() Sound LandedSound;
+var class<Actor> LandedClass;
+var Sound LandedSound;
 
-var() bool bUseSpawnRotation;    			// Moca: If true, launch using projectile's own rotation
-var(ProjectileHoming) bool bHomingTowardTarget;  			// Moca: If true, steer gently toward ShotTarget
+var float DamageToDeal;
+var name DamageName;
 
-var() float DamageToDeal;					// Moca: How much damage to deal to Harry. Def: 10
-var(ProjectilePhysics) float LaunchSpeed;         			// Moca: Initial speed of projectile
-var(ProjectilePhysics) float LaunchAngle;         			// Moca: Angle in degrees (0 = forward, 90 = straight up)
-var(ProjectilePhysics) float GravityScale;        			// Moca: Scale gravity effect (1.0 = normal, 0.0 = none)
-var(ProjectilePhysics) float TargetInaccuracy;				// Moca: How inaccurate is the projectile? The higher this value is, the further it can possibly land from the intended target. Def: 8.0
-var(ProjectilePhysics) float MinRange;
-var(ProjectilePhysics) float MaxRange;
-var(ProjectileHoming) float HomingStrength;      			// Moca: Blend factor (0 = none, 1 = instant snap)
-var(ProjectileHoming) float HomingAccuracy;					// Moca: How accurate is the homing? 0.0 is most accurate, with higher numbers being less accurate. Def: 50
+var bool bUseSpawnRotation;
+var float LaunchSpeed;
+var float LaunchAngle;
+var float GravityScale;
+var float TargetInaccuracy;
+var float MinRange;
+var float MaxRange;
+var Actor TargetActor;
 
-var() name DamageName; 						// Moca: Name of the damage type harry will take
+var Vector DesiredDirection;
+var Vector InitialDirection;
+var Vector ShotTarget;
+var Vector Gravity;
 
-var ParticleFX ParticleActor;            	// Instance of spawned effect
-
-var vector DesiredDirection;     			// Stored direction to target (for homing)
-var vector InitialDir;           			// Stored initial launch direction
-var vector ShotTarget;           			// Where this projectile is aimed
-var vector Gravity;							// Projectile gravity
+var bool bHomingTowardTarget;
+var float HomingStrength;
+var float HomingAccuracy;
 
 var harry PlayerHarry;
 
-var bool bNoDespawnEmit;					// Whether or not to use a particle emission on despawn
+
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-    Super.PostBeginPlay();
-    PlayerHarry = Harry(Level.PlayerHarryActor);
-    Gravity = Region.Zone.ZoneGravity * 0.5;
-    LaunchProjectile();
-}
+	Super.PostBeginPlay();
 
-function vector GetShotTarget()
-{
-	local float FinalRange;
-	local float NegativeTI;
-	local Vector FinalInaccuracy;
-
-	NegativeTI = TargetInaccuracy * -1.0;
-	
-	FinalInaccuracy.X = RandRange(NegativeTI,TargetInaccuracy);
-	FinalInaccuracy.Y = RandRange(NegativeTI,TargetInaccuracy);
-	FinalInaccuracy.Z = RandRange(NegativeTI,TargetInaccuracy);
-
-	FinalRange = RandRange(MinRange,MaxRange);
-
-    if (Owner != None)
-        return Owner.Location + Vector(Owner.Rotation) + FinalInaccuracy * FinalRange;
-    else
-        return Location + Vector(Rotation) + FinalInaccuracy * FinalRange;
-}
-
-function LaunchProjectile()
-{
-    local vector AimError;
-
-    // Fire in spawn rotation
-    InitialDir = vector(Rotation);
-    Velocity   = InitialDir * LaunchSpeed;
-
-    // Pick a target with some error
-    ShotTarget = GetShotTarget();
-
-    // Add random aim offset (error cone)
-    AimError.X = FRand() * HomingAccuracy; // tweak values for spread
-    AimError.Y = FRand() * HomingAccuracy;
-    AimError.Z = FRand() * HomingAccuracy;
-    ShotTarget += AimError;
-
-    // Spawn attached particle if specified
-    if (ParticleClass != None && ParticleActor == None)
-    {
-        ParticleActor = Spawn(ParticleClass, self);
-        if (ParticleActor != None)
-            ParticleActor.SetBase(self);
-    }
+	PlayerHarry = harry(Level.PlayerHarryActor);
+	Gravity = (Region.Zone.ZoneGravity * 0.5) * GravityScale;
+	LaunchProjectile();
 }
 
 event Tick(float DeltaTime)
 {
-    local vector NewDir, CurrentTargetDir;
+	local Vector NewDirection;
+	local Vector CurrentTargetDirection;
 
-    Super.Tick(DeltaTime);
+	Super.Tick(DeltaTime);
 
-    // Gravity
-    Velocity.Z += (Gravity.Z * GravityScale) * DeltaTime;
+	Velocity.Z += (Gravity.Z) * DeltaTime;
 
-    if (bHomingTowardTarget)
-    {
-        // Always re-aim at Harry's current position (plus error offset we baked in)
-        if (PlayerHarry != None)
-            CurrentTargetDir = Normal((PlayerHarry.Location - Location) + (ShotTarget - GetShotTarget()));
-        else
-            CurrentTargetDir = Normal(ShotTarget - Location);
-
-        NewDir = Normal(Velocity);
-        NewDir = Normal(NewDir + (CurrentTargetDir - NewDir) * HomingStrength * DeltaTime);
-
-        Velocity = Normal(NewDir) * VSize(Velocity);
-    }
-
-    if (ParticleActor != None)
-        ParticleActor.SetLocation(Location);
-}
-
-function OnLand(vector HitNormal)
-{
-	local float SlopeAngle;
-	SlopeAngle = acos(HitNormal.Z) * (180 / Pi);
-	Log("Projectile landed slope angle: " $ string(SlopeAngle));
-
-	if (SlopeAngle < 45.0 && LandedClass != None)
+	if ( bHomingTowardTarget )
 	{
-		Log("Spawning landed class");
-		Spawn(LandedClass,,,Location,Rotation,True);
+		CurrentTargetDirection = Normal((PlayerHarry.Location - Location) + (ShotTarget - GetShotTarget()));
+
+		NewDirection = Normal(Velocity);
+		NewDirection = Normal((NewDirection + (CurrentTargetDirection - NewDirection) * HomingStrength) * DeltaTime);
+
+		Velocity = Normal(NewDirection) * VSize(Velocity);
 	}
 
-    KillProjectile();
+	if ( ParticleActor != None )
+	{
+		ParticleActor.SetLocation(Location);
+	}
 }
 
-function KillProjectile()
+event Landed(vector HitNormal)
 {
-    if (ParticleActor != None)
-    {
-        ParticleActor.Shutdown();
-        ParticleActor = None;
-    }
-
-    if (!bNoDespawnEmit)
-    {
-        Spawn(DespawnEmitter);
-    }
-
-	PlaySound(LandedSound,SLOT_Misc);
-    Destroy();
-}
-
-event Touch(Actor Other)
-{
-    super.Touch(Other);
-    if (Other.IsA('harry'))
-    {
-        PlayerHarry.TakeDamage(DamageToDeal,Pawn(Owner),Location,Velocity,DamageName);
-        KillProjectile();
-    }
+	Super.Landed(HitNormal);
+	OnLand(HitNormal);
 }
 
 event HitWall(vector HitNormal, actor HitWall)
 {
-    super.HitWall(HitNormal, HitWall);
-	
-    OnLand(HitNormal);
+	Super.HitWall(HitNormal, HitWall);
+	OnLand(HitNormal);
 }
+
+
+///////////////////
+// Main Functions
+///////////////////
+
+function LaunchProjectile()
+{
+	InitialDirection = Vector(Rotation);
+	Velocity = InitialDirection * LaunchSpeed;
+
+	ShotTarget = GetShotTarget();
+
+	if ( ParticleClass != None && ParticleActor == None )
+	{
+		ParticleActor = Spawn(ParticleClass,Self,,Location);
+	}
+}
+
+function KillProjectile()
+{
+	if ( ParticleActor != None )
+	{
+		ParticleActor.Shutdown();
+	}
+
+	if ( !bNoDespawnEmit )
+	{
+		Spawn(DespawnEmitter);
+	}
+
+	PlaySound(LandedSound,SLOT_Misc);
+	Destroy();
+}
+
+function OnLand(Vector HitNormal)
+{
+	local float SlopeAngle;
+	SlopeAngle = ACos(HitNormal.Z) * (180 / Pi);
+
+	if ( SlopeAngle < 45.0 && LandedClass != None )
+	{
+		Spawn(LandedClass,,,Location,Rotation,True);
+	}
+
+	KillProjectile();
+}
+
+event Touch(Actor Other)
+{
+	Super.Touch(Other);
+
+	if ( Other == PlayerHarry )
+	{
+		PlayerHarry.TakeDamage(DamageToDeal,Pawn(Owner),Location,Velocity,DamageName);
+		KillProjectile();
+	}
+}
+
+
+/////////////////////
+// Helper Functions
+/////////////////////
+
+function Vector GetShotTarget()
+{
+	local float FinalRange;
+	local Vector FinalInaccuracy;
+
+	FinalInaccuracy.X = RandRange(-TargetInaccuracy,TargetInaccuracy);
+	FinalInaccuracy.Y = RandRange(-TargetInaccuracy,TargetInaccuracy);
+	FinalInaccuracy.Z = RandRange(-TargetInaccuracy,TargetInaccuracy);
+
+	FinalRange = RandRange(MinRange,MaxRange);
+
+	return ( TargetActor.Location + FinalInaccuracy ) * FinalRange;
+}
+
 
 defaultproperties
 {
-    DespawnEmitter=Class'SmokeExplo_01'
-    LaunchSpeed=600.0
-    LaunchAngle=0.0
-    GravityScale=1.0
-    LifeSpan=6.0
-    Damage=20
-    MomentumTransfer=50000
-    ParticleClass=None
-    DamageToDeal=10
-    DamageName=MOCAProjectile
+	DespawnEmitter=Class'SmokeExplo_01'
+	LaunchSpeed=600.0
+	GravityScale=1.0
+	LifeSpan=6.0
+	Damage=20
+	MomentumTransfer=50000
+	DamageToDeal=10
+	DamageName=MOCAProjectile
 
-    HomingStrength=0.25
+	HomingStrength=0.25
 	HomingAccuracy=64.0
 
 	MinRange=1000

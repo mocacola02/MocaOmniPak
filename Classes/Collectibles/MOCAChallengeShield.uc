@@ -4,34 +4,34 @@ state PickupProp
 {
 	function BeginState()
 	{
-		Spawn(class'ShieldCollect',,,Location);
 		Super.BeginState();
+		Spawn(class'ShieldCollect',,,Location);
 	}
 
 	function EndState()
 	{
-		local ChallengeScoreManager managerChallenge;
+		local ChallengeScoreManager ManagerChallenge;
 
-		foreach AllActors(Class'ChallengeScoreManager',managerChallenge)
+		foreach AllActors(Class'ChallengeScoreManager',ManagerChallenge)
 		{
 			break;
 		}
 
-		managerChallenge.PickedUpStar();
+		ManagerChallenge.PickedUpStar();
 	}
 }
 
 defaultproperties
 {
-    pickUpSound=Sound'HPSounds.Magic_sfx.pickup_star'
+	PickUpSound=Sound'HPSounds.Magic_sfx.pickup_star'
 
-    classStatusGroup=Class'MOCAStatusGroupShield'
+	classStatusGroup=Class'MOCAStatusGroupShield'
 
-    classStatusItem=Class'MOCAStatusItemShield'
+	classStatusItem=Class'MOCAStatusItemShield'
 
 	Physics=PHYS_Rotating
 
 	CollisionHeight=48
 
-    Mesh=SkeletalMesh'MocaModelPak.skChallengeShield'
+	Mesh=SkeletalMesh'MocaModelPak.skChallengeShield'
 }
