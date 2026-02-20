@@ -1,258 +1,274 @@
+//================================================================================
+// MOCASpawner.
+//================================================================================
 class MOCASpawner extends MOCAPawn;
 
-struct SpawnedProperties
+struct SpawnedProperty
 {
-    var() string PropertyName;
-    var() string PropertyValue;
+	var() string PropertyName;
+	var() string PropertyValue;
 };
 
-struct SpawnSettings
+struct SpawnSetting
 {
-    var() Class<actor> actorToSpawn;
-    var() Byte spawnChance;
-    var() float spawnDelay;
-    var() vector spawnLocationOffset;
-    var() Rotator spawnRotation;
-    var() float velocityMult;
-    var() Sound spawnSound;
-    var() class<ParticleFX> spawnParticle;
-    var() array<SpawnedProperties> spawnProperties;
+	var() class<Actor> ActorToSpawn;
+	var() class<ParticleFX> SpawnParticles;
+	var() Sound SpawnSound;
+
+	var() byte SpawnChance;
+	var float FinalWeight;
+
+	var() float SpawnDelay;
+	var() float SpawnVelocityMult;
+
+	var() Vector SpawnOffset;
+	var() Rotator SpawnRotation;
+
+	var() array<SpawnedProperty> SpawnProperties;
 };
 
-var(MOCASpawnActors) array<SpawnSettings> listOfSpawns;
-var(MOCASpawnActors) bool bRandomSpawnOrder;
-var(MOCASpawnActors) bool bUseSpawnChance;
-var(MOCASpawnActors) bool bVaryVelocity;
-var(MOCASpawnActors) int maxVelocityVariance;
-var(MOCASpawnActors) bool bTurnSpawnerTowardsHarry;
+var() array<SpawnSetting> ListOfSpawns;
 
-var(MOCASpawnAmount) int numberToSpawn;
-var(MOCASpawnAmount) int minAmountToSpawn;
-var(MOCASpawnAmount) int maxAmountToSpawn;
-var(MOCASpawnAmount) int maxLives;
+var() bool bRandomSpawnOrder;
+var() bool bRandomSpawnDirection;
+var() bool bVaryVelocity;
+var() bool bSpawnerFacesHarry;
 
-var array<float> spawnWeights;
-var bool bNoWeights;
+var() int MinSpawnCount;
+var() int MaxSpawnCount;
+var() int MaxLives;
+var() float VaryVelocityIntensity;
 
-var int maxIndex;
-var int currentSpawnIndex;
-var int numOfSpawns;
-var int maxSpawns;
+var() Vector GlobalSpawnOffset;
+var() Rotator GlobalSpawnRotation;
 
-var ESpellType defaultSpell;
-var ParticleFX particleOnSpawn;
 
-var(MOCASpawnGlobal) bool bUseGlobalSpawnSettings;
-var(MOCASpawnGlobal) vector GlobalSpawnOffset;
-var(MOCASpawnGlobal) rotator GlobalSpawnDirection;
-var(MOCASpawnGlobal) vector GlobalSpawnAngle;
+var int CurrentSpawnCount;
+var int CurrentSpawnIdx;
+var int TotalWeight;
+var int FinalMaxSpawnCount;
+var int ListLength;
+
+
+///////////
+// Events
+///////////
 
 event PostBeginPlay()
 {
-    Super.PostBeginPlay();
+	Super.PostBeginPlay();
 
-    defaultSpell = eVulnerableToSpell;
+	if ( MOCAHelpers.IsEmpty(ListOfSpawns) )
+	{
+		Log("Error! "$string(Self)$" does not have anything in its spawn list! Destroying!");
+		Destroy();
+	}
 
-    if (listOfSpawns.Length == 0)
-    {
-        Log("There is nothing to spawn. Destroying self : " $ string(self));
-        Destroy();
-    }
+	SetSpawnWeights();
 
-    maxIndex = listOfSpawns.Length;
-
-    if (bUseSpawnChance)
-    {
-        DetermineSpawnWeights();
-    }
-
-    if (maxAmountToSpawn > minAmountToSpawn)
-    {
-        maxSpawns = Clamp(Rand(maxAmountToSpawn), minAmountToSpawn, maxAmountToSpawn);
-    }
-    else
-    {
-        maxSpawns = numberToSpawn;
-    }
+	ListLength = ListOfSpawns.Length;
 }
 
-event Trigger(Actor Other, Pawn Instigator)
+event Trigger(Actor Other, Pawn EventInstigator)
 {
-    if (IsInState('stateDormant'))
-    {
-        GotoState('stateSpawn');
-    }
+	if ( IsInState('stateIdle') )
+	{
+		GotoState('stateSpawn');
+	}
 }
 
-function DetermineSpawnWeights()
+
+////////////////////
+// Main Functions
+////////////////////
+
+function SpawnItem()
 {
-    local int i;
-    local int totalWeight;
+	local ParticleFX SpawnedParticle;
+	local Actor SpawnedActor;
+	local float RandVelocityMult;
+	local Vector SpawnLocation;
+	local Vector SpawnDirection;
+	local Rotator SpawnRotation;
 
-    for (i = 0; i < maxIndex; i++)
-    {
-        totalWeight += int(listOfSpawns[i].spawnChance);
-    }
+	if ( bRandomSpawnOrder )
+	{
+		CurrentSpawnIdx = GetWeightedRandomIndex;
+	}
 
-    for (i = 0; i < maxIndex; i++)
-    {
-        spawnWeights[i] = float(listOfSpawns[i].spawnChance) / float(totalWeight);
-    }
+	SpawnLocation = Location + GlobalSpawnOffset + ListOfSpawns[CurrentSpawnIdx].SpawnOffset;
+
+	SpawnedParticle = Spawn(GetSpawnParticles(),,,SpawnLocation);
+
+	if ( bRandomSpawnDirection )
+	{
+		SpawnDirection = GetRandomDirection();
+		SpawnRotation = Rotator(SpawnDirection);
+	}
+	else
+	{
+		SpawnRotation = Rotation + GlobalSpawnRotation + ListOfSpawns[CurrentSpawnIdx].SpawnRotation;
+		SpawnDirection = Vector(FinalRot);
+	}
+
+	SpawnedParticle = Spawn(GetSpawnParticles(),,,SpawnLocation);
+	SpawnedParticle.PlaySound(GetSpawnSound());
+
+	SpawnedActor = Spawn(ListOfSpawns[CurrentSpawnIdx].ActorToSpawn,,,SpawnLocation,SpawnRotation);
+
+	if ( bVaryVelocity )
+	{
+		RandVelocityMult = Range(1.0,VaryVelocityIntensity);
+	}
+	else
+	{
+		RandVelocityMult = 1.0;
+	}
+
+	SpawnedActor.Velocity = SpawnDirection * RandVelocityMult * ListOfSpawns[CurrentSpawnIdx].SpawnVelocityMult;
+
+	if ( ListOfSpawns[CurrentSpawnIdx].SpawnProperties.Length > 0 )
+	{
+		SetSpawnProperties(SpawnedActor);
+	}
+
+	CurrentSpawnCount++;
+}
+
+function ProcessSpell()
+{
+	if ( !IsInState('stateSpawn') )
+	{
+		GotoState('stateSpawn');
+	}
+}
+
+
+/////////////////////
+// Helper Functions
+/////////////////////
+
+function SetSpawnProperties(Actor SpawnedActor)
+{
+	local int i;
+	local string PropName;
+	local string PropVal;
+
+	for ( i = 0; i < ListOfSpawns[CurrentSpawnIdx].SpawnProperties.Length; i++ )
+	{
+		PropName = ListOfSpawns[CurrentSpawnIdx].SpawnProperties[i].PropertyName;
+		PropVal = ListOfSpawns[CurrentSpawnIdx].SpawnProperties[i].PropertyValue;
+
+		if ( PropName != "" )
+		{
+			SpawnedActor.SetPropertyText(PropName,PropVal);
+		}
+	}
+}
+
+function SetSpawnWeights()
+{
+	local int i;
+
+	for ( i = 0; i < ListLength; i++ )
+	{
+		TotalWeight += int(ListOfSpawns[i].SpawnChance);
+	}
+
+	for ( i = 0; i < ListLength; i++ )
+	{
+		ListOfSpawns[i].FinalWeight = ListOfSpawns[i].SpawnChance / TotalWeight;
+	}
+}
+
+function bool ShouldDie()
+{
+	return MaxLives <= 0;
+}
+
+function int GetMaxSpawnCount()
+{
+	local int RandCount;
+	RandCount = Clamp(Rand(MaxSpawnCount),MinSpawnCount,MaxSpawnCount);
+	RandCount = Clamp(RandCount,1,MAXINT);
+	return RandCount;
+}
+
+function int GetWeightedRandomIndex()
+{
+	local int i;
+	
+	Roll = FRand() * TotalWeight;
+
+	for ( i = 0; i < ListLength; i++ )
+	{
+		if ( ListOfSpawns[i].FinalWeight <= 0.0 )
+		{
+			continue;
+		}
+
+		Roll -= ListOfSpawns[i].FinalWeight;
+		if ( Roll <= 0.0 )
+		{
+			return i;
+		}
+	}
+
+	return 0;
+}
+
+function float GetSpawnDelay()
+{
+	return ListOfSpawns[CurrentSpawnIdx].SpawnDelay;
+}
+
+function Vector GetRandomDirection()
+{
+	local float Theta;
+	local float Radius;
+	local float Z;
+	local Vector Direction;
+
+	Theta = FRand() * (2 * Pi);
+
+	Z = (FRand() * 2) - 1.0;
+
+	Radius = Sqrt(1.0 - Z * Z);
+
+	Direction.X = Radius * Cos(Theta);
+	Direction.Y = Radius * Sin(Theta);
+	Direction.Z = Z;
+
+	return Direction;
 }
 
 function Sound GetSpawnSound()
 {
-    return listOfSpawns[currentSpawnIndex].spawnSound;
+	return ListOfSpawns[CurrentSpawnIdx].SpawnSound;
 }
 
-function class<ParticleFX> GetSpawnParticle()
+function class<ParticleFX> GetSpawnParticles()
 {
-    return listOfSpawns[currentSpawnIndex].spawnParticle;
+	return ListOfSpawns[CurrentSpawnIdx].SpawnParticles;
 }
 
-function vector GetRandomizedDirection()
+
+///////////
+// States
+///////////
+
+auto state stateIdle
 {
-    local vector Dir;
-    local float u, v, theta, phi;
-    local float RandPitch, RandYaw;
-    local rotator Offset;
-    local float DegToUnr;
-
-    DegToUnr = 65536.0 / 360.0;
-
-    if (GlobalSpawnAngle.Y >= 180.0 && GlobalSpawnAngle.X >= 180.0)
-    {
-        u = FRand();
-        v = FRand();
-
-        theta = 2.0 * PI * u;
-        phi   = Acos(2.0 * v - 1.0);
-
-        Dir.X = Sin(phi) * Cos(theta);
-        Dir.Y = Sin(phi) * Sin(theta);
-        Dir.Z = Cos(phi);
-
-        return Normal(Dir);
-    }
-
-    RandPitch = (FRand() * 2.0 - 1.0) * GlobalSpawnAngle.X;
-    RandYaw   = (FRand() * 2.0 - 1.0) * GlobalSpawnAngle.Y;
-
-    Offset.Pitch = int(RandPitch * DegToUnr);
-    Offset.Yaw   = int(RandYaw   * DegToUnr);
-    Offset.Roll  = 0;
-
-    Dir = Vector(GlobalSpawnDirection + Offset);
-
-    return Normal(Dir);
-}
-
-function SpawnItem()
-{
-    local ParticleFX spawnedParticle;
-    local Actor spawnedActor;
-    local Vector spawnLocation;
-    local int i;
-    local vector Dir;
-    local vector RandOffset;
-    local float RandAmount;
-    local int RandAmountMult;
-    local rotator FinalRot;
-
-    if (bRandomSpawnOrder)
-    {
-        currentSpawnIndex = Rand(listOfSpawns.Length);
-    }
-    else
-    {
-        currentSpawnIndex = numOfSpawns;
-        if (currentSpawnIndex > listOfSpawns.Length)
-        {
-            currentSpawnIndex = 0;
-        }
-    }
-
-    if (bUseGlobalSpawnSettings)
-    {
-        spawnLocation = Location + GlobalSpawnOffset + listOfSpawns[currentSpawnIndex].spawnLocationOffset;
-    }
-    else
-    {
-        spawnLocation = Location + listOfSpawns[currentSpawnIndex].spawnLocationOffset;
-    }
-
-    spawnedParticle = Spawn(GetSpawnParticle(),,,spawnLocation);
-
-    if (spawnedParticle != None)
-    {
-        spawnedParticle.PlaySound(GetSpawnSound());
-    }
-
-    if (bUseGlobalSpawnSettings)
-    {
-        Dir = GetRandomizedDirection();
-        FinalRot = rotator(Dir);
-    }
-    else
-    {
-        FinalRot = Rotation + listOfSpawns[currentSpawnIndex].spawnRotation;
-        Dir = Vector(FinalRot);
-    }
-
-    spawnedActor = Spawn(listOfSpawns[currentSpawnIndex].actorToSpawn,,,spawnLocation, FinalRot);
-
-    if (bVaryVelocity)
-    {
-        RandAmountMult = Clamp(Rand(maxVelocityVariance),2,maxVelocityVariance);
-        RandAmount = FRand() * RandAmountMult;
-
-        RandOffset.X = (FRand() * 2.0 - 1.0) * RandAmount;
-        RandOffset.Y = (FRand() * 2.0 - 1.0) * RandAmount;
-        RandOffset.Z = (FRand() * 2.0 - 1.0) * RandAmount;
-    }
-    else
-    {
-        RandOffset = vect(0,0,0);
-    }
-
-    Dir = Normal(Dir + RandOffset);
-
-    spawnedActor.Velocity = Dir * ((128 + Rand((maxVelocityVariance * 8))) * listOfSpawns[currentSpawnIndex].velocityMult);
-
-    if (listOfSpawns[currentSpawnIndex].spawnProperties.Length != 0)
-    {
-        for(i = 0; i < listOfSpawns[currentSpawnIndex].spawnProperties.Length; i++)
-        {
-            if (listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyName != "" && listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyValue != "")
-            {
-                spawnedActor.SetPropertyText(listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyName, listOfSpawns[currentSpawnIndex].spawnProperties[i].PropertyValue);
-            }
-        }
-    }
-
-    numOfSpawns++;
-}
-
-auto state stateDormant
-{
-    event BeginState()
-    {
-        numOfSpawns = 0;
-        eVulnerableToSpell = defaultSpell;
-    }
-
-    event EndState()
-    {
-        maxLives--;
-        eVulnerableToSpell = SPELL_None;
-    }
 }
 
 state stateSpawn
 {
 	event BeginState()
 	{
-		if (bTurnSpawnerTowardsHarry)
+		eVulnerableToSpell = SPELL_None;
+		MaxLives--;
+
+		if ( bTurnSpawnerTowardsHarry )
 		{
 			EnableTurnTo(PlayerHarry);
 		}
@@ -260,57 +276,46 @@ state stateSpawn
 
 	event EndState()
 	{
-		if (bTurnSpawnerTowardsHarry)
+		if ( ShouldDie() )
 		{
-			DisableTurnTo();
+			Destroy();
 		}
+
+		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+		CurrentSpawnCount = 0;
+
+		DisableTurnTo();
 	}
 
-    begin:
-        SpawnItem();
-        sleep(listOfSpawns[currentSpawnIndex].spawnDelay);
-        if (numOfSpawns >= maxSpawns)
-        {
-            GotoState('stateDone');
-        }
-        goto('begin');
-}
+	begin:
+		FinalMaxSpawnCount = GetMaxSpawnCount();
+		SpawnItem();
+		Sleep(GetSpawnDelay());
 
-state stateDone
-{
-    begin:
-        if (maxLives <= 0)
-        {
-            sleep(5.0);
-            Destroy();
-        }
-        else
-        {
-            sleep(1.0);
-            GotoState('stateDormant');
-        }
-}
+		if ( CurrentSpawnCount >= FinalMaxSpawnCount )
+		{
+			GotoState('stateIdle');
+		}
 
-function ProcessSpell()
-{
-    GotoState('stateSpawn');
+		Goto('begin');
 }
 
 defaultproperties
 {
-    listOfSpawns(0)=(actorToSpawn=Class'Jellybean',spawnChance=255,spawnDelay=1.0,spawnSound=Sound'spawn_bean01',spawnParticle=Class'Spawn_flash_1',velocityMult=1.0)
-    eVulnerableToSpell=SPELL_Flipendo
-    bRandomSpawnOrder=true
-    numberToSpawn=4
-    maxLives=4
-    DrawType=DT_Sprite
-    Texture=Texture'MocaTexturePak.EditorIco.MOCASpawnerIcon'
-    bHidden=True
-    bVaryVelocity=True
-    maxVelocityVariance=4
-    bBlockPlayers=false
+	ListOfSpawns(0)=(ActorToSpawn=class'Jellybean',SpawnParticles=class'Spawn_flash_1',SpawnSound=Sound'spawn_bean01',SpawnChance=255,SpawnDelay=1.0,SpawnVelocityMult=1.0)
 
-    GlobalSpawnOffset=(X=0,Y=0,Z=0)
-    GlobalSpawnDirection=(Pitch=0,Yaw=0,Roll=0)
-    GlobalSpawnAngle=(X=20,Y=20,Z=0)
+	bRandomSpawnOrder=True
+	bVaryVelocity=True
+	VaryVelocityIntensity=1.5
+
+	MinSpawnCount=3
+	MaxSpawnCount=6
+	MaxLives=3
+
+	Physics=PHYS_None
+	eVulnerableToSpell=SPELL_Flipendo
+	DrawType=DT_Sprite
+	Texture=Texure'MocaTexturePak.EditorIco.MOCASpawnerIcon'
+	bHidden=True
+	bBlockPlayers=False
 }

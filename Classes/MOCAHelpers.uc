@@ -38,9 +38,14 @@ static function NavigationPoint GetFurthestNavPFromActor(Actor ActorToCheck)
 	return FurthestNav;
 }
 
-function bool IsFacingOther(Actor SourceActor, Actor Other, float MinDot)
+static function bool IsFacingOther(Actor SourceActor, Actor Other, float MinDot)
 {
 	local float DotProduct;
 	DotProduct = Vector(Rotation) Dot Normal(Other.Location - Location);
 	return DotProduct > MinDot;
+}
+
+static function bool IsEmpty(Array ArrayToCheck)
+{
+	return ArrayToCheck.Length <= 0;
 }

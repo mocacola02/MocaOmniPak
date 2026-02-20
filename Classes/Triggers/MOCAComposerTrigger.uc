@@ -5,6 +5,8 @@ enum ComposerCommand
 	CC_Start,
 	CC_Queue,
 	CC_Continue,
+	CC_Continuous,
+	CC_ContinuousRandom,
 	CC_Stop
 };
 
@@ -32,6 +34,8 @@ function ProcessTrigger()
 			case CC_Start: A.BeginComposing(TrackOverride); break;
 			case CC_Queue: A.bReadyToProgress = True; break;
 			case CC_Continue: A.ProgressTrack(TrackOverride); break;
+			case CC_Continuous: A.BeginContinuous(TrackOverride); break;
+			case CC_ContinuousRandom: A.BeginContinuous(TrackOverride,True); break;
 			default: A.StopComposing(StopFadeTime); break;
 		}
 	}

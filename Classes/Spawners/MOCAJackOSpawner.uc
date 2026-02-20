@@ -1,21 +1,18 @@
 //================================================================================
 // MOCAJackOSpawner.
 //================================================================================
-
 class MOCAJackOSpawner extends MOCAVisibleSpawner;
+
 
 defaultproperties
 {
-     spawnAnims=(Spawning=Scream,EndSpawning=None,Idle=Rest,DoneIdle=Rest,FinalSpawnEnd=Scream)
-     visibleSpawnSounds=(Opening=Sound'MocaSoundPak.jacko_spawn')
-     Physics=PHYS_None
-     Mesh=SkeletalMesh'MocaModelPak.skJackOLanternMesh'
-     DrawScale=1.0
-     AmbientGlow=32
-     CollisionRadius=21
-     CollisionHeight=14
-     CollideType=CT_OrientedCylinder
-     bBlockPlayers=True
-     bAlignBottomAlways=True
-     bBlockCamera=True
+	SpawnerAnims=(Spawning=Scream,EndSpawning=None,Idle=Rest,DoneIdle=Rest,FinalSpawnEnd=Scream)
+	SpawnerSounds=(Opening=Sound'MocaSoundPak.jacko_spawn)
+
+	Mesh=SkeletalMesh'MocaModelPak.skJackOLanternMesh'
+	AmbientGlow=32
+	CollisionRadius=21
+	CollisionHeight=14
+	CollideType=CT_OrientedCylinder
+	bAlignBottomAlways=True
 }

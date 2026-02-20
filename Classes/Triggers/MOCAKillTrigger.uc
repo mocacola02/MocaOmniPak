@@ -1,57 +1,36 @@
 class MOCAKillTrigger extends MOCATrigger;
 
-var() array<class<HPawn>> ClassesToExclude; // Moca: List of HPawn classes that should not be killed if triggered by them
-var() bool bSendEventOnKill; // Moca: Should we broadcast Event after destroying an actor
-var() bool bKillHarry; // Moca: Should the kill trigger kill Harry
-var() name PainType; // Moca: What type of pain to inflict? Use ZonePain for a kill zone style death. See harry's class for other DamageTypes. Default: ZonePain
+var() bool bSendEventOnKill;
+var() name DamageName; // Moca: What type of damage to inflict? Use ZonePain for a kill zone style death. See harry's class for other DamageTypes. Default: ZonePain
+var() array<class<HPawn>> ClassesToKill;
 
-function Activate(actor Other, pawn Instigator)
+
+function ProcessTrigger(Actor Other)
 {
-	super.Activate(Other, Instigator);
+	local int i;
 
-	if (Other.IsA('harry') && bKillHarry)
+	if ( MOCAHelpers.IsEmpty(ClassesToKill) )
 	{
-		KillOther(Other,Instigator);
+		Log(string(Self)$" has no classes listed to kill!");
 	}
 
-	if (ClassesToExclude.Length > 0)
+	for ( i = 0; i < ClassesToKill.Length; i++ )
 	{
-		local int i;
-
-		for(i=0; i < ClassesToExclude.Length; i++)
+		if ( Other.Class == ClassesToKill[i] )
 		{
-			local name NameOfClass;
-			NameOfClass = ClassesToExclude[i].Default.Name;
+			Other.TakeDamage(MAXINT,None,Location,Velocity,DamageName);
 
-			if (Other.IsA(NameOfClass))
+			if ( bSendEventOnKill )
 			{
-				Log(string(Other) $ " is in our excluded class list for class " $ NameOfClass);
-				return;
+				TriggerEvent(Event,Self,None);
 			}
-
-			KillOther(Other,Instigator);
 		}
 	}
-	else
-	{
-		KillOther(Other,Instigator);
-	}
 }
 
-function KillOther(Actor Other, Pawn Instigator)
-{
-	Log(string(self) $ " is killing " $ string(Other));
-	Other.TakeDamage(MaxInt,Instigator,Location,Velocity,PainType);
-
-	if (bSendEventOnKill)
-	{
-		TriggerEvent(Event,self,Instigator);
-	}
-}
 
 defaultproperties
 {
 	bSendEventOnKill=True
-	bKillHarry=True
-	PainType=ZonePain
+	DamageName=ZonePain
 }

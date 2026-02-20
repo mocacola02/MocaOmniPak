@@ -1,88 +1,58 @@
 //================================================================================
 // MOCACameraTrigger.
 //================================================================================
-
 class MOCACameraTrigger extends MOCATrigger;
 
-enum ECamMode 
-{
-	CM_Startup,
-	CM_Idle,
-	CM_Transition,
-	CM_Standard,
-	CM_Quidditch,
-	CM_FlyingCar,
-	CM_Dueling,
-	CM_CutScene,
-	CM_Boss,
-	CM_Free
-};
+var() bool bTurnHarry;
+var() BaseCam.ECamMode CameraMode;
 
-var() bool bOrientHarry;  	// Moca: Orient Harry to face CameraTarget?
-var() ECamMode CameraMode; 	// Moca: CameraMode to switch to
-var() Name CameraTargetTag; // Moca: Tag of the MOCACameraTarget
 
-function Activate ( actor Other, pawn Instigator )
+///////////
+// Events
+///////////
+
+event Activate(Actor Other, Pawn Instigator)
 {
-    ProcessTrigger();
+	ProcessTrigger();
 }
+
+
+///////////////////
+// Main Functions
+///////////////////
 
 function ProcessTrigger()
 {
-    local MOCACameraTarget A;
 	local MOCACameraTarget CamTarget;
 
-	if (CameraMode == CM_Boss)
+	if ( CameraMode == CM_Boss )
 	{
-		foreach AllActors(Class'MOCACameraTarget', A)
+		foreach AllActors(class'MOCACameraTarget', CamTarget)
 		{
-			if (A.Tag == CameraTargetTag)
+			if ( CamTarget.Tag == Event )
 			{
-				CamTarget = A;
-				break; // Exit the loop early when a match is found
+				break;
 			}
 		}
 
-		if (CamTarget == None)
+		if ( CamTarget.Tag != Event )
 		{
+			Log(string(Self)$" could not find MOCACameraTarget with tag "$Event);
 			return;
 		}
 
 		PlayerHarry.BossTarget = CamTarget;
 
-		if (bOrientHarry)
+		if ( bTurnHarry )
 		{
-			log("rotat");
 			PlayerHarry.SetRotation(Rotator(CamTarget.Location - PlayerHarry.Location));
 		}
 	}
 
-	SetCam(CameraMode);
+	SetCam();
 }
 
-function SetCam( ECamMode eMode )
+function SetCam()
 {
-	switch( eMode )
-	{
-		case CM_Startup:	PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_Startup);		break;
-		case CM_Idle:		PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_Idle);			break;
-
-		case CM_Transition:	PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_Transition); break;
-		
-		case CM_Standard:	PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_Standard);	break;
-		case CM_FlyingCar:	PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_FlyingCar);	break;
-		case CM_Quidditch:	PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_Quidditch);	break;
-		case CM_Dueling:	PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_Dueling);		break;
-		case CM_CutScene:	PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_CutScene);	break;
-		case CM_Boss:		PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_Boss);		break;
-
-		case CM_Free:		PlayerHarry.Cam.SetCameraMode(PlayerHarry.Cam.ECamMode.CM_Free);		break;
-		
-		
-		default: log("Camera: Trying to set a camera mode that is not supported!!!");
-	}
-}
-
-defaultproperties
-{
+	PlayerHarry.Cam.SetCameraMode(CameraMode);
 }

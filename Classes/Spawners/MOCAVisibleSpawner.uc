@@ -1,110 +1,103 @@
+//================================================================================
+// MOCAVisibleSpawner.
+//================================================================================
 class MOCAVisibleSpawner extends MOCASpawner;
 
-struct Sounds
+struct SpawnSounds
 {
-  var() Sound Opening;
-  var() Sound Closing;
-  var() Sound Ending;
+	var() Sound Opening;
+	var() Sound Closing;
+	var() Sound Ending;
 };
 
-struct Animations
+struct SpawnAnimations
 {
-  var() name Spawning;
-  var() name EndSpawning;
-  var() name Idle;
-  var() name DoneIdle;
-  var() name FinalSpawnEnd;
+	var() name Spawning;
+	var() name EndSpawning;
+	var() name Idle;
+	var() name DoneIdle;
+	var() name FinalSpawnEnd;
 };
 
-var(MOCASpawnGlobal) bool bResetGlobalOffsetWhenDone;
+var() SpawnAnimations SpawnerAnims;
+var() SpawnSounds SpawnerSounds;
 
-var(MOCAVisibleSpawnAnimations) Animations spawnAnims;
-var(MOCAVisibleSounds) Sounds visibleSpawnSounds;
 
 var bool bAnimCooldown;
 
-auto state stateDormant
+
+///////////
+// States
+///////////
+
+auto state stateIdle
 {
-    event BeginState()
-    {
-        numOfSpawns = 0;
-        eVulnerableToSpell = defaultSpell;
-    }
-
-    event EndState()
-    {
-        maxLives--;
-        eVulnerableToSpell = SPELL_None;
-    }
-
-    begin:
-        LoopAnim(spawnAnims.Idle);
+	event BeginState()
+	{
+		Super.BeginState();
+		LoopAnim(SpawnerAnims.Idle);
+	}
 }
-
 
 state stateSpawn
 {
-    event EndState()
-    {
-        bAnimCooldown = false;
-    }
+	event EndState()
+	{
+		Super.EndState();
+		bAnimCooldown = False;
+	}
 
-    begin:
-        if (!bAnimCooldown)
-        {
-            if (maxLives <= 0)
-            {
-				if (bResetGlobalOffsetWhenDone)
-				{
-					GlobalSpawnOffset = vect(0,0,0);
-				}
+	begin:
+		if ( !bAnimCooldown )
+		{
+			if ( ShouldDie() )
+			{
+				PlayAnim(SpawnerAnims.FinalSpawnEnd);
+				PlaySound(SpawnerSounds.Ending);
+			}
+			else
+			{
+				PlayAnim(SpawnerAnims.Spawning);
+				PlaySound(SpawnerSounds.Opening);
+			}
+		}
 
-                PlayAnim(spawnAnims.FinalSpawnEnd);
-                PlaySound(visibleSpawnSounds.Ending);
-            }
-            else
-            {
-                PlayAnim(spawnAnims.Spawning); 
-                PlaySound(visibleSpawnSounds.Opening);
-            }
-        }
+		SpawnItem();
+		bAnimCooldown = True;
+		Sleep(GetSpawnDelay());
 
-        SpawnItem();
-        bAnimCooldown = true;
-        sleep(listOfSpawns[currentSpawnIndex].spawnDelay);
+		if ( CurrentSpawnCount >= FinalMaxSpawnCount )
+		{
+			GotoState('stateDone');
+		}
 
-        if (numOfSpawns > maxSpawns)
-        {
-            GotoState('stateDone');
-        }
-
-        goto('begin');
+		Goto('begin');
 }
 
 state stateDone
 {
-    begin:
-        FinishAnim();
-        if (maxLives <= 0)
-        {
-            //PlayAnim(spawnAnims.FinalSpawnEnd);
-            //FinishAnim();
-            LoopAnim(spawnAnims.DoneIdle);
-        }
-        else
-        {
-            PlayAnim(spawnAnims.EndSpawning);
-            PlaySound(visibleSpawnSounds.Closing);
-            FinishAnim();
-            GotoState('stateDormant');
-        }
+	begin:
+		FinishAnim();
+
+		if ( ShouldDie() )
+		{
+			eVulnerableToSpell=SPELL_None;
+			LoopAnim(SpawnerAnims.DoneIdle);
+		}
+		else
+		{
+			PlayAnim(SpawnerAnims.EndSpawning);
+			PlaySound(SpawnerSounds.Closing);
+			FinishAnim();
+			GotoState('stateIdle');
+		}
 }
+
 
 defaultproperties
 {
-    listOfSpawns(0)=(actorToSpawn=Class'Jellybean',spawnChance=255,spawnDelay=0.1,spawnSound=Sound'spawn_bean01',spawnParticle=Class'Spawn_flash_1',velocityMult=1.0)
-    minAmountToSpawn=4
-    maxAmountToSpawn=12
-    DrawType=DT_Mesh
-    bHidden=false
+	DrawType=DT_Mesh
+	bHidden=False
+	bBlockPlayers=True
+	bBlockCamera=True
 }

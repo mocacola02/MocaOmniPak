@@ -4,12 +4,17 @@ var harry PlayerHarry;
 
 event PostBeginPlay()
 {
-    super.PostBeginPlay();
-    PlayerHarry = harry(Level.PlayerHarryActor);
+	Super.PostBeginPlay();
+	PlayerHarry = harry(Level.PlayerHarryActor);
+}
+
+event Activate(Actor Other, Pawn Instigator)
+{
+	ProcessTrigger();
 }
 
 defaultproperties
 {
-    bDoActionWhenTriggered=True
+	bDoActionWhenTriggered=True
 	bSpriteRelativeScale=True
 }
