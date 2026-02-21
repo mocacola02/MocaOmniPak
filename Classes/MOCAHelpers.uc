@@ -49,3 +49,8 @@ static function bool IsEmpty(Array ArrayToCheck)
 {
 	return ArrayToCheck.Length <= 0;
 }
+
+static function PushError(string ErrorMessage)
+{
+	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT THIS TO M212 ENGINE! Error Message: "$ErrorMessage);
+}

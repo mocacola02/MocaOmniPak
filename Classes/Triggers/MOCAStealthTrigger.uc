@@ -4,40 +4,48 @@
 
 class MOCAStealthTrigger extends MOCATrigger;
 
-var bool bDoOnce;
-var bool bAttachedToKnight;
+var() float TimeOutDuration;
+var() name EventOnTrigger;
 
-function Activate ( actor Other, pawn Instigator ) {
-    if (bDoOnce && !PlayerHarry.IsInState('caught')) {
-        GotoState('ProcessTrigger');
-    }
+
+function ProcessTrigger(Actor Other, Pawn EventInstigator)
+{
+	if ( !IsInState('stateTimeout') && !PlayerHarry.IsInState('stateCaught') )
+	{
+		PlayerHarry.GetCaught(Self,EventOnTrigger);
+
+		if ( Owner.IsA('MOCAWatcher') )
+		{
+			Owner.GotoState('stateCatch');
+		}
+		else
+		{
+			GotoState('stateTimeout');
+		}
+	}
 }
 
-state ProcessTrigger
+function Reset()
 {
-    begin:
-        bDoOnce = False;
-        if (bAttachedToKnight)
-        {
-            Owner.GotoState('catch');
-        }
-        PlayerHarry.GotoState('caught');
-        sleep(4.0);
-        bDoOnce = True;
+	if ( IsInState('stateTimeout') )
+	{
+		GotoState(LastValidState);
+	}
+}
+
+state stateTimeout
+{
+	begin:
+		Sleep(TimeOutDuration);
+		Reset();
 }
 
 defaultproperties
 {
-    bDoOnce=True
-    CollisionHeight=35
-    CollisionRadius=42
-    CollisionWidth=0
-    CollideType=CT_Box
-    bAttachedToKnight=False
-    LightBrightness=128
-    LightHue=128
-    LightSaturation=128
-    bDynamicLight=true
-    LightRadius=8
-    LightType=LT_Steady
+	TimeOutDuration=4.0
+
+	CollisionHeight=35
+	CollisionRadius=42
+	CollisionWidth=0
+	CollideType=CT_Box
 }    

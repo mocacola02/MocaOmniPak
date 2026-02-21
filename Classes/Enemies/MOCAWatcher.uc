@@ -20,6 +20,8 @@ var() name CatchAnim;
 
 var() name TriggerBoneName;
 
+var() name EventOnCatch;
+
 var() Texture BeamTexture;
 var() Sound SqueakSound;
 var() Sound ClangSound;
@@ -46,7 +48,7 @@ event Bump(Actor Other)
 {
 	if ( CanCatchHarry() && Other == PlayerHarry )
 	{
-		PlayerHarry.GetCaught();
+		PlayerHarry.GetCaught(Self,EventOnCatch);
 		GotoState('stateCatch');
 	}
 }
@@ -115,6 +117,13 @@ function ShowBeam()
 	{
 		CatchTrigger = Spawn(class'MOCAStealthTrigger',Self,,BonePos(TriggerBoneName));
 		CatchTrigger.AttachToBone(Self,TriggerBoneName);
+		CatchTrigger.TimeOutDuration = 100.0;
+		CatchTrigger.LightBrightness = 128;
+		CatchTrigger.LightHue = 128;
+		CatchTrigger.LightSaturation = 128;
+		CatchTrigger.bDynamicLight = True;
+		CatchTrigger.LightRadius = 8;
+		CatchTrigger.LightType = LT_Steady;
 	}
 }
 
@@ -143,6 +152,7 @@ function TurnHead(name TurnAnimation, float TweenRate)
 
 function Reset()
 {
+	CatchTrigger.Reset();
 	GotoState('stateIdle');
 }
 
@@ -168,32 +178,32 @@ auto state stateAsleep
 
 state stateIdle
 {
-	begin:
-		LoopAnim('Idle');
-		Sleep(GetLookTime());
+begin:
+	LoopAnim('Idle');
+	Sleep(GetLookTime());
 
-		if ( Rand(1) == 0 )
-		{
-			TurnHead(TurnLeftAnim,GetTurnSpeed());	// IdleLeft
-			FinishAnim();
-		}
-		else
-		{
-			TurnHead(TurnRightAnim,GetTurnSpeed()); // IdleRight
-			FinishAnim();
-		}
-		
-		Sleep(GetLookTime());
-		TurnHead(IdleAnim,0.75); // Idle
+	if ( Rand(1) == 0 )
+	{
+		TurnHead(TurnLeftAnim,GetTurnSpeed());	// IdleLeft
 		FinishAnim();
-		Goto('begin');
+	}
+	else
+	{
+		TurnHead(TurnRightAnim,GetTurnSpeed()); // IdleRight
+		FinishAnim();
+	}
+		
+	Sleep(GetLookTime());
+	TurnHead(IdleAnim,0.75); // Idle
+	FinishAnim();
+	goto('begin');
 }
 
 state stateCatch
 {
-	begin:
-		LoopAnim(CatchAnim);
-		PlayArmorSound(ClangSound,0.667,1.334);
+begin:
+	LoopAnim(CatchAnim);
+	PlayArmorSound(ClangSound,0.667,1.334);
 }
 
 

@@ -10,8 +10,10 @@ event PostBeginPlay()
 
 event Activate(Actor Other, Pawn Instigator)
 {
-	ProcessTrigger();
+	ProcessTrigger(Other,Instigator);
 }
+
+function ProcessTrigger(Actor Other, Pawn EventInstigator);
 
 defaultproperties
 {

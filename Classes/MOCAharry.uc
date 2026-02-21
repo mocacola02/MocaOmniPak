@@ -35,6 +35,7 @@ var SpellCursor StockCursor;	// Ref to stock SpellCursor
 var MOCASpellCursor MocaCursor;	// Ref to MOCASpellCursor
 
 var MOCAChar CaughtByActor;
+var name PostCaughtEvent;
 
 
 ///////////
@@ -598,9 +599,10 @@ function TeleportHarry(Vector TPLocation, Rotator TPRotation)
 	SetRotation(TPRotation);
 }
 
-function GetCaught(Actor Catcher)
+function GetCaught(Actor Catcher, optional name CatchEvent)
 {
 	CaughtByActor = Catcher;
+	PostCaughtEvent = CatchEvent;
 	GotoState('stateCaught');
 }
 
@@ -638,6 +640,16 @@ state stateCaught
 		bKeepStationary = True;
 	}
 
+	event Tick(float DeltaTime)
+	{
+		Global.Tick(DeltaTime);
+
+		if ( bSkipCutScene )
+		{
+			Goto('endcatch');
+		}
+	}
+
 	begin:
 		Sleep(1.0);
 		ScreenFade(1.0, 2.0);
@@ -645,6 +657,7 @@ state stateCaught
 		TeleportHarry(RespawnLocation,RespawnRotation);
 		Sleep(0.5);
 
+	endcatch:
 		if ( CaughtByActor.IsA('MOCAWatcher') )
 		{
 			CaughtByActor.Reset();
@@ -652,6 +665,12 @@ state stateCaught
 
 		ScreenFade(0.0, 2.0);
 		bKeepStationary = False;
+
+		if ( PostCaughtEvent != '' )
+		{
+			TriggerEvent(PostCaughtEvent,Self,Self);
+		}
+
 		GotoState('PlayerWalking');
 }
 

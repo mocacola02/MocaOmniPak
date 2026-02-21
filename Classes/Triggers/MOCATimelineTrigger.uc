@@ -5,123 +5,133 @@ class MOCATimelineTrigger extends MOCATrigger;
 
 struct TimedEvent
 {
-    var() name timedEventName;      //Name of event to trigger
-    var() float timeToSendEvent;    //What point in the timeline to trigger it?
+	var() name EventName;
+	var() name TimeToSendEvent;
 };
 
-var() array<TimedEvent> listOfEvents;
-var() bool bDestroyWhenDone; // Should the trigger destroy when timeline is done? Def: True
-var() bool bLoopWhenDone;    // Should the timeline loop on finish?
+var() array<TimedEvent> Timeline;
+var() bool bDestroyWhenDone;
+var() bool bLoopWhenDone;
 
-var float waitTime;
+var int CurrentIndex;
 
-var int currIndex;
-var int nextIndex;
 
-event PostBeginPlay()
+///////////////////
+// Main Functions
+///////////////////
+
+function ProcessTrigger(Actor Other, Pawn EventInstigator)
 {
-    super.PostBeginPlay();
+	if ( IsInState('statePlayTimeline') )
+	{
+		StopTimeline();
+	}
 
-    if (listOfEvents.Length <= 0)
-    {
-        Log("No events set, destroying: " $ string(self));
-        Destroy();
-    }
+	if ( MOCAHelper.IsEmpty(Timeline) )
+	{
+		Log(string(Self)$" has no events in its timeline. Destroying!");
+		Destroy();
+	}
 
-    if (bLoopWhenDone && bDestroyWhenDone)
-    {
-        Log("Timeline shouldn't loop AND destroy, deactivating bDestroyWhenDone on: " $ string(self));
-        bDestroyWhenDone = false;
-    }
+	if ( bLoopWhenDone && bDestroyWhenDone )
+	{
+		Log(string(Self)$" is set to loop AND destroy which isn't correct, deactivating bDestroyWhenDone.");
+		bDestroyWhenDone = False;
+	}
 
-    SortEvents();
+	SortEvents();
+	GotoState('statePlayTimeline');
 }
 
 function SortEvents()
 {
-    local int i, j;
-    local TimedEvent temp;
+	local int i,j;
+	local TimedEvent EventToSort;
 
-    Log("Timeline index length sanity check before: " $ string(listOfEvents.Length));
-
-    // Bubble sort: compare pairs and swap if out of order
-    for (i = 0; i < listOfEvents.Length; i++)
-    {
-        for (j = 0; j < listOfEvents.Length - 1; j++)
-        {
-            if (listOfEvents[j].timeToSendEvent > listOfEvents[j + 1].timeToSendEvent)
-            {
-                // Swap
-                temp = listOfEvents[j];
-                listOfEvents[j] = listOfEvents[j + 1];
-                listOfEvents[j + 1] = temp;
-                Log("Reordering " $ string(listOfEvents[j].timedEventName));
-            }
-        }
-    }
-
-    Log("Timeline index length sanity check after: " $ string(listOfEvents.Length));
-}
-
-
-event Activate(Actor Other, Pawn Instigator)
-{
-    Log("Timeline activating from state: " $ string(GetStateName()));
-    if (!IsInState('stateCount'))
-    {
-        GotoState('stateCount');
-    }
-    else
-    {
-        Log("uhh actually nvm (is timeline already running?)");
-    }
-}
-
-state stateCount
-{
-    function sendEvent()
-    {
-        local name currEvent;
-        currIndex = nextIndex;
-        nextIndex++;
-
-        currEvent = listOfEvents[currIndex].timedEventName;
-
-        if( currEvent != '' )
+	for ( i = 0; i < Timeline.Length; i++ )
+	{
+		for ( j = 0; j < Timeline.Length; j++ )
 		{
-            Log("Broadcasting event: " $ string(currEvent));
-			foreach AllActors( class 'Actor', Target, currEvent )
-				Target.Trigger( Self, Instigator );
+			if ( Timeline[j].TimeToSendEvent > Timelime[j + 1].TimeToSendEvent )
+			{
+				EventToSort = Timeline[j];
+				Timeline[j] = Timeline[j + 1];
+				Timeline[j + 1] = EventToSort;
+			}
 		}
-    }
-
-    begin:
-        if (nextIndex > listOfEvents.Length)
-        {
-            Log("Finished timeline");
-            currIndex = 0;
-            nextIndex = 0;
-            if (bDestroyWhenDone)
-            {
-                Destroy();
-            }
-            
-            if (bLoopWhenDone)
-            {
-                Goto('begin');
-            }
-
-            GotoState('stateDormant');
-        }
-
-        waitTime = Abs(listOfEvents[currIndex].timeToSendEvent - listOfEvents[nextIndex].timeToSendEvent);
-        sleep(waitTime);
-        sendEvent();
-        Goto('begin');
+	}
 }
+
+function SendEvent()
+{
+	if ( CurrentIndex > Timeline.Length )
+	{
+		StopTimeline();
+		return;
+	}
+
+	if ( Timeline[CurrentIndex].EventName != '' )
+	{
+		foreach AllActors(class'Actor', TargetActor, Timeline[CurrentIndex].EventName)
+		{
+			TargetActor.Trigger(Self,Instigator);
+		}
+	}
+
+	CurrentIndex++;
+}
+
+function StopTimeline()
+{
+	if ( bDestroyWhenDone && ( CurrentIndex >= Timeline.Length ) )
+	{
+		Destroy();
+	}
+
+	if ( bLoopWhenDone && ( CurrentIndex >= Timeline.Length ) )
+	{
+		CurrentIndex = 0;
+		GotoState('statePlayTimeline');
+	}
+	else
+	{
+		GotoState(MapDefault.state);
+	}
+}
+
+
+/////////////////////
+// Helper Functions
+/////////////////////	
+
+function float GetWaitTime()
+{
+	local float StartTime,EndTime;
+	StartTime = Timeline[CurrentIndex].TimeToSendEvent;
+	EndTime = Timeline[CurrentIndex + 1].TimeToSendEvent;
+
+	if ( CurrentIndex == 0 )
+	{
+		StartTime = 0.0;
+	}
+
+	return Abs(StartTime - EndTime);
+}
+
+///////////
+// States
+///////////
+
+state statePlayTimeline
+{
+	begin:
+		Sleep(WaitTime);
+		SendEvent();
+		Goto('begin');
+}
+
 
 defaultproperties
 {
-    bDestroyWhenDone=True
-    Texture=Texture'MocaTexturePak.EditorIco.ICO_TimelineTrigger'
+	bDestroyWhenDone=True
 }

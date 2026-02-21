@@ -1,47 +1,45 @@
 class MOCAForceField extends HProp;
 
-var(MOCAFFAttraction) float AttractionRange;    // Moca: Maximum AttractionRange of effect. Def: 512.0
-var(MOCAFFDispel) float DispelRange;		// Moca: How close should Harry be to start preparing to Dispel him? Only useful is attraction is positive. I recommend using around a third of your attraction range.  Def: 192.0
-var(MOCAFFDispel) float DispelTime;		// Moca: How long does Harry need to be close for the Dispel function be triggered? Def: 3.0
-var(MOCAFFDispel) float DispelStrength;	// Moca: How strong is the Dispel effect? Def: -512.0
-var(MOCAFFDispel) float DispelDuration;	// Moca: How long does Dispel last? Def: 3.0
-var(MOCAFFAttraction) float Attraction;     	// Moca: Positive = pull, Negative = push, 0 = no force. Def: 256.0
-
-var float DefAttraction;
+var() float ForceRange;
+var() float ForceStrength;
+var() float DispelRange;
+var() float DispelTime;
+var() float DispelStrength;
 
 var float DispelLevel;
-var vector lastHarryPos;
 
-event PostBeginPlay()
+
+function bool IsHarryNear(float DistCheck)
 {
-	super.PostBeginPlay();
-	DefAttraction = Attraction;
+	return MOCAHelpers.GetDistanceBetweenActors(Self,PlayerHarry) > DistCheck;
 }
 
-auto state stateDormant
+auto state stateIdle
 {
-    begin:
+	begin:
+		if ( IsHarryNear(ForceRange) )
+		{
+			GotoState('stateForce');
+		}
+
+		Sleep(0.25);
+		Goto('begin');
+}
+
+state stateForce
+{
+	event EndState()
+	{
 		DispelLevel = 0.0;
+	}
 
-        if (isHarryNear(AttractionRange))
-        {
-            GotoState('statePull');
-        }
-
-        sleep(0.25);
-        goto('begin');
-}
-
-state statePull
-{
-    event Tick(float DeltaTime)
-    {
-        if (!isHarryNear(AttractionRange))
-        {
-            GotoState('stateDormant');
-        }
-
-		if (isHarryNear(DispelRange))
+	event Tick(float DeltaTime)
+	{
+		if ( !IsHarryNear(ForceRange) )
+		{
+			GotoState('stateIdle');
+		}
+		else if ( IsHarryNear(DispelRange) )
 		{
 			DispelLevel += DeltaTime;
 		}
@@ -52,74 +50,35 @@ state statePull
 
 		DispelLevel = FClamp(DispelLevel,0.0,99999.0);
 
-		if (DispelLevel >= DispelTime)
+		if ( DispelLevel >= DispelTime )
 		{
-			GotoState('stateDispel');
+			ForceRange = DispelStrength;
+		}
+		else if ( DispelTime <= 0.0 )
+		{
+			ForceRange = MapDefault.ForceRange;
 		}
 
-        local vector ToPlayer;
-        local vector Dir;
-        local float DistSquared;
-        local float Strength;
-        local vector FinalVelocity;
+		local vector Direction;
+		local float Distance, Strength;
 
-        Global.Tick(DeltaTime);
+		Direction = PlayerHarry.Location - Location;
+		Distance = VSize(Direction);
 
-        // Vector from player to this actor
-        ToPlayer = Location - PlayerHarry.Location;
+		Direction = Normal(Direction);
 
-        // Check squared distance first
-        DistSquared = ToPlayer Dot ToPlayer; 
+		Strength = (1.0 - (Distance / ForceRange)) * ForceStrength;
 
-        Dir = Normal(ToPlayer);
-        Strength = (1.0 - (Sqrt(DistSquared) / AttractionRange)) * Attraction;
-
-        FinalVelocity = Dir * Strength * DeltaTime;
-
-        PlayerHarry.Velocity += FinalVelocity;
-    }
+		PlayerHarry.Velocity += Direction * Strength * DeltaTime;
+	}
 }
 
-state stateDispel
-{
-	begin:
-		Log(string(self) $ " IS DispelING!!!!!!!!!!!!");
-		Attraction = DispelStrength;
-		sleep(DispelDuration);
-		Attraction = DefAttraction;
-		GotoState('stateDormant');
-}
-
-function bool isHarryNear(optional float requiredDistance)
-{
-    local float Size;
-    local float distToCheck;
-    distToCheck = SightRadius;
-    Size = VSize(PlayerHarry.Location - Location);
-    //PlayerHarry.ClientMessage("Distance" @ string(Size));
-
-    if (requiredDistance != 0)
-    {
-        distToCheck = requiredDistance;
-    }
-
-    if (VSize(PlayerHarry.Location - Location) < distToCheck)
-    {
-        //Log("is close: " $ string(VSize(PlayerHarry.Location - Location) < distToCheck));
-        lastHarryPos = PlayerHarry.Location;
-        return True;
-    }
-    //Log("not close");
-    return False;
-}
 
 defaultproperties
 {
-    AttractionRange=512.0
-    Attraction=256.0
-    bHidden=True
+	ForceRange=512.0
+	ForceStrength=128.0
 	DispelRange=128.0
 	DispelTime=3.0
-	DispelStrength=-512.0
-	DispelDuration=3.0
+	DispelStrength=-256.0
 }

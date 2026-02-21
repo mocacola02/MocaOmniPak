@@ -1,99 +1,70 @@
 //=============================================================================
 // MOCARandomDispatcher.
 //=============================================================================
-class MOCARandomDispatcher extends Triggers;
+class MOCARandomDispatcher extends MOCATrigger;
 
-//-----------------------------------------------------------------------------
-// Dispatcher variables.
-
-var() Array<name>  OutEvents; // Events to select from.
-var() Array<float> OutDelays; // Relative delays before generating events.
-var() bool bDispatchAllAtOnce; //Moca: Should it randomly dispatch all events after a single trigger?
-var() bool bEventsFireOnce; //Moca: Should it be able to trigger events multiple times?
-var int i;                // Internal counter.
-
-function Trigger( actor Other, pawn EventInstigator )
+struct EventDispatch
 {
-	Activate(Other,EventInstigator);
-}
+	var() bool bEventFiresOnceOnly;
+	var() name OutEvent;
+	var() float OutDelay;
+};
 
-event Activate( actor Other, pawn EventInstigator )
+var() bool bOnceAtATime;
+var() bool bResetIfEmptied;
+var() array<EventDispatch> ListofEvents;
+
+var int i;
+
+
+function ProcessTrigger(Actor Other, Pawn EventInstigator)
 {
-	Log("MRD TRIGGERED!!!!!!!!!!!!");
-	if (!IsInState('Dispatch'))
+	if ( !IsInState('stateDispatch') )
 	{
-		Log("Starting dispatch...");
 		Instigator = EventInstigator;
-		if (bDispatchAllAtOnce)
-		{
-			gotostate('Dispatch', 'loop');
-		}
-		else
-		{
-			gotostate('Dispatch', 'fire');
-		}
+		GotoState('stateDispatch');
 	}
 	else
 	{
-		Log("pausing dispatch");
-		gotostate('');
+		GotoState(LastValidState);
 	}
 }
 
-function RemoveEventFromList()
+state stateDispatch
 {
-	OutEvents.Remove(i,1);
-	OutDelays.Remove(i,1);
-}
+	begin:
+		i = Rand(ListofEvents.Length);
 
-state Dispatch
-{
-	fire:
-		Log("TRIGGERED - Fire.");
-		disable('Trigger');
-		i = Rand(OutEvents.Length);
-		if( OutEvents[i] != '' )
+		if ( ListofEvents[i].OutEvent != '' )
 		{
-			Sleep( OutDelays[i] );
-			foreach AllActors( class 'Actor', Target, OutEvents[i] )
+			Sleep(ListofEvents[i].OutDelay);
+			
+			foreach AllActors(class'Actor',TargetActor,ListofEvents[i].OutEvent)
 			{
-				Log("Triggering:  " @ string(Target));
-				Target.Trigger( Self, Instigator );
-			}
-				
-		}
-		if (bEventsFireOnce)
-		{
-			RemoveEventFromList();
-		}
-		if (OutEvents.Length <= 0)
-		{
-			Destroy();
-		}
-		enable('Trigger');
-		gotostate('');
-
-	loop:
-		Log("TRIGGERED - Loop.");
-		while (OutEvents.Length > 0)
-		{
-			i = Rand(OutEvents.Length);
-			if( OutEvents[i] != '' )
-			{
-				Sleep( OutDelays[i] );
-				foreach AllActors( class 'Actor', Target, OutEvents[i] )
-					Target.Trigger( Self, Instigator );
-			}
-			if (bEventsFireOnce)
-			{
-				RemoveEventFromList();
+				TargetActor.Trigger(Self,Instigator);
 			}
 		}
-		Destroy();
-}
+		else if ( ListOfEvents[i].bEventFiresOnceOnly || ListOfEvents[i].OutEvent == '' )
+		{
+			ListOfEvents.RemoveItem(i);
+		}
 
-defaultproperties
-{
-     bEventsFireOnce=True
-     Texture=Texture'MocaTexturePak.EditorIco.ICO_RandomDispatcher'
+		if ( MOCAHelpers.IsEmpty(ListOfEvents) )
+		{
+			if ( bResetIfEmptied )
+			{
+				ListOfEvents = MapDefault.ListOfEvents;
+			}
+			else
+			{
+				Destroy();
+			}
+		}
+
+		if ( bOnceAtATime )
+		{
+			GotoState(LastValidState);
+		}
+
+		Goto('begin');
 }

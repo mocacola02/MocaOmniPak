@@ -4,21 +4,17 @@
 
 class MOCAMenuTrigger extends MOCATrigger;
 
-var() string MenuName;
+var() string MenuName;	// MAIN, INPUT, SOUNDVIDEO, LANG, LANGUAGE, INGAME, FOLIO, MAP, QUID, QUIDDITCH, DUEL, HPOINTS, CHALLENGES, CREDITSPAGE
 
-function Activate ( actor Other, pawn Instigator )
-{
-    ProcessTrigger();
-}
 
 function ProcessTrigger()
 {
-    HPConsole(PlayerHarry.Player.Console).menuBook.bGamePlaying = False;
-    HPConsole(PlayerHarry.Player.Console).menuBook.OpenBook(MenuName);
-    HPConsole(PlayerHarry.Player.Console).LaunchUWindow();
+	HPConsole(PlayerHarry.Player.Console).menuBook.bGamePlaying = False;
+	HPConsole(PlayerHarry.Player.Console).menuBook.OpenBook(MenuName);
+	HPConsole(PlayerHarry.Player.Console).LaunchUWindow();
 }
 
 defaultproperties
 {
-     MenuName="INGAME"
+	MenuName="INGAME"
 }
