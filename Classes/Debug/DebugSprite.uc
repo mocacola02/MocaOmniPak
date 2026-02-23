@@ -1,36 +1,26 @@
 //================================================================================
-// DebugSprite. for testing only
+// DebugSprite. for testing only (THAT'S WHAT DEBUG MEANS DUMMY)
 //================================================================================
 
 class DebugSprite extends Sprite;
 
-var float DespawnDelay;
-var float CurrentTime;
+var float DespawnDelay;	// How long before despawning
+var float CurrentTime;	// Current time accrued
 
-// Function to start the despawn countdown when the actor is spawned
-event PostBeginPlay()
-{
-	Super.PostBeginPlay();
-	CurrentTime = 0.0;
-}
 
-// Function called every frame
 event Tick(float DeltaTime)
 {
 	Super.Tick(DeltaTime);
 
-	CurrentTime += DeltaTime;
+	CurrentTime += DeltaTime;	// Increment time
+
+	// If we've surpassed the delay, destroy
 	if ( CurrentTime >= DespawnDelay )
 	{
-		DespawnSprite();
+		Destroy();
 	}
 }
 
-// Function to despawn the actor
-function DespawnSprite()
-{
-	Destroy();
-}
 
 defaultproperties
 {

@@ -4,15 +4,13 @@
 
 class MOCADiscoveryPoint extends MOCACollectible;
 
-var() float MinHoverTime;
-var() float MaxHoverTime;
-var() float CircleRadius;
-var() float CircleSpeed;
-var() float FlySpeed;
+var() Range HoverTime;		// Moca: Min and max value for HoverTime (will choose a random value between the two). Default: Min 2.5 Max 5.0
+var() float CircleRadius;	// Moca: Radius size to circle around Harry. Def: 48.0
+var() float CircleSpeed;	// Moca: Speed to circle around Harry at. Def: 400.0
 
-var bool bFlyDone;
-var float CircleAngle;
-var Vector CircleCenter;
+var bool bFlyDone;		// Is fly done
+var float CircleAngle;	// Current angle
+var Vector CircleCenter;// Current circle center
 
 
 ///////////
@@ -23,18 +21,22 @@ event PostBeginPlay()
 {
 	Super.PostBeginPlay();
 
+	// Vary our attraction speed
 	AttractionSpeed += FRand() * 10.0;
 
+	// Play point creation sound
 	PlaySound(Sound'MocaSoundPak.Magic.SFX_DiscoveryPointStart',SLOT_None,,,1500);
 
+	// If not attracted to Harry, collide with world so we don't fall out
 	bCollideWorld = !bAttractedToHarry;
 }
 
-event FellOutOfWorld();
+event FellOutOfWorld();	// Don't do anything if we fall out of world
 
 event Touch(Actor Other)
 {
-	if ( Other.IsA('harry') && !IsInState('stateCircle') )
+	// If we touched Harry and we're not already circling him
+	if ( Other == PlayerHarry && !IsInState('stateCircle') )
 	{
 		GotoState('stateCircle');
 	}
@@ -54,48 +56,66 @@ state stateCircle
 		local Vector NewLocation;
 		local float RadSpeed;
 
+		// Get circle center
 		CircleCenter = PlayerHarry.Location + AttractionOffset;
 
+		// If not done flying
 		if ( !bFlyDone )
 		{
+			// Get radius speed
 			RadSpeed = CircleSpeed * Pi / 180.0;
 
+			// Get angle to circle at
 			CircleAngle += RadSpeed * DeltaTime;
 
+			// If our angle is coming full circle, reset it
 			if ( CircleAngle > 2.0 * Pi )
 			{
 				CircleAngle -= 2.0 * Pi;
 			}
 
+			// Set desired location, conforming to a circular movement
 			DesiredLocation.X = CircleCenter.X + CircleRadius * Cos(CircleAngle);
 			DesiredLocation.Y = CircleCenter.Y + CircleRadius * Sin(CircleAngle);
 			DesiredLocation.Z = CircleCenter.Z;
 
+			// Get final location
 			NewLocation = Location + (DesiredLocation - Location) * FMin(DeltaTime * 5.0, 1.0);
 
+			// Set location
 			SetLocation(NewLocation);
 
+			// Get direction
 			Direction.X = -Sin(CircleAngle);
 			Direction.Y = Cos(CircleAngle);
 			Direction.Z = 0.0;
+			// Rotate in that direction
 			SetRotation(Rotator(Direction));
 		}
+		// Otherwise, if we're done
 		else
 		{
+			// Fly into Harry proper
 			TargetPoint = PlayerHarry.Location;
 
+			// Get direction to Harry and calculate our new location
 			Direction = Normal(TargetPoint - Location);
-			NewLocation = Location + Direction * FlySpeed * DeltaTime;
+			NewLocation = Location + Direction * AttractionSpeed * DeltaTime;
 
+			// Set location and rotation
 			SetLocation(NewLocation);
 			SetRotation(Rotator(Direction));
 		}
 	}
 
 	begin:
-		Sleep(RandRange(MinHoverTime,MaxHoverTime));
+		// Delay for random hover time
+		Sleep(RandRange(HoverTime.Min,HoverTime.Max));
+		// After delay, tell us to finish flying
 		bFlyDone = True;
+		// Delay for a quarter of a second to allow some movement towards Harry
 		Sleep(0.2);
+		// Force Touch instructions from parent class
 		Super.Touch(PlayerHarry);
 }
 
@@ -110,7 +130,6 @@ defaultproperties
 	AttractionSpeed=300.0
 	CircleRadius=48.0
 	CircleSpeed=400.0
-	FlySpeed=400.0
 
 	DrawType=DT_Sprite
 	DrawScale=0.25

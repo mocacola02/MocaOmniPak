@@ -1,152 +1,169 @@
-// cracker without the barrel
-// TODO: Clean me
 class MOCAWizardCracker extends MOCAPawn;
 
-var() float SwellRate; 				//Moca: How long does it take for the cracker to swell up? 1.0 is regular speed, 2.0 is 2x speed, etc. Def: 1.5
-var() float BurstDelay; 			//Moca: How long to wait after done swelling to burst? Def: 2.0
-var() float BurstRadius; 			//Moca: How far does the burst reach?
-var() float BurstDamage; 			//Moca: How much damage does the burst do? This represents the maximum damage if bBurstFalloff=True. Def: 15.0
-var() float bDirectHitDamage; 		//Moca: How much damage should a direct hit on Harry do? Def: 20.0
-var() float CameraShakeIntensity; 	//Moca: How much should the camera shake from bursts? Def: 100.0
-var() float CameraShakeDuration; 	//Moca: How long should camera shake. Def: 0.75
+var() bool bActAsSpell;				// Moca: Act as a spell (similar to sword beams). Def: False
+var() bool bBurstFalloff;			// Moca: Apply falloff to burst damage. Def: True
 
-var() bool bActAsSpell; 				//Moca: Should the fire cracker act as a spell? Works similarly to SwordMode activating spell functions. Def: False
-var() bool bBurstFalloff; 			//Moca: Should less damage be done the further away from the burst Harry is? Def: True
-var() bool bExplodeOnTouch; 			//Moca: Should the wizard cracker explode on touch? Aka it cannot be picked up. Def: False
-var() bool bWaitForSwell; 			//Moca: Should we wait for the swelling to finish before starting BurstDelay? Def: True
+var() float BurstDamage;			// Moca: How much damage to deal when bursting? Def: 15.0
+var() float DirectHitDamage;		// Moca: How much damage to deal on a direct hit? Def: 20.0
+var() float BurstRadius;			// Moca: How far does the burst reach? Def: 128.0
+var() float BurstDelay;				// Moca: How long does it take after swelling to burst? Def: 5.0
+var() float CameraShakeIntensity;	// Moca: Intensity of burst camera shake. Def: 100.0
+var() float CameraShakeDuration;	// Moca: Duration of burst camera shake. Def: 0.75
 
-var(MOCAWizardCrackerSounds) Sound SwellSound;	// Moca: What sound to play when swelling?
-var(MOCAWizardCrackerSounds) Sound PopSound;	// Moca: What sound to play when bursting?
-var(MOCAWizardCrackerSounds) Sound LandSound;	// Moca: What sound to play when landing on the ground?
-var(MOCAWizardCrackerSounds) Sound PulseSound;	// Moca: What sound to play when pulsing?
-var(MOCAWizardCrackerSounds) float MinPopPitch;	// Moca: Minimum burst sound pitch
-var(MOCAWizardCrackerSounds) float MaxPopPitch;	// Moca: Maximum burst sound pitch
 
-var bool bIsSwelling;
-var bool bDirectHit;
-var bool bCanHitHarry;
-var vector LastSafeLocation;
+var bool bCanHitHarry;	// Can we hit harry right now?
+var bool bDirectHit;	// Was hit a direct hit?
+var bool bIsSwelling;	// Are we swelling right now?
 
-var float WCSoundRadius;
+var Sound SwellSound;	// Sound to play when swelling
+var Sound PulseSound;	// Sound to play when pulsing post-swell
+var Sound PopSound;		// Sound to play on burst
 
-function Burst();
-function float DetermineDamage(float Distance);
 
-event PostBeginPlay()
-{
-	Super.PostBeginPlay();
-
-	if ( WCSoundRadius == 9 )
-	{
-		WCSoundRadius = BurstRadius * 0.5;
-	}
-}
+///////////
+// Events
+///////////
 
 event FellOutOfWorld()
 {
-	local vector HandPos;
-	HandPos = PlayerHarry.BonePos('bip01 R Hand');
-	SetLocation(HandPos);
+	// Reset location to Harry's hand instead of falling OOB
+	SetLocation(PlayerHarry.BonePos('bip01 R Hand'));
 }
 
-function float GetRandomPitch(float fMin, float fMax)
+event Timer()
 {
-	return RandRange(fMin,fMax);
-}
-
-function PrepareTimer()
-{
-	local float FinalWaitTime;
-	if ( bWaitForSwell )
-	{
-		FinalWaitTime = BurstDelay + (3.0 * SwellRate);
-	}
-	else
-	{
-		FinalWaitTime = BurstDelay;
-	}
-
-	SetTimer(FinalWaitTime,False,'DoBurst');
-}
-
-function DoBurst()
-{
+	// Explode the cracker
 	GotoState('stateBurst');
 }
 
-auto state stateDormant
+function Burst()
+{
+	local float DistanceFromHarry;
+
+	// Stop swelling & pulsing sound
+	StopSound(SwellSound);
+	StopSound(PulseSound);
+
+	// If bActAsSpell, do the spell effect
+	if ( bActAsSpell )
+	{
+		AutoHitAreaEffect(BurstRadius);
+	}
+
+	// Get distance from Harry
+	DistanceFromHarry = VSize(Location - PlayerHarry.Location);
+
+	// If Harry is within our radius
+	if ( DistanceFromHarry < BurstRadius )
+	{
+		local float DamageToDeal;
+		local float ShakeAmount;
+		// Determine damage based on Harry's distance to cracker
+		DamageToDeal = DetermineDamage(DistanceFromHarry);
+		// Deal damage
+		PlayerHarry.TakeDamage(DamageToDeal,Self,Location,Velocity,'WizardCracker');
+
+		// Determine shake amount based on damage
+		ShakeAmount = DamageToDeal / BurstDamage;
+		// Add intensity mult
+		ShakeAmount *= CameraShakeIntensity;
+		// Shake cam
+		PlayerHarry.ShakeView(CameraShakeDuration,ShakeAmount,ShakeAmount);
+	}
+
+	// Play pop sound
+	PlaySound(PopSound,SLOT_Interact);
+	// Spawn burst particles
+	Spawn(class'Firecracker_Burst',,,Location);
+	// Destroy self
+	GotoState('stateKill');
+}
+
+function AutoHitAreaEffect (float Radius)
+{
+	local HPawn Pawn;
+	local spellTrigger spTrigger;
+
+	// For all HPawns
+	foreach AllActors(Class'HPawn',Pawn)
+	{
+		// If within radius
+		if ( VSize(Pawn.Location - Location) < Radius )
+		{
+			// If it has a spell vulnerability
+			if ( Pawn.eVulnerableToSpell != SPELL_None )
+			{
+				// Handle spell
+				Pawn.CallHandleSpellBySpellType(Pawn.eVulnerableToSpell,Pawn.Location);
+			}
+			// If a bean or wizard card, bounce them (unless being collected)
+			if ( (Pawn.Owner == None) && (Pawn.IsA('Jellybean') || Pawn.IsA('WizardCardIcon')) )
+			{
+				Pawn.SetPhysics(PHYS_Falling);
+				Pawn.Velocity = Vec(0.0,0.0,300.0) + Normal(Pawn.Location - Location) * 100 * FRand();
+			}
+		}	
+	}
+	// For all spell triggers
+	foreach AllActors(Class'spellTrigger',spTrigger)
+	{
+		// If vulnerable to spell and within range
+		if ( spTrigger.eVulnerableToSpell != SPELL_None && (VSize(spTrigger.Location - Location) < fRadius) )
+		{
+			// Activate them
+			spTrigger.Activate(Self,Self);
+		}
+	}
+}
+
+function bool IsValidPawn(Actor Other)
+{
+	// Return true if Other is a HPawn or Harry
+	return Other.IsA('HPawn') || Other.IsA('harry');
+}
+
+function float DetermineDamage(float Distance)
+{
+	// If direct hit, do direct hit damage
+	if ( bDirectHit )
+	{
+		return DirectHitDamage;
+	}
+
+	// If no burst falloff, apply full burst damage
+	if ( !bBurstFalloff )
+	{
+		return BurstDamage;
+	}
+
+	// Otherwise, calculte burst damage with falloff
+	return BurstDamage * ((BurstRadius - Distance) / BurstRadius);
+}
+
+auto state stateIdle
 {
 	event BeginState()
 	{
-		LoopAnim('idle');
-
-		if ( bExplodeOnTouch )
-		{
-			bObjectCanBePickedUp = False;
-		}
+		LoopAnim('Idle');
+		// If not explode on touch, we can pick it up
+		bObjectCanBePickedUp = !bExplodeOnTouch;
 	}
 
-	event EndEvent()
+	event EndState()
 	{
+		// Only allow pickup in idle
 		bObjectCanBePickedUp = False;
 	}
 
-	event Touch (Actor Other)
+	event Touch(Actor Other)
 	{
-		if ( bExplodeOnTouch && (Other.IsA('HChar') || Other.IsA('harry')) )
+		// If explode on touch & other is valid pawn
+		if ( bExplodeOnTouch && IsValidPawn(Other) )
 		{
-			Log(string(Self)$" hit HChar "$string(Other));
+			// Direct hit if other is harry! & burst
 			bDirectHit = Other.IsA('harry');
 			GotoState('stateBurst');
 		}
-	}
-}
-
-state stateBeingThrown
-{
-	event BeginState()
-	{
-		PlayerHarry.ActorToCarry = None;
-		bCanHitHarry = False;
-		SetCollision(True,False,False);
-	}
-
-	event Touch (Actor Other)
-	{
-		if (Other.IsA('HChar') || (Other.IsA('harry') && bCanHitHarry))
-		{
-			Log(string(Self)$" hit HChar "$string(Other));
-			bDirectHit = Other.IsA('harry');
-			GotoState('stateBurst');
-		}
-	}
-
-	event Landed(vector HitNormal)
-	{
-		PlaySound(LandSound,SLOT_Interact,,,WCSoundRadius);
-		GotoState('stateSwell');
-	}
-
-begin:
-	sleep(0.25);
-	bCanHitHarry = True;
-        
-}
-
-state stateSwell
-{
-begin:
-	SetCollision(True,False,False);
-	bObjectCanBePickedUp = True;
-	if (!bIsSwelling)
-	{
-		bIsSwelling = True;
-		PrepareTimer();
-		PlaySound(SwellSound,SLOT_Misc,,,WCSoundRadius);
-		PlayAnim('swell',SwellRate);
-		FinishAnim();
-		PlaySound(PulseSound,SLOT_Misc,,,WCSoundRadius,,,True);
-		LoopAnim('shake');
 	}
 }
 
@@ -154,72 +171,95 @@ state stateBurst
 {
 	event BeginState()
 	{
-		if (PlayerHarry.ActorToCarry == Self)
+		// If Harry is carrying us, make him drop us
+		if ( PlayerHarry.ActorToCarry == Self )
 		{
 			PlayerHarry.DropCarryingActor(True);
 		}
-		
+		// Burst
 		Burst();
 	}
+}
 
-	function Burst()
+state stateBeingThrown
+{
+	event BeginState()
 	{
-		local float DistanceFromHarry;
-
-		StopSound(PulseSound);
-
-		if (bActAsSpell)
-		{
-			PlayerHarry.AutoHitAreaEffect(BurstRadius);
-		}
-
-		DistanceFromHarry = VSize(Location - PlayerHarry.Location);
-
-		if (DistanceFromHarry < BurstRadius)
-		{
-			local float DamageToDeal;
-			local float ShakeAmount;
-			DamageToDeal = DetermineDamage(DistanceFromHarry);
-			PlayerHarry.TakeDamage(DamageToDeal,Self,Location,Velocity,'MOCAWizardCracker');
-
-			ShakeAmount = DamageToDeal / BurstDamage;
-			ShakeAmount *= CameraShakeIntensity;
-			PlayerHarry.ShakeView(0.2,ShakeAmount,ShakeAmount);
-		}
-
-		PlaySound(PopSound,SLOT_Interact,,,WCSoundRadius,GetRandomPitch(MinPopPitch,MaxPopPitch));
-
-		Spawn(class'Firecracker_Burst',,,Location);
-
-		GotoState('stateKill');
+		// Enable cooldown for hitting harry so it doesn't explode on throw
+		bCanHitHarry = False;
+		// Enable collision, but don't block
+		SetCollision(True,False,False);
 	}
 
-	function float DetermineDamage(float Distance)
+	event Touch(Actor Other)
 	{
-		if (bDirectHit)
+		// If other is valid pawn and we can hit Harry
+		if ( IsValidPawn(Other) && bCanHitHarry )
 		{
-			return bDirectHitDamage;
+			// Direct hit if other is harry! & burst
+			bDirectHit = Other.IsA('harry');
+			GotoState('stateBurst');
 		}
-
-		if (!bBurstFalloff)
-		{
-			return BurstDamage;
-		}
-
-		return BurstDamage * ((BurstRadius - Distance) / BurstRadius);
 	}
+
+	event Landed(Vector HitNormal)
+	{
+		// If landed, start swelling
+		PlaySound(LandSound,SLOT_Interact);
+		GotoState('stateSwell');
+	}
+
+	begin:
+		// Wait for cooldown, then enable hits
+		Sleep(0.25);
+		bCanHitHarry = True;
+}
+
+state stateSwell
+{
+	begin:
+		// Enable collision but don't block
+		SetCollision(True,False,False);
+		// Enable pick up
+		bObjectCanBePickedUp = True;
+
+		// If not swelling already, start swelling
+		if ( !bIsSwelling )
+		{
+			bIsSwelling = True;
+			SetTimer(BurstDelay);
+			PlaySound(SwellSound,SLOT_Misc);
+			PlayAnim('swell',SwellRate);
+			FinishAnim();
+			PlaySound(PulseSound,SLOT_Misc,[Loop] True);
+			LoopAnim('shake');
+		}
 }
 
 state stateKill
 {
-begin:
-	SleepForTick();
-	Destroy();
+	begin:
+		// Destroy self
+		SleepForTick();
+		Destroy();
 }
+
 
 defaultproperties
 {
-	attachedParticleClass(0)=Class'HPParticle.WizCrackSparkle'
+	bBurstFalloff=True
+	BurstDamage=15.0
+	DirectHitDamage=20.0
+	BurstRadius=128.0
+	BurstDelay=5.0
+	CameraShakeIntensity=100.0
+	CameraShakeDuration=0.75
+
+	SwellSound=Sound'wizard_cracker_swell_multi'
+	PopSound=Sound'wizard_cracker_pop'
+	LandSound=Sound'wizard_cracker_land_multi'
+	PulseSound=Sound'wizard_cracker_pulse'
+
 	bBlockActors=False
 	bBlockPlayers=False
 	bBlockCamera=False
@@ -228,23 +268,6 @@ defaultproperties
 	CollisionHeight=6
 	CollisionRadius=6
 	CollisionWidth=20
+	attachedParticleClass(0)=Class'HPParticle.WizCrackSparkle'
 	Mesh=SkeletalMesh'MocaModelPak.skwizardcrackerMesh'
-
-	SwellRate=1.5
-	BurstDelay=2.0
-	BurstRadius=128.0
-	BurstDamage=15.0
-	bDirectHitDamage=20.0
-	CameraShakeIntensity=100.0
-	CameraShakeDuration=0.75
-
-	bBurstFalloff=True
-	bWaitForSwell=True
-
-	SwellSound=MultiSound'wizard_cracker_swell_multi'
-	PopSound=Sound'wizard_cracker_pop'
-	LandSound=MultiSound'wizard_cracker_land_multi'
-	PulseSound=Sound'wizard_cracker_pulse'
-	MinPopPitch=0.85
-	MaxPopPitch=1.15
 }

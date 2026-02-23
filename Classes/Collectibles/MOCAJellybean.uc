@@ -1,79 +1,38 @@
 //================================================================================
 // MOCAJellybean.
 //================================================================================
-
 class MOCAJellybean extends MOCACollectible;
 
-var int iSkinTexture;
+var() array<Texture> BeanTextures;	// Array of bean textures to use
 
 function PreBeginPlay()
 {
 	Super.PreBeginPlay();
-	if (  !bInitialized )
-	{
-		iSkinTexture = Rand(17);
-		bInitialized = True;
-	}
-	switch (iSkinTexture)
-	{
-		case 0:
-		Skin = Texture'skBeanBlueSpotTex0';
-		break;
-		case 1:
-		Skin = Texture'skJellybeanTex0';
-		break;
-		case 2:
-		Skin = Texture'skBeanBlackTex0';
-		break;
-		case 3:
-		Skin = Texture'skBeanPurpleTex0';
-		break;
-		case 4:
-		Skin = Texture'skBeanRedTex0';
-		break;
-		case 5:
-		Skin = Texture'skBeanDarkGreenTex0';
-		break;
-		case 6:
-		Skin = Texture'skBeanBogieTex0';
-		break;
-		case 7:
-		Skin = Texture'skBlueJellyBeanTex0';
-		break;
-		case 8:
-		Skin = Texture'skGreenJellyBeanTex0';
-		break;
-		case 9:
-		Skin = Texture'skGreenPurpleCheckerBeanTex0';
-		break;
-		case 10:
-		Skin = Texture'skSpottedJellyBeanTex0';
-		break;
-		case 11:
-		Skin = Texture'skRedBlackStripeBeanTex0';
-		break;
-		case 12:
-		Skin = Texture'skBeanBrownTex0';
-		break;
-		case 13:
-		Skin = Texture'skBeanDkBlueTex0';
-		break;
-		case 14:
-		Skin = Texture'skBeanMauveTex0';
-		break;
-		case 15:
-		Skin = Texture'skBeanOrngeTex0';
-		break;
-		case 16:
-		Skin = Texture'skBeanYellowyTex0';
-		break;
-		default:
-	}
+
+	// Set random bean texture
+	Texture = BeanTextures[Rand(BeanTextures.Length)];
 }
 
 defaultproperties
 {
+	BeanTextures(0)=Texture'skBeanBlueSpotTex0'
+	BeanTextures(1)=Texture'skJellybeanTex0'
+	BeanTextures(2)=Texture'skBeanBlackTex0'
+	BeanTextures(3)=Texture'skBeanPurpleTex0'
+	BeanTextures(4)=Texture'skBeanRedTex0'
+	BeanTextures(5)=Texture'skBeanDarkGreenTex0'
+	BeanTextures(6)=Texture'skBeanBogieTex0'
+	BeanTextures(7)=Texture'skBlueJellyBeanTex0'
+	BeanTextures(8)=Texture'skGreenJellyBeanTex0'
+	BeanTextures(9)=Texture'skGreenPurpleCheckerBeanTex0'
+	BeanTextures(10)=Texture'skSpottedJellyBeanTex0'
+	BeanTextures(11)=Texture'skRedBlackStripeBeanTex0'
+	BeanTextures(12)=Texture'skBeanBrownTex0'
+	BeanTextures(13)=Texture'skBeanDkBlueTex0'
+	BeanTextures(14)=Texture'skBeanMauveTex0'
+	BeanTextures(15)=Texture'skBeanOrngeTex0'
+	BeanTextures(16)=Texture'skBeanYellowyTex0'
 	classStatusGroup=Class'HGame.StatusGroupJellybeans'
-    classStatusItem=Class'HGame.StatusItemJellybeans'
+	classStatusItem=Class'HGame.StatusItemJellybeans'
 	Mesh=SkeletalMesh'HProps.skJellybeanMesh'
 }

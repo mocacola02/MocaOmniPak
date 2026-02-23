@@ -1,174 +1,192 @@
 class MOCAIceSpot extends MOCAPawn;
 
-var() float TimeToLive; 		// Moca: How long should ice remain? Def: 60.0
-var() float GrowthTime; 		// Moca: How long should it take for the ice to grow in seconds? Def: 5.0
-var() ESpellType ShatterSpell; 	// Moca: What spell, if any, should shatter the ice if cast on? Def: SPELL_Flipendo
-var() bool bUseMoverCollision;   // Moca: If true, model collision will not be applied and instead will send an event (based on the Event property) to trigger a mover when freezing/melting/shattering. Intended to be used with an invisible mover for special poly collision. Def: False
-var() Sound FreezeSound;
-var() Sound SmashSound;
+var() bool bDisableCollision;
+var() float Lifetime;
+var() float GrowthTime;
+var() float Cooldown;
 
-var float DefColRad;
-var float DefColWid;
-var float DefColHei;
-var float DefDS;
-var ESpellType DefVunSpell;
+var() Sound FreezeSound;
+var() Sound ShatterSound;
+var() Sound MeltSound;
+
+var() class<ParticleFX> IdleFX;
+var() class<ParticleFX> FreezeFX;
+var() class<ParticleFX> ShatterFX;
+var() class<ParticleFX> MeltFX;
+
+var() eVulnerableToSpell ShatterSpell;
+
 
 var float CurrentGrowthTime;
-var Iceberg_Grow FreezeParticles;
-var IceBerg_Spot IdleParticles;
+var ParticleFX FreezeParticles;
+var ParticleFX IdleParticles;
+var ParticleFX MeltParticles;
 
-event PreBeginPlay()
+
+function Reset()
 {
-    super.PreBeginPlay();
-	DefColRad = CollisionRadius;
-	DefColWid = CollisionWidth;
-	DefColHei = CollisionHeight;
-	DefDS = DrawScale;
-	DefVunSpell = eVulnerableToSpell;
+	IdleParticles = Spawn(IdleFX,Self,,Location,,True);
+	IdleParticles.bEmit = True;
+	eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+	DrawScale = 0.0;
+	SetCollisionSize(0.0,0.0,0.0);
 }
 
-event PostBeginPlay()
+function SetBergSize(float DeltaTime, Vector StartSize, Vector EndSize, float StartScale, float EndScale)
 {
-    super.PostBeginPlay();
-    FreezeParticles = Spawn(class'Iceberg_Grow',Self,,Location,,True);
-    IdleParticles = Spawn(class'IceBerg_Spot',Self,,Location,,True);
+	CurrentGrowthTime += DeltaTime;
+
+	local float Alpha;
+	local float NewRad,NewHgt,NewWid;
+	Alpha = CurrentGrowthTime / GrowthTime;
+
+	NewRad = Lerp(Alpha,StartSize.X,EndSize.X);
+	NewHgt = Lerp(Alpha,StartSize.Y,EndSize.Y);
+	NewWid = Lerp(Alpha,StartSize.Z,EndSize.Z);
+
+	SetCollisionSize(NewRad,NewHgt,NewWid);
+
+	DrawScale = Lerp(Alpha,StartScale,EndScale);
 }
 
-function ChangeBergSize(float DeltaTime, optional bool Reverse)
+auto state stateIdle
 {
-    local float Alpha;
+	event BeginState()
+	{
+		Reset();
+	}
 
-    CurrentGrowthTime += DeltaTime;
+	event EndState()
+	{
+		IdleParticles.Shutdown();
+		eVulnerableToSpell = SPELL_None;
+	}
 
-    if (CurrentGrowthTime > GrowthTime)
-    {
-        CurrentGrowthTime = GrowthTime;
-    }
-    
-    if (Reverse)
-    {
-        Alpha = 1 - (CurrentGrowthTime / GrowthTime);
-    }
-    else
-    {
-        Alpha = CurrentGrowthTime / GrowthTime;
-    }
-
-    local float tempRadius;
-    local float tempWidth;
-    local float tempHeight;
-
-    tempRadius = Lerp(Alpha, 0.0, DefColRad);
-    tempWidth  = Lerp(Alpha,  0.0,  DefColWid);
-    tempHeight = Lerp(Alpha, 0.0, DefColHei);
-
-    SetCollisionSize(tempRadius,tempHeight,tempWidth);
-
-    DrawScale = Lerp(Alpha, 0.0, DefDS);
-}
-
-auto state stateDormant
-{
-    event BeginState()
-    {
-        eVulnerableToSpell = DefVunSpell;
-        DrawScale = 0.0;
-        SetCollision(true,false,false);
-        SetCollisionSize(DefColRad,DefColHei,DefColWid);
-        IdleParticles.bEmit = True;
-    }
-
-    event EndState()
-    {
-        IdleParticles.bEmit = False;
-    }
-
-    function ProcessSpell()
-    {
-        GotoState('stateFreeze');
-    }
+	function ProcessSpell()
+	{
+		GotoState('stateFreeze');
+	}
 }
 
 state stateFreeze
 {
-    event Tick(float DeltaTime)
-    {
-		Global.Tick(DeltaTime);
-
-        if (CurrentGrowthTime < GrowthTime)
-        {
-            ChangeBergSize(DeltaTime);
-        }
-        else
-        {
-            GotoState('stateFrozen');
-        }
-    }
-
-    event BeginState()
-    {
+	event BeginState()
+	{
+		FreezeParticles = Spawn(FreezeFX,Self,,Location,,True);
+		FreezeParticles.bEmit = True;
 		PlaySound(FreezeSound);
-        eVulnerableToSpell = SPELL_None;
-        SetCollision(true,true,true);
-        FreezeParticles.bEmit = true;
-    }
+		TriggerEvent(Event,Self,Self);
+	}
 
-    event EndState()
-    {
+	event EndState()
+	{
+		FreezeParticles.Shutdown();
 		StopSound(FreezeSound);
-        CurrentGrowthTime = 0;
-        FreezeParticles.bEmit = false;
-    }
+		CurrentGrowthTime = 0.0;
+	}
+
+	event Tick(float DeltaTime)
+	{
+		if ( CurrentGrowthTime < GrowthTime )
+		{
+			ChangeBergSize(DeltaTime,vect(0,0,0),vect(MapDefault.CollisionRadius,MapDefault.CollisionHeight,MapDefault.CollisionWidth),0.0,MapDefault.DrawScale);
+		}
+		else
+		{
+			GotoState('stateFrozen');
+		}
+	}
+}
+
+state stateMelt
+{
+	event BeginState()
+	{
+		MeltParticles = Spawn(MeltFX,Self,,Location,,True);
+		MeltParticles.bEmit = True;
+		PlaySound(MeltSound);
+	}
+
+	event EndState()
+	{
+		MeltParticles.Shutdown();
+		StopSound(MeltSound);
+		CurrentGrowthTime = 0.0;
+	}
+
+	event Tick(float DeltaTime)
+	{
+		if ( CurrentGrowthTime < GrowthTime )
+		{
+			ChangeBergSize(DeltaTime,vect(MapDefault.CollisionRadius,MapDefault.CollisionHeight,MapDefault.CollisionWidth),vect(0,0,0),MapDefault.DrawScale,0.0);
+		}
+		else
+		{
+			GotoState('stateIdle');
+		}
+	}
 }
 
 state stateFrozen
 {
-    event BeginState()
-    {
-        DrawScale = DefDS;
-        SetCollisionSize(DefColRad,DefColHei,DefColWid);
-        eVulnerableToSpell = ShatterSpell;
-    }
+	event BeginState()
+	{
+		DrawScale = MapDefault.DrawScale;
+		SetCollisionSize(MapDefault.CollisionRadius,MapDefault.CollisionHeight,MapDefault.CollisionWidth);
+		eVulnerableToSpell = ShatterSpell;
+	}
+	
+	event EndState()
+	{
+		eVulnerableToSpell = SPELL_None;
+	}
 
-    function ProcessSpell()
-    {
-        GotoState('stateShatter');
-    }
+	function ProcessSpell()
+	{
+		GotoState('stateShatter');
+	}
+
+	begin:
+		Sleep(Lifetime);
+		GotoState('stateMelt');
 }
 
 state stateShatter
 {
-    event BeginState()
-    {
-		PlaySound(SmashSound);
-        eVulnerableToSpell = SPELL_None;
-        Spawn(class'Ice_Break',self,,Location);
-        DrawScale = 0.0;
-        SetCollision(true,false,false);
-        SetCollisionSize(DefColRad,DefColHei,DefColWid);
-    }
+	event BeginState()
+	{
+		PlaySound(ShatterSound);
+		Spawn(ShatterFX);
+		DrawScale = 0.0;
+		SetCollisionSize(0,0,0);
+	}
 
-    begin:
-        sleep(1.0);
-        GotoState('stateDormant');
-        
+	begin:
+		Sleep(Cooldown);
+		GotoState('stateIdle');
 }
+
 
 defaultproperties
 {
-    TimeToLive=60.0
-    GrowthTime=5.0
-    eVulnerableToSpell=SPELL_LocomotorWibbly
-    ShatterSpell=SPELL_Flipendo
-    Mesh=SkeletalMesh'MocaModelPak.skIceberg1'
+	Lifetime=15.0
+	GrowthTime=3.0
+	Cooldown=1.0
 
-    CollisionHeight=8
-    CollisionRadius=150
-    CollisionWidth=0
-
-    bGestureFaceHorizOnly=False
-
-    PrePivot=(X=0,Y=0,Z=8)
 	FreezeSound=Sound'MocaSoundPak.ice_freeze'
-	SmashSound=Sound'MocaSoundPak.salamander_explode'
+	ShatterSound=Sound'MocaSoundPak.salamander_explode'
+
+	IdleFX=class'IceBerg_Spot'
+	FreezeFX=class'Iceberg_Grow'
+	ShatterFX=class'Ice_Break'
+	MeltFX=class'BasilEyeSmoke'
+
+	ShatterSpell=SPELL_Flipendo
+	bGestureFaceHorizOnly=False
+	CollisionHeight=8.0
+	CollisionRadius=150.0
+	CollisionWidth=0.0
+	PrePivot=(X=0,Y=0,Z=0)
+	eVulnerableToSpell=SPELL_LocomotorWibbly
+	Mesh=SkeletalMesh'MocaModelPak.skIceberg1'
 }

@@ -14,7 +14,7 @@ function ProcessTrigger(Actor Other, Pawn EventInstigator)
 	{
 		PlayerHarry.GetCaught(Self,EventOnTrigger);
 
-		if ( Owner.IsA('MOCAWatcher') )
+		if ( Owner.IsA('MOCAWatcher') && MOCAWatcher(Owner).CanCatchHarry() )
 		{
 			Owner.GotoState('stateCatch');
 		}

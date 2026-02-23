@@ -23,7 +23,9 @@ event PostBeginPlay()
 {
 	Super.PostBeginPlay();
 
+	// Get MOCAharry
 	MocaPlayer = MOCAharry(PlayerHarry);
+	// Determine spell type
 	SpellToActAs = MocaPlayer.DetermineSpellType(Self.Class);
 }
 
@@ -34,6 +36,7 @@ event PostBeginPlay()
 
 function bool OnSpellHitHPawn(Actor HitActor, Vector HitLocation)
 {
+	// If MOCAPawn or MOCAChar, HandleSpell
 	if ( HitActor.IsA('MOCAPawn') )
 	{
 		return MOCAPawn(HitActor).HandleSpell(Self,HitLocation);
@@ -42,6 +45,7 @@ function bool OnSpellHitHPawn(Actor HitActor, Vector HitLocation)
 	{
 		return MOCAChar(HitActor).HandleSpell(Self,HitLocation);
 	}
+	// Otherwise, use stock behavior
 	else
 	{
 		switch (SpellToActAs)
@@ -69,8 +73,10 @@ auto state StateFlying
 	event Tick(float DeltaTime)
 	{
 		Super.Tick(DeltaTime);
+		// Update rotation
 		UpdateRotationWithSeeking(DeltaTime);
 
+		// Move particle effect
 		if ( fxFlyParticleEffect != None )
 		{
 			fxFlyParticleEffect.SetLocation(Location);
@@ -78,5 +84,6 @@ auto state StateFlying
 	}
 
 	begin:
+		// Set velocity
 		Velocity = Vect(Rotation) * Speed;
 }

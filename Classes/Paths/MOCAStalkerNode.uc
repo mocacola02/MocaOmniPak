@@ -3,9 +3,9 @@
 //=============================================================================
 class MOCAStalkerNode extends PathNode;
 
-var() bool bPerformanceMode;	// Moca: Makes node check only once or twice a second instead of every tick
-var() float MinDot;				// Moca: Minimum dot product required to be seen
-var() float RequiredDistance;	// Moca: Required proximity to be triggered as seen
+var() bool bPerformanceMode;	// Moca: Makes node check only once or twice a second instead of every tick. Def: False
+var() float MinDot;				// Moca: Minimum dot product required to be seen. Def: 0.25
+var() float RequiredDistance;	// Moca: Required proximity to be triggered as seen. Def: 2000.0
 
 var harry PlayerHarry;
 
@@ -18,6 +18,7 @@ event PostBeginPlay()
 {
 	Super.PostBeginPlay();
 
+	// If performance mode, use manual timer and disable tick
 	if ( bPerformanceMode )
 	{
 		local float TimerRate;
@@ -44,10 +45,13 @@ event Timer()
 
 function CheckForHarry()
 {
+	// If Harry is near
 	if ( MOCAHelpers.GetDistanceBetweenActors(Self,PlayerHarry) < RequiredDistance )
 	{
+		// If Harry is facing self, become blocked
 		bBlocked = MOCAHelpers.IsFacingOther(PlayerHarry,Self,MinDot);
 	}
+	// Otherwise, don't be blocked
 	else
 	{
 		bBlocked = False;
@@ -58,6 +62,7 @@ function CheckForHarry()
 
 function SetRequiredDistance(float NewDistance)
 {
+	// Set required distance to 1.0 if it is 0.0
 	if ( NewDistance <= 0.0 )
 	{
 		NewDistance = 1.0;

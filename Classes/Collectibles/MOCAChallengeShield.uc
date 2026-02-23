@@ -1,3 +1,6 @@
+//================================================================================
+// MOCAChallengeShield.
+//================================================================================
 class MOCAChallengeShield extends MOCACollectible;
 
 state PickupProp
@@ -5,11 +8,13 @@ state PickupProp
 	function BeginState()
 	{
 		Super.BeginState();
+		// Spawn pickup particles
 		Spawn(class'ShieldCollect',,,Location);
 	}
 
 	function EndState()
 	{
+		// Pickup star
 		local ChallengeScoreManager ManagerChallenge;
 
 		foreach AllActors(Class'ChallengeScoreManager',ManagerChallenge)
@@ -17,7 +22,10 @@ state PickupProp
 			break;
 		}
 
-		ManagerChallenge.PickedUpStar();
+		if ( ManagerChallenge != None )
+		{
+			ManagerChallenge.PickedUpStar();
+		}
 	}
 }
 

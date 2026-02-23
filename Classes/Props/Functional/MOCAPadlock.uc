@@ -1,88 +1,63 @@
 //================================================================================
 // MOCAPadlock.
 //================================================================================
+class MOCAPadlock extends MOCAPawn;
 
-class MOCAPadlock extends MOCAHP3Objects;
+var() bool bFastOpen;
+var() Sound UnlockSFX;
+var() class<ParticleFX> DespawnFX;
 
-var ParticleFX fxExplode;
-var() Class<ParticleFX> fxExplodeClass;
-var() bool bFastOpen; 			// Moca: If true, use faster opening animation
-var() Sound UnlockSounds[3]; 	// Moca: Sounds to use for unlock animation
-
-event PreBeginPlay()
-{
-  PlayerHarry = harry(Level.PlayerHarryActor);
-}
 
 event Destroyed()
 {
-  if ( fxExplode != None )
-  {
-    fxExplode.Shutdown();
-  }
-  Super.Destroyed();
+	if ( DespawnFX != None )
+	{
+		DespawnFX.Shutdown();
+	}
+
+	Super.Destroyed();
 }
 
-function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
+auto state stateIdle
 {
-  if (bFastOpen)
-  {
-    GotoState('openUpFast');
-  }
-  else 
-  {
-    GotoState('openUp');
-  }
-  return True;
+	function ProcessSpell()
+	{
+		GotoState('stateUnlock');
+	}
 }
 
-function OnAlohomoraExplode()
+state stateUnlock
 {
-  TriggerEvent(Event,None,None);
-  Destroy();
-}
+	begin:
+		PlaySound(UnlockSFX);
+		
+		if ( bFastOpen )
+		{
+			PlayAnim('open2');
+		}
+		else
+		{
+			PlayAnim('Open');
+		}
 
-
-state openUp
-{
-    begin:
-        PlaySound(GetUnlockSFX());
-        PlayAnim('Open');
-        FinishAnim();
-        OnAlohomoraExplode();
-}
-
-state openUpFast
-{
-    begin:
-        PlayAnim('open2');
-        FinishAnim();
-        OnAlohomoraExplode();
-}
-
-function Sound GetUnlockSFX()
-{
-    local int randNum;
-    local Sound UnlockSFX;
-
-    randNum = Rand(ArrayCount(UnlockSounds));
-    UnlockSFX = UnlockSounds[randNum];
-    return UnlockSFX;
+		FinishAnim();
+		TriggerEvent(Event,Self,Self);
+		Destroy();
 }
 
 defaultproperties
 {
-     fxExplodeClass=Class'HPParticle.Aloh_hit'
-     UnlockSounds(0)=Sound'MocaSoundPak.Props.padlock01'
-     UnlockSounds(1)=Sound'MocaSoundPak.Props.padlock02'
-     UnlockSounds(2)=Sound'MocaSoundPak.Props.padlock03'
-     eVulnerableToSpell=SPELL_Alohomora
-     Mesh=SkeletalMesh'MocaModelPak.skPadlock'
-     DrawScale=2.5
-     CollisionRadius=8
-     CollisionWidth=16
-     CollisionHeight=8
-     CollideType=CT_OrientedCylinder
-     bBlockActors=False
-     bBlockPlayers=False
+	UnlockSFX=Sound'MocaSoundPak.padlock_multi'
+	DespawnFX=class'HPParticle.Aloh_hit'
+
+	DrawScale=2.5
+	CollisionRadius=8.0
+	CollisionHeight=8.0
+	CollisionWidth=16.0
+	CollideType=CT_OrientedCylinder
+	bBlockActors=True
+	bBlockPlayers=True
+
+	Mesh=SkeletalMesh'MocaModelPak.skPadlock'
+	eVulnerableToSpell=SPELL_Alohomora
 }

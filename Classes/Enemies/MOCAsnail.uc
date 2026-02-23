@@ -1,13 +1,11 @@
 //================================================================================
-// MOCAsnail.
+// MOCAsnail. Ripped from KW essentially, not gonna modify this or document it
 //================================================================================
-
 class MOCAsnail extends orangesnail;
 
 var() class<SnailTrail> TrailToSpawn; // Moca: What SnailTrail class to spawn
 
 
-// Ripped from KW, not messing with this further
 function DoTrailUpdates (float DeltaTime)
 {
 	local int nTrailRadius;

@@ -14,12 +14,15 @@ var() float FoundSoundVolume; // Moca: Volume of sound
 
 function Sound GetRandomSound()
 {
+	// If we have sounds in the sound pool
 	if ( SoundPool.Length > 0 )
 	{
+		// Return a random sound
 		local int RandIdx;
 		RandIdx = Rand(SoundPool.Length);
 		return SoundPool[RandIdx];
 	}
+	// Otherwise, default to the stock sound
 	else
 	{
 		return Sound'HPSounds.Music_Events.Found_Secret_Music';
@@ -28,12 +31,16 @@ function Sound GetRandomSound()
 
 function OnFound()
 {
+	// If not found yet
 	if ( !bFound )
 	{
+		// We're now found
 		bFound = True;
 
+		// The message of all time
 		cm("Secret Area Found!  Oh most glorious delight and joy!!!");
 
+		// Get and play sound
 		FoundSound = GetRandomSound();
 		PlaySound(FoundSound,,FoundSoundVolume);
 	}

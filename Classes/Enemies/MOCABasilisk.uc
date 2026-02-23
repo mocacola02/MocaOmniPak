@@ -1,6 +1,10 @@
+//================================================================================
+// MOCABasilisk.
+//================================================================================
 class MOCABasilisk extends Basilisk;
 
 // DELETEME
+// 2/23/2026, I'm leaving this for now. I'm not touching it or documenting it cuz its not good. just a quick fix for something cake needed.
 
 var() int DeathHoleIndex;
 

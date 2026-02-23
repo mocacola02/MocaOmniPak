@@ -1,7 +1,6 @@
 //================================================================================
 // MOCACollectible.
 //================================================================================
-
 class MOCACollectible extends HProp;
 
 var() bool bAttractedToHarry;	// Moca: Should the collectible move toward Harry
@@ -19,8 +18,8 @@ var() Vector AttractionOffset;	// Moca: Offset to the position (Harry's location
 var() Sound PickUpSound;		// Moca: What sound to play on pickup
 
 
-var float CurrentYaw;
-var float CurrentDelayTime;
+var float CurrentYaw;			// Current yaw
+var float CurrentDelayTime;		// Current delay time for spawning
 
 
 ///////////
@@ -31,9 +30,52 @@ event PreBeginPlay()
 {
 	Super.PreBeginPlay();
 
+	// Override nPickupIncrement & soundPickup
 	nPickupIncrement = IncrementAmount;
-
 	soundPickup = PickUpSound;
+}
+
+
+///////////////////
+// Main Functions
+///////////////////
+
+function FlyToHarry(float DeltaTime)
+{
+	local float DistFromHarry;
+
+	// Get distance from harry
+	DistFromHarry = VSize(Location - PlayerHarry.Location);
+
+	// If Harry is close
+	if ( DistFromHarry <= AttractionRange )
+	{
+		// If we aren't already flying
+		if ( Physics != PHYS_Flying )
+		{
+			// Enter flying mode
+			SetPhysics(PHYS_Flying);
+			SetCollision(True,False,False);
+			bCollideWorld = False;
+		}
+
+		// Get target location & direction and go there (aka fly to Harry)
+		local Vector TargetLocation, Direction;
+		TargetLocation = PlayerHarry.Location + AttractionOffset;
+		Direction = Normal(TargetLocation - Location);
+		SetLocation(Location + Direction * AttractionSpeed * DeltaTime);
+	}
+	// Otherwise, if Harry is too far
+	else
+	{
+		// If we aren't falling, go to falling
+		if ( Physics != PHYS_Falling )
+		{
+			SetPhysics(PHYS_Falling);
+			SetCollision(MapDefault.bCollideActors, MapDefault.bBlockActors, MapDefault.bBlockPlayers);
+			bCollideWorld = MapDefault.bCollideWorld;
+		}
+	}
 }
 
 
@@ -45,6 +87,7 @@ auto state stateIdle
 {
 	event BeginState()
 	{
+		// If we should bounce, do that
 		if ( bBounceIntoPlace || bBounce )
 		{
 			GotoState('BounceIntoPlace');
@@ -55,6 +98,7 @@ auto state stateIdle
 	{
 		Global.Tick(DeltaTime);
 
+		// If attracted to Harry, fly to him
 		if ( bAttractedToHarry )
 		{
 			FlyToHarry(DeltaTime);
@@ -66,10 +110,12 @@ state BounceIntoPlace
 {
 	event BeginState()
 	{
+		// If fall to ground, fall
 		if ( bFallsToGround )
 		{
 			SetPhysics(PHYS_Falling);
 		}
+		// Otherwise, don't
 		else
 		{
 			SetPhysics(PHYS_None);
@@ -80,44 +126,15 @@ state BounceIntoPlace
 	{
 		Super.Tick(DeltaTime);
 
+		// If attracted to harry, fly to him
 		if (bAttractedToHarry && AttractionDelay < CurrentDelayTime)
 		{
 			FlyToHarry(DeltaTime);
 		}
+		// Otherwise, don't
 		else if (bAttractedToHarry)
 		{
 			CurrentDelayTime += DeltaTime;
-		}
-	}
-}
-
-function FlyToHarry(float DeltaTime)
-{
-	local float DistFromHarry;
-
-	DistFromHarry = VSize(Location - PlayerHarry.Location);
-
-	if ( PlayerHarry != None && DistFromHarry <= AttractionRange )
-	{
-		if ( Physics != PHYS_Flying )
-		{
-			SetPhysics(PHYS_Flying);
-			SetCollision(True,False,False);
-			bCollideWorld = False;
-		}
-
-		local Vector TargetLocation, Direction;
-		TargetLocation = PlayerHarry.Location + AttractionOffset;
-		Direction = Normal(TargetLocation - Location);
-		SetLocation(Location + Direction * AttractionSpeed * DeltaTime);
-	}
-	else
-	{
-		if ( Physics != PHYS_Falling )
-		{
-			SetPhysics(PHYS_Falling);
-			SetCollision(MapDefault.bCollideActors, MapDefault.bBlockActors, MapDefault.bBlockPlayers);
-			bCollideWorld = MapDefault.bCollideWorld;
 		}
 	}
 }

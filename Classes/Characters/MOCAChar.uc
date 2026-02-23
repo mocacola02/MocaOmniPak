@@ -1,18 +1,16 @@
 //================================================================================
-// MOCAChar
+// MOCAChar.
 //================================================================================
-
 class MOCAChar extends HChar;
 
-var(MOCAMovement) bool bTiltOnMovement;
-var(MOCAMovement) float MaxTravelDistance;
+var() bool bTiltOnMovement;		// Should we tilt with movement like Pawns usually do? Def: True
+var() int HitsToKill;			// How many hits does it take to kill me? If 0, can't die. Def: 0
+var() float MaxTravelDistance;	// How far can we travel from home? Def: 1024.0
 
-var(MOCACombat) int HitsToKill;
+var int HitsTaken;				// Current number of hits taken
 
-var int HitsTaken;
-
-var Vector HomeLocation;
-var Vector LastHarryLocation;
+var Vector HomeLocation;		// Home location
+var Vector LastHarryLocation;	// Location we last saw Harry at
 
 
 ///////////
@@ -113,6 +111,7 @@ function bool CanHarrySeeMe(float MinDot)
 
 function bool CanISeeHarry(float MinDot, optional bool bRememberLocation)
 {
+	// If Harry can see us and is facing us and we're within 50 units on Z (up & down)
 	if ( PlayerCanSeeMe() && MOCAHelpers.IsFacingOther(Self,PlayerHarry,MinDot) && Abs(PlayerHarry.Location.Z - Location.Z) <= 50.0 )
 	{
 		if ( bRememberLocation )
@@ -132,6 +131,7 @@ function bool CanISeeHarry(float MinDot, optional bool bRememberLocation)
 // Magic
 //////////
 
+// Redirect all stock handle spell functions to our new generic HandleSpell function
 function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
 {
 	return HandleSpell(spell,vHitLocation);
@@ -236,6 +236,7 @@ function EnterErrorMode(string ErrorMessage)
 
 function EnableTurnTo(Actor TurnTarget)
 {
+	// Enable turn to and set turn target
 	bTurnTo_FollowActor = True;
 	TurnTo_TargetActor = TurnTarget;
 	MakeTurnToPermanentController();
@@ -243,6 +244,7 @@ function EnableTurnTo(Actor TurnTarget)
 
 function DisableTurnTo()
 {
+	// Disable turn to
 	bTurnTo_FollowActor = False;
 	TurnTo_TargetActor = None;
 	DestroyTurnToPermanentController();
@@ -250,6 +252,7 @@ function DisableTurnTo()
 
 function bool ShouldDie()
 {
+	// If we've taken enough hits and HitsToKill isn't 0
 	return HitsTaken >= HitsToKill && HitsToKill > 0;
 }
 

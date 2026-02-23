@@ -1,7 +1,6 @@
 //================================================================================
 // MOCAPawn.
 //================================================================================
-
 class MOCAPawn extends HPawn;
 
 var(MOCAFloating) bool bFloatingActor;	// Moca: Is this actor a floating actor? Use this for stuff like floating torches. Uses RotationSpeed, BobSpeed, & BobIntensity.
@@ -9,8 +8,8 @@ var(MOCAFloating) float RotationSpeed;	// Moca: How fast to rotate if bFloatingA
 var(MOCAFloating) float BobSpeed;		// Moca: How fast to bob up and down if bFloatingActor
 var(MOCAFloating) float BobIntensity;	// Moca: How deep to bob up and down if bFloatingActor
 
-var float BobTime;
-var Vector HomeLocation;
+var float BobTime;		// Current bob time
+var Vector HomeLocation;// Home location
 
 
 ///////////
@@ -20,6 +19,7 @@ var Vector HomeLocation;
 event PreBeginPlay()
 {
 	Super.PreBeginPlay();
+	// Set home location
 	HomeLocation = Location;
 }
 
@@ -39,6 +39,7 @@ event Tick(float DeltaTime)
 // Magic
 //////////
 
+// Redirect all stock handle spell functions to our new generic HandleSpell function
 function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
 {
 	return HandleSpell(spell,vHitLocation);
@@ -136,8 +137,15 @@ function ProcessSpell(); // Define in child classes.
 // Misc. Functions
 ////////////////////
 
-function EnableTurnTo(actor TurnTarget)
+function EnterErrorMode(string ErrorMessage)
 {
+	// Crash game with error message
+	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: "$ErrorMessage);
+}
+
+function EnableTurnTo(Actor TurnTarget)
+{
+	// Enable turn to and set turn target
 	bTurnTo_FollowActor = True;
 	TurnTo_TargetActor = TurnTarget;
 	MakeTurnToPermanentController();
@@ -145,6 +153,7 @@ function EnableTurnTo(actor TurnTarget)
 
 function DisableTurnTo()
 {
+	// Disable turn to
 	bTurnTo_FollowActor = False;
 	TurnTo_TargetActor = None;
 	DestroyTurnToPermanentController();

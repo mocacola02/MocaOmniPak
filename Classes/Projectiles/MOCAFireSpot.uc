@@ -18,11 +18,13 @@ event PostBeginPlay()
 
 event Touch(Actor Other)
 {
+	// If other is Harry, damage him
 	if ( Other == PlayerHarry )
 	{
 		local int RandDamage;
 		RandDamage = Round(RandRange(5.0,15.0));
 		PlayerHarry.TakeDamage(RandDamage,Self,Location,Vect(0,0,0),'FireSpot');
+		KillProjectile();
 	}
 }
 
@@ -33,6 +35,7 @@ event Touch(Actor Other)
 
 function PlayCloudSound()
 {
+	// Play random sound on spawn
 	local int RandIdx;
 	RandIdx = Rand(CloudSounds.Length);
 	

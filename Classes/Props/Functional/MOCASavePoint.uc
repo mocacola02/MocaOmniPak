@@ -4,32 +4,34 @@
 
 class MOCASavePoint extends SavePoint;
 
-var() Sound SaveJingle; 		// Moca: What sound to play after saving
-var() float JingleVolumeMult; 	// Moca: Volume control for SaveJingle
-var() float TimeToRegenerate; 	// Moca: If SaveOnce=False, how long should it take to regen
-var() float BobStrength; 		// Moca: How intense should the floating movement be
+var() float RegenerateTime;
+var() float BobStrength;
+var() Sound SaveSFX;
+
 
 event PostBeginPlay()
 {
-    Super.PostBeginPlay();
-    fWaitTime = TimeToRegenerate;
-    fBobAmount = BobStrength;
+	Super.PostBeginPlay();
+	fWaitTime = RegenerateTime;
+	fBobAmount = BobStrength;
 }
 
 function OnSaveGame()
 {
-    Super.OnSaveGame();
-    if (SaveJingle != None)
-    {
-        PlaySound(SaveJingle, SLOT_None, JingleVolumeMult);
-    }
-    fWaitTime = TimeToRegenerate;
+	Super.OnSaveGame();
+
+	if ( SaveSFX != None )
+	{
+		PlaySound(SaveSFX);
+	}
+
+	fWaitTime = RegenerateTime;
 }
+
 
 defaultproperties
 {
-     SaveJingle=Sound'MocaSoundPak.Music_Cues.hp1_save'
-     JingleVolumeMult=0.8
-     TimeToRegenerate=10
-     BobStrength=10
+	SaveSFX=Sound'MocaSoundPak.hp1_save'
+	RegenerateTime=10.0
+	BobStrength=10.0
 }

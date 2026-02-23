@@ -6,6 +6,7 @@ event PreBeginPlay()
 	
 	local int X,Y,Z;
 
+	// Rotate randomly
 	X = Round(RandRange(20000,100000));
 	Y = Round(RandRange(20000,100000));
 	Z = Round(RandRange(20000,100000));
@@ -14,6 +15,7 @@ event PreBeginPlay()
 	RotationRate.Roll = Y;
 	RotationRate.Yaw = Z;
 
+	// Randomize drawscale
 	DrawScale = RandRange(0.34,0.67);
 }
 

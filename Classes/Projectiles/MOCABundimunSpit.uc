@@ -9,6 +9,7 @@ function OnLand(Vector HitNormal)
 {
 	local MOCABundimunSpray BundiSpray;
 
+	// If ground is mostly flat, spawn bundi spray
 	if ( HitNormal.Z > 0.7 )
 	{
 		BundiSpray = Spawn(class'MOCABundimunSpray',Self,,Location);
@@ -20,6 +21,7 @@ function OnLand(Vector HitNormal)
 		}
 	}
 
+	// Destroy self
 	KillProjectile();
 }
 

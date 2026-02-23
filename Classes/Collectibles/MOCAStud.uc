@@ -1,6 +1,9 @@
+//================================================================================
+// MOCAStud.
+//================================================================================
 class MOCAStud extends MOCACollectible;
 
-enum StudType
+enum StudType	// Types of studs
 {
 	STUD_10,
 	STUD_100,
@@ -13,38 +16,39 @@ enum StudType
 
 var() StudType StudValue; // Moca: How much is the stud worth? RandomType chooses a random type from the numbered options. Fully random chooses a totally random value 1 - 10000. Custom uses the MOCACollectible increment value. Def: STUD_100
 
-var Texture Color10;
-var Texture Color100;
-var Texture Color1000;
-var Texture Color10000;
+var int RedoIndex;		// Index to use when redoing our value check
 
-var Texture SilverIcon;
-var Texture BronzeIcon;
-var Texture BlueIcon;
-var Texture PurpleIcon;
+var Texture Color10;	// Texture for Stud10
+var Texture Color100;	// Texture for Stud100
+var Texture Color1000;	// Texture for Stud1000
+var Texture Color10000;	// Texture for Stud10000
 
-var Sound SoundLow;
-var Sound SoundMid;
-var Sound SoundHi;
+var Texture SilverIcon;	// Icon texture of Stud10
+var Texture BronzeIcon; // Icon texture of Stud100
+var Texture BlueIcon;	// Icon texture of Stud1000
+var Texture PurpleIcon;	// Icon texture of Stud <= 10000
 
-var StatusManager managerStatus;
-
-var int RedoIndex;
+var Sound SoundLow;		// Sound for low tier studs
+var Sound SoundMid;		// Sound for mid tier studs
+var Sound SoundHi;		// Sound for high tier studs
 
 event PostBeginPlay()
 {
 	Super.PostBeginPlay();
 
-	managerStatus = PlayerHarry.managerStatus;
-
+	// Determine our stud value
 	if ( SetStudValue() )
 	{
+		// If we used STUD_RandomType, check for our stud value again
 		ResolveRedo();
+		// Set the increment value again
 		SetStudValue();
 	}
 
+	// Set our bounce sound based on stud tier
 	soundBounce = SetStudSound();
 
+	// Get texture based on value
 	Skin = GetTexture(nPickupIncrement);
 }
 
@@ -52,11 +56,13 @@ event Touch (Actor Other)
 {
 	Super.Touch(Other);
 	
-	managerStatus.GetStatusItem(classStatusGroup,classStatusItem).textureHudIcon = Texture(DynamicLoadObject(string(GetStudIcon(nPickupIncrement)),Class'Texture'));
+	// Set the icon to the correct stud color
+	PlayerHarry.managerStatus.GetStatusItem(classStatusGroup,classStatusItem).textureHudIcon = Texture(DynamicLoadObject(string(GetStudIcon(nPickupIncrement)),Class'Texture'));
 }
 
 function ResolveRedo()
 {
+	// Match our RedoIndex to StudValue
 	switch(RedoIndex)
 	{
 		case 0:
@@ -79,6 +85,7 @@ function ResolveRedo()
 
 function Texture GetStudIcon(int Value)
 {
+	// Determine stud icon based on value
 	if ( Value <= 10 )
 	{
 		return SilverIcon;
@@ -98,6 +105,7 @@ function Texture GetStudIcon(int Value)
 function bool SetStudValue()
 {
 	local bool bRedo;
+	// Match stud value to our increment count
 	switch(StudValue)
 	{
 		case STUD_10:
@@ -113,14 +121,18 @@ function bool SetStudValue()
 			nPickupIncrement = 10000;
 			break;
 		case STUD_RandomType:
+			// If random, determine a random index for STUD-10 thru STUD_10000
 			RedoIndex = Rand(4);
+			// Set flag to redo assignment
 			bRedo = True;
 			break;
 		case STUD_FullyRandom:
+			// Get random value, but don't allow it to go higher than 10000 (subject to change?)
 			nPickupIncrement = Rand(10001);
 			nPickupIncrement = Clamp(nPickupIncrement,1,10000);
 			break;
 		case STUD_Custom:
+			// If custom, don't assign anything
 			break;
 	}
 
@@ -129,6 +141,7 @@ function bool SetStudValue()
 
 function Texture GetTexture(int Value)
 {
+	// Get stud texture (color) based on value
 	if ( Value <= 10 )
 	{
 		return Color10;
@@ -147,6 +160,7 @@ function Texture GetTexture(int Value)
 
 function Sound SetStudSound()
 {
+	// Get stud pickup sound based on value
 	if ( nPickupIncrement < 60 )
 	{
 		pickUpSound = SoundLow;
