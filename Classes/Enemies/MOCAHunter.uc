@@ -31,9 +31,9 @@ event PostBeginPlay()
 	Super.PostBeginPlay();
 
 	// If there are no path nodes or MOCAharry, yell at mapper
-	if ( !ActorExistenceCheck(Class'PathNode') || !ActorExistenceCheck(Class'MOCAharry') )
+	if ( !DoesActorExist(Class'PathNode') || !DoesActorExist(Class'MOCAharry') )
 	{
-		MOCAHelpers.PushError("MOCAHunter actors (such as MOCAWatcherHunter) require PathNodes and MOCAharry.");
+		PushError("MOCAHunter actors (such as MOCAWatcherHunter) require PathNodes and MOCAharry.");
 	}
 }
 
@@ -42,9 +42,9 @@ event Bump(Actor Other)
 	Super.Bump(Other);
 
 	// If we aren't asleep & 
-	if ( !IsInState('stateAsleep') && !PlayerHarry.IsInState('stateCaught') && Other == PlayerHarry )
+	if ( !IsInState('stateAsleep') && !PlayerHarry.IsInState('stateCaught') && Other.IsA('MOCAharry') )
 	{
-		PlayerHarry.GetCaught();
+		MOCAharry(PlayerHarry).GetCaught(Self,Event);
 		GotoState('stateCatch');
 	}
 }
@@ -126,7 +126,7 @@ state stateIdle
 		// If we see Harry, store current destination as previous and chase Harry
 		if( CanISeeHarry(0.25,True) )
 		{
-			prevNavP = navP;
+			LastNavP = navP;
 			GotoState('stateChase');
 		}
 	}
@@ -150,7 +150,7 @@ state stateIdle
 		Sleep(RandRange(0.75,2.0));
 
 		// If we're far from home, go home
-		if ( !CloseToHome(MaxTravelDistance) )
+		if ( !CloseToHome() )
 		{
 			Goto('gohome');
 		}
@@ -189,7 +189,7 @@ state stateIdle
 		navP = NavigationPoint(FindPathTo(HomeLocation));
 
 		// While we're not in the inner radius of our home and we have a valid navP
-		while ( !CloseToHome(MaxTravelDistance * 0.5) && navP != None && navP != prevNavP )
+		while ( !CloseToHome(MaxTravelDistance * 0.5) && navP != None && navP != LastNavP )
 		{
 			// Move toward navP
 			MoveToward(navP);
@@ -269,7 +269,7 @@ state stateChase
 			// If we're running out of chase attempts, guess which navP Harry *might* have gone to
 			if ( ChaseAttempts > Round(MaxChaseAttempts * 0.667) )
 			{
-				navP = NavigationPoint(FindPathTo(GetNearbyNavPInView(SightRadius)));
+				navP = NavigationPoint(FindPathToward(GetNearbyNavPInView(SightRadius)));
 			}
 			// Otherwise, follow Harry's trail
 			else

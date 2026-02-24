@@ -11,8 +11,9 @@ var() float YPosition;				// Moca: Optional Y (up & down) position of pop up. If
 
 var() string WarningMessage;		// Moca: Message to display on the pop up
 var() Font WarningFont;				// Moca: Font to use for message text
+var() Sound WarningSound;			// Moca: Sound to play on pop up
 
-event Activate(Actor Other, Pawn Instigator)
+function ProcessTrigger(Actor Other, Pawn Instigator)
 {
 	local MOCAWarning PopUp;
 	
@@ -25,7 +26,7 @@ event Activate(Actor Other, Pawn Instigator)
 
 	// Set position
 	PopUp.XPos = XPosition;
-	PosUp.YPos = YPosition;
+	PopUp.YPos = YPosition;
 
 	// Set scale, text, & duration
 	PopUp.SizeScale = SizeMultiplier;

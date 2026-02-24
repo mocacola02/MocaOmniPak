@@ -1,7 +1,7 @@
 class MOCASpongifyPad extends SpongifyPad;
 
-var() bool bDeactivateOnJump;
-var() Sound JumpSFX;
+var() bool bDeactivateOnJump;	// Moca: Should pad deactivate on jump? Def: False
+var() Sound JumpSFX;			// Moca: What sound to play for jump. Def: JumpSFX=Sound'SPN_bounce_on'
 
 
 function UpdateSpecialFX (float fTimeDelta)
@@ -77,6 +77,8 @@ function OnBounce (Actor Other)
 		fxSheet.DrawScale = DrawScale * 2;
 		bBouncing = True;
 		PlaySound(JumpSFX,SLOT_None,,True);
+
+		TriggerEvent(Event,Self,Self);
 
 		if ( bDeactivateOnJump )
 		{

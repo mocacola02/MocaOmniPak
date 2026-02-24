@@ -16,31 +16,11 @@ var int CurrentLetter;				// Current letter we're on
 var array<Sound> LettersToBabble;	// Array of letters to speak
 
 
-///////////
-// Events
-///////////
-
-event PostBeginPlay()
-{
-	Super.PostBeginPlay();
-
-	// Fix invalid pitch values
-	if ( BabbleVoicePitch <= 0.0 )
-	{
-		BabbleVoicePitch = 1.0;
-	}
-	else if ( BabbleVoicePitch > 2.0 )
-	{
-		BabbleVoicePitch = 2.0;
-	}
-}
-
-
 /////////////
 // Bumpline
 /////////////
 
-function DoBumpLine (optional string AlternateBumpSet)
+function DoBumpLine(optional bool bJustTalk, optional string AlternateBumpLineSet)
 {
 	local string ActiveBumpSet;
 	local string SetID;
@@ -89,9 +69,9 @@ function DoBumpLine (optional string AlternateBumpSet)
 	}
 
 	// If we don't have valid bump params, cancel
-	if ( BumpSetFile == "" && AlternateBumpSet == "" )
+	if ( BumpSetFile == "" && AlternateBumpLineSet == "" )
 	{
-		Print("ERROR, I DO NOT HAVE ANY BUMPLINES!!!",True);
+		Log(string(Self)$": ERROR, I DO NOT HAVE ANY BUMPLINES!!!");
 		return;
 	}
 
@@ -99,18 +79,18 @@ function DoBumpLine (optional string AlternateBumpSet)
 	ActiveBumpSet = BumpSetFile;
 
 	// If we have an alternative, use that
-	if ( AlternateBumpSet != "" )
+	if ( AlternateBumpLineSet != "" )
 	{
-		ActiveBumpSet = AlternateBumpSet;
+		ActiveBumpSet = AlternateBumpLineSet;
 	}
 
 	// Add prefix to get our ID
-	if ( BumpSetPrefix != "" )
+	if ( BumpLineSetPrefix != "" )
 	{
-		SetID = BumpsetPrefix$"_"$ActiveBumpSet;
+		SetID = BumpLineSetPrefix$"_"$ActiveBumpSet;
 	}
 
-	Print("LOOKING FOR BUMPSET: "$string(SetID));
+	Log("LOOKING FOR BUMPSET: "$SetID);
 
 	// Get bumpline index
 	if ( bRandomBumpLine )
@@ -143,7 +123,7 @@ function DoBumpLine (optional string AlternateBumpSet)
 	// If we still have invalid index, cancel
 	if ( InStr(SayTextID, "<") > -1 )
 	{
-		Print("ERROR: COULDN'T FIND BUMPSET: "$ActiveBumpSet);
+		Log("ERROR: COULDN'T FIND BUMPSET: "$ActiveBumpSet);
 		return;
 	}
 
@@ -153,7 +133,7 @@ function DoBumpLine (optional string AlternateBumpSet)
 	// If we have a bad ID, cancel
 	if ( InStr(SayText, "<?") > -1 )
 	{
-		Print("ERROR: COULDN'T FIND BUMPLINE ID: "$SayTextID$" FROM BUMPSET: "$ActiveBumpSet);
+		Log("ERROR: COULDN'T FIND BUMPLINE ID: "$SayTextID$" FROM BUMPSET: "$ActiveBumpSet);
 		return;
 	}
 
@@ -336,6 +316,6 @@ defaultproperties
 	BabbleAnim=Idle
 	
 	TransientSoundVolume=1.4
-	TransientSoundPitch=128
+	TransientSoundPitch=192
 	TransientSoundRadius=10000.0
 }

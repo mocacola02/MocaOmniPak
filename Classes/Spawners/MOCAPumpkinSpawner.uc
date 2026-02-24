@@ -14,12 +14,16 @@ var() float FadeSpeed;			// Moca: Speed to fade out if bDespawnWhenDone
 state stateDone
 {
 	begin:
-		eVulnerableToSpell=SPELL_None;
+		// Make us uncastable
+		eVulnerableToSpell = SPELL_None;
+		// Finish anim
 		FinishAnim();
+		// If we should die, play DoneIdle anim
 		if ( ShouldDie() )
 		{
 			LoopAnim(SpawnerAnims.DoneIdle);
 		}
+		// Otherwise, do end spawn anim & sound
 		else
 		{
 			PlayAnim(SpawnerAnims.EndSpawning);
@@ -27,6 +31,7 @@ state stateDone
 			FinishAnim();
 		}
 
+		// Sleep for 2 seconds then fade away
 		Sleep(2.0);
 		GotoState('stateFadeAway');
 }
@@ -35,13 +40,36 @@ state stateFadeAway
 {
 	event Tick(float DeltaTime)
 	{
+		// Decrease our opacity
 		Opacity -= FadeSpeed * DeltaTime;
 
+		// If we're invisible
 		if ( Opacity <= 0.0 )
 		{
-			DetermineNextState();
+			// If we should die, destroy self
+			if ( ShouldDie() )
+			{
+				Destroy();
+			}
+			// Otherwise, grow back
+			else
+			{
+				GotoState('stateGrow');
+			}
 		}
 	}
+}
+
+state stateGrow
+{
+	begin:
+		// Play grow anim
+		PlayAnim('grow',,0.0);
+		// Become visible again
+		Opacity = 1.0;
+		// Finish anim then go to idle
+		FinishAnim();
+		GotoState('stateIdle');
 }
 
 

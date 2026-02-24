@@ -95,11 +95,12 @@ state stateCircle
 		// Otherwise, if we're done
 		else
 		{
+			local Vector TargetLocation;
 			// Fly into Harry proper
-			TargetPoint = PlayerHarry.Location;
+			TargetLocation = PlayerHarry.Location;
 
 			// Get direction to Harry and calculate our new location
-			Direction = Normal(TargetPoint - Location);
+			Direction = Normal(TargetLocation - Location);
 			NewLocation = Location + Direction * AttractionSpeed * DeltaTime;
 
 			// Set location and rotation
@@ -123,8 +124,7 @@ state stateCircle
 defaultproperties
 {
 	AttractionOffset=(X=0.0,Y=0.0,Z=42.0)
-	MinHoverTime=2.5
-	MaxHoverTime=5.0
+	HoverTime=(Min=2.5,Max=5.0)
 	AttractionRange=99999.0
 	bAttractedToHarry=True
 	AttractionSpeed=300.0

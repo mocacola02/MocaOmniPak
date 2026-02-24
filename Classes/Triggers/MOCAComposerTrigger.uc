@@ -2,33 +2,30 @@ class MOCAComposerTrigger extends MOCATrigger;
 
 enum ComposerCommand
 {
-	CC_Start,
-	CC_Queue,
-	CC_Continue,
-	CC_Continuous,
-	CC_ContinuousRandom,
-	CC_Stop
+	CC_Start,				// Moca: Starts playing
+	CC_Queue,				// Moca: On the next timer interval, play the next track
+	CC_Continue,			// Moca: Play the next track right now
+	CC_Continuous,			// Moca: Continuously play music in the order of the track list
+	CC_ContinuousRandom,	// Moca: Continuously play music in random order
+	CC_Stop					// Moca: Stop playing
 };
 
-var() ComposerCommand CommandToSend;
+var() ComposerCommand CommandToSend;	// Moca: What command to send to the composer? Def: CC_Start
 
-var() int TrackOverride;
-var() float StopFadeTime;
+var() int TrackOverride;				// Moca: Force a specific track to play. -1 means don't override. Def: -1
+var() float StopFadeTime;				// Moca: Fade out duration if CC_Stop. Def: 1.0
 
-var MOCAMusicComposer Composer;
+var MOCAMusicComposer Composer;	// Reference to composer actor
 
 
-event Activate(Actor Other, Pawn Instigator)
-{
-	ProcessTrigger();
-}
-
-function ProcessTrigger()
+function ProcessTrigger(Actor Other, Pawn EventInstigator)
 {
 	local MOCAMusicComposer A;
 	
+	// For each music composer with the matching event
 	foreach AllActors(class'MOCAMusicComposer', A, Event)
 	{
+		// Send command
 		switch (CommandToSend)
 		{
 			case CC_Start: A.BeginComposing(TrackOverride); break;

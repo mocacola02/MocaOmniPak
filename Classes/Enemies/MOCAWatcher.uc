@@ -34,7 +34,7 @@ event PostBeginPlay()
 	// If Harry is not a MOCAharry, yell at mapper
 	if ( !PlayerHarry.IsA('MOCAharry') )
 	{
-		MOCAHelpers.PushError("MOCAWatcher requires MOCAharry. Please replace harry with MOCAharry.");
+		PushError("MOCAWatcher requires MOCAharry. Please replace harry with MOCAharry.");
 	}
 }
 

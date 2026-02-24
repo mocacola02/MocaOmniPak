@@ -6,15 +6,15 @@ class MOCAharry extends harry;
 
 struct SpellMap
 {
-	var() const editconst ESpellType SpellSlot; 				// What spell slot to assign the spell to?
-	var() class<baseSpell> SpellToAssign; 					// What custom spell class to assign to the slot?
-	var() ESpellType SpellToActAs;  							// What spell to act as? For example, if you set this as SPELL_Rictusempra, it will activate actors designed for Rictusempra.
+	var() const editconst ESpellType SpellSlot; 				// Moca: What spell slot to assign the spell to?
+	var() class<baseSpell> SpellToAssign; 						// Moca: What custom spell class to assign to the slot?
+	var() ESpellType SpellToActAs;  							// Moca: What spell to act as? For example, if you set this as SPELL_Rictusempra, it will activate actors designed for Rictusempra.
 																// By default, it will act as the assigned spell slot if blank.
 };
 
-var() bool bSaveOnLoad;
+var() bool bSaveOnLoad;										// Moca: Should the game save when we load in? Def: False
 
-var(MOCAMagic) bool bLoadWithAllSpells;						// Moca: Add all spells to spellbook on load
+var(MOCAMagic) bool bLoadWithAllSpells;						// Moca: Add all spells to spellbook on load. Def: False
 var(MOCAMagic) bool bUseDefaultSpellbook;					// Moca: Whether or not the custom default spellbook will be applied. Def: False
 var(MOCAMagic) Array<Class<baseSpell>> DefaultSpellbook;	// Moca: What default spells do we have?
 var(MOCAMagic) SpellMap SpellMapping[28];					// Moca: What spells are mapped to each spell slot?
@@ -22,7 +22,7 @@ var(MOCAMagic) SpellMap SpellMapping[28];					// Moca: What spells are mapped to
 var(MOCAMagic) class<ParticleFX> WandParticleFX;			// Moca: Particle class to use for wand
 var(MOCAMagic) Color DefaultWandParticleColor;				// Moca: Default color of wand particles
 
-var(MOCAMagic) bool bInvisibleWeapon;						// Moca: Makes MOCAwand invisible and spawns spells from the hand's weapon bone.
+var(MOCAMagic) bool bInvisibleWeapon;						// Moca: Makes MOCAwand invisible and spawns spells from the hand's weapon bone. Def: class'MocaOmniPak.MOCAWandParticles'
 var(MOCAMagic) float WandGlowRange;							// Moca: How far does the wand glow reach? Def: 6.0
 
 var Weapon PreviousWeapon;		// Previous weapon actor equipped
@@ -34,8 +34,8 @@ var Rotator RespawnRotation;	// Rotation to set on "respawn"
 var SpellCursor StockCursor;	// Ref to stock SpellCursor
 var MOCASpellCursor MocaCursor;	// Ref to MOCASpellCursor
 
-var MOCAChar CaughtByActor;
-var name PostCaughtEvent;
+var Actor CaughtByActor;		// Actor that caught us
+var name PostCaughtEvent;		// Event to send after caught
 
 
 ///////////
@@ -152,8 +152,6 @@ function SetWeaponBySlot(byte DesiredSlot)
 	// Store previous weapon slot
 	SetPreviousSlot(Weapon.InventoryGroup);
 
-	Log("Switching to Weapon "$string(DesiredWeapon)$" in slot "$string(DesiredSlot));
-
 	// Switch our weapon and give ammo
 	SwitchWeapon(DesiredSlot);
 	ChangedWeapon();
@@ -173,12 +171,17 @@ function Weapon GetWeaponActorByClass(class<Weapon> DesiredWeapon, optional bool
 {
 	// Get the weapon from our inventory
 	local Weapon FoundWeapon;
-	FoundWeapon = FindInventoryType(DesiredWeapon);
+	local Inventory FoundInventory;
+	FoundInventory = FindInventoryType(DesiredWeapon);
 
 	// If we didn't find it and we're force getting, spawn the weapon
-	if ( FoundWeapon == None && bForceGet )
+	if ( FoundInventory == None && bForceGet )
 	{
 		FoundWeapon = SpawnWeaponActor(DesiredWeapon);
+	}
+	else
+	{
+		FoundWeapon = FoundInventory.WeaponChange(DesiredWeapon.Default.InventoryGroup);
 	}
 
 	return FoundWeapon;
@@ -188,7 +191,7 @@ function Weapon SpawnWeaponActor(class<Weapon> WeaponToSpawn)
 {
 	// Create weapon actor and make it an item
 	local Weapon WeaponActor;
-	WeaponActor = Spawn((WeaponToSpawn, Self));
+	WeaponActor = Spawn(WeaponToSpawn, Self);
 	WeaponActor.BecomeItem();
 
 	if ( AddInventory(WeaponActor) )	// If successfully added, return the weapon
@@ -276,18 +279,18 @@ function CreateCursors()
 	}
 }
 
-function SetCursor(name WeaponClass) // Breaking this into its own function so it can easily be extended with new classes
+function SetCursor(class<Object> WeaponClass) // Breaking this into its own function so it can easily be extended with new classes
 {
 	// Assign the correct cursor, if any
 	switch (WeaponClass)
 	{
-		case 'baseWand':
+		case class'baseWand':
 			SpellCursor = StockCursor;
-		case 'MOCAWand':
+		case class'MOCAWand':
 			SpellCursor = MocaCursor;
 			// Throwing these in here just cuz its convenient
-			MOCAWand(WeaponActor).DefaultColorToUse = DefaultWandParticleColor;
-			MOCAWand(WeaponActor).fxChargeParticleFXClass = WandParticleFX;
+			MOCAWand(Weapon).DefaultColorToUse = DefaultWandParticleColor;
+			MOCAWand(Weapon).fxChargeParticleFXClass = WandParticleFX;
 		default:
 			SpellCursor = None;
 	}
@@ -352,34 +355,6 @@ function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
 
 	Log("No mapping found for "$string(TestSpell));
 	return SPELL_None;
-}
-
-function AddToMocaSpellbook(class<baseClass> SpellToAdd)
-{
-	if ( !IsSpellInMocaSpellbook(SpellToAdd) )
-	{
-		MocaSpellbook.AddItem(SpellToAdd);
-	}
-}
-
-function ClearMocaSpellbook()
-{
-	MocaSpellbook.Empty();
-}
-
-function bool IsSpellInMocaSpellbook(class<baseClass> SpellToTest)
-{
-	local int i;
-
-	for ( i = 0; i < MocaSpellbook.Length; i++ )
-	{
-		if ( MocaSpellbook[i] == SpellToTest )
-		{
-			return True;
-		}
-	}
-
-	return False;
 }
 
 function StartAimSoundFX()
@@ -452,10 +427,12 @@ function SetRespawnPosition(Vector NewLocation, Rotator NewRotation)
 
 exec function JackOMode()
 {
+	// If not pumpkin, pumpkin
 	if ( Mesh == SkeletalMesh'skPumpkinHarry' )
 	{
 		Mesh = SkeletalMesh'MOCAharry';
 	}
+	// If pumpkin, not pumpkin
 	else
 	{
 		Mesh = SkeletalMesh'skPumpkinHarry';
@@ -479,6 +456,7 @@ exec function ShowCollectibles()
 	managerStatus.IncrementCount(Class'MOCAStatusGroupWater',Class'MOCAStatusItemWater',nCount);
 }
 
+// TODO: delete this maybe? might not be needed anymore if MOCAbaseHands alt fire works
 exec function AltFire (optional float f)
 {
 	local Vector TraceStart;
@@ -502,10 +480,10 @@ exec function AltFire (optional float f)
 			StartAiming(bHarryUsingSword);
 		}
 
-		if ( (Weapon.IsA('MOCAbaseHands')) )
-		{
-			InteractTrace(250.0);
-		}
+		// if ( (Weapon.IsA('MOCAbaseHands')) )
+		// {
+		// 	InteractTrace(250.0);
+		// }
 	}
 }
 
@@ -514,27 +492,20 @@ exec function AltFire (optional float f)
 // Misc. Functions
 ////////////////////
 
-function InteractTrace(float TraceDistance)
-{
-	local Vector TraceStart;
-	local Vector TraceDirection;
-	local Vector TraceEnd;
-
-	TraceStart = Cam.Location;
-	TraceDirection = vector(Cam.Rotation);
-	TraceEnd = TraceStart + TraceDirection * TraceDistance;
-
-	MOCAbaseHands(Weapon).TraceForInteracts(TraceEnd, TraceStart);
-}
+// function InteractTrace(float TraceDistance)
+// {
+// 	MOCAbaseHands(Weapon).AltFire(1.0);
+// }
 
 function SetNewMesh()
 {
+	// If harry, goyle
 	if ( bIsGoyle && Mesh == SkeletalMesh'MOCAharry' )
 	{
 		Mesh = SkeletalMesh'skGoyleMesh';
 		DrawScale = 1.15;
 	}
-	
+	// If goyle, harry
 	if ( !bIsGoyle && Mesh == SkeletalMesh'skGoyleMesh' )
 	{
 		Mesh = SkeletalMesh'MOCAharry';
@@ -552,16 +523,18 @@ function PickupActor(Actor Other)
 
 function DoBundiJump(MOCABundimun Bundi)
 {
+	// If bundi is stunned, KILL
 	if ( Bundi.IsInState('stateStunned') )
 	{
 		fTimeInAir = 0.0;
-		Bundi.HandleStomp();
+		Bundi.ProcessStomp();
 		GotoState('stateStomping');
 	}
 }
 
 function SetAnimSet(enumHarryAnimSet NewSet)
 {
+	// Set animation set
 	Log("Changing anim set to "$string(NewSet));
 	HarryAnimSet = NewSet;
 }
@@ -571,12 +544,14 @@ function name GetCurrIdleAnimName()
 	local string AnimName;
 	local name nm;
 	local int iIndex;
+	// If using MOCAbaseHands, use wandless idle
 	if ( Weapon.IsA('MOCAbaseHands') )
 	{
 		AnimName = "IdleWandless";
 		nm = StringToAnimName(AnimName);
 		return nm;
 	}
+	// Otherwise, use normal
 	else
 	{
 		iIndex = 1 + Rand(IdleNums);
@@ -589,21 +564,47 @@ function name GetCurrIdleAnimName()
 function ScreenFade(float TargetOpacity, float FadeOutTime)
 {
 	local FadeViewController CamFade;
+	// Spawn fade controller and fade
 	CamFade = Spawn(Class'FadeViewController');
 	CamFade.Init(TargetOpacity,0,0,0,FadeOutTime);
 }
 
 function TeleportHarry(Vector TPLocation, Rotator TPRotation)
 {
+	// Set location & rotation
 	SetLocation(TPLocation);
 	SetRotation(TPRotation);
 }
 
 function GetCaught(Actor Catcher, optional name CatchEvent)
 {
+	// Store caught by actor & event, then get caught
 	CaughtByActor = Catcher;
 	PostCaughtEvent = CatchEvent;
 	GotoState('stateCaught');
+}
+
+function EndCaught()
+{
+	// If caught by watcher, reset it now
+	if ( CaughtByActor.IsA('MOCAWatcher') )
+	{
+		MOCAWatcher(CaughtByActor).Reset();
+	}
+
+	// Fade screen & unlock movements
+	ScreenFade(0.0, 2.0);
+	bKeepStationary = False;
+
+	// If we have an event, emit it
+	if ( PostCaughtEvent != '' )
+	{
+		TriggerEvent(PostCaughtEvent,Self,Self);
+		PostCaughtEvent = '';
+	}
+
+	// Go back to gameplay
+	GotoState('PlayerWalking');
 }
 
 
@@ -614,9 +615,13 @@ function GetCaught(Actor Catcher, optional name CatchEvent)
 state stateStomping
 {
 	begin:
+		// Lock harry into place
 		bStationary = True;
+		// Loop land anim
 		LoopAnim('Land');
+		// Small delay
 		Sleep(0.5);
+		// Release harry and jump
 		bStationary = False;
 		DoJump();
 		GotoState('PlayerWalking');
@@ -625,6 +630,7 @@ state stateStomping
 state stateInteract
 {
 	begin:
+		// Play pick up anim briefly, then stop
 		PlayAnim('PickBitOfGoyle',3,3);
 		Sleep(0.667);
 		GotoState('PlayerWalking');
@@ -634,9 +640,12 @@ state stateCaught
 {
 	event BeginState()
 	{
+		// Play stuck anim (TODO: make configurable)
 		PlayAnim('webmove');
+		// Play caught music cue & sound
 		PlaySound(Sound'MocaSoundPak.Music_Cues.stealthCaught_hp3', SLOT_None);
 		PlaySound(Sound'HPSounds.Magic_sfx.Dueling_MIM_self_lucky', SLOT_Misc);
+		// Lock movement
 		bKeepStationary = True;
 	}
 
@@ -644,39 +653,30 @@ state stateCaught
 	{
 		Global.Tick(DeltaTime);
 
-		if ( bSkipCutScene )
+		// If skip is pressed, end caught
+		if ( bSkipCutScene == 1 )
 		{
-			Goto('endcatch');
+			EndCaught();
 		}
 	}
 
 	begin:
+		// Wait 1 second
 		Sleep(1.0);
+		// Fade screen
 		ScreenFade(1.0, 2.0);
+		// Wait 2 and a half
 		Sleep(2.5);
+		// Teleport harry
 		TeleportHarry(RespawnLocation,RespawnRotation);
+		// Brief pause
 		Sleep(0.5);
-
-	endcatch:
-		if ( CaughtByActor.IsA('MOCAWatcher') )
-		{
-			CaughtByActor.Reset();
-		}
-
-		ScreenFade(0.0, 2.0);
-		bKeepStationary = False;
-
-		if ( PostCaughtEvent != '' )
-		{
-			TriggerEvent(PostCaughtEvent,Self,Self);
-		}
-
-		GotoState('PlayerWalking');
+		// End caught
+		EndCaught();
 }
 
 defaultproperties
 {
-	DefaultWeapon=class'MOCAWand'
 	Mesh=SkeletalMesh'MOCAHarry'
 	Cutname="harry"
 	RotationRate=(Pitch=20000,Yaw=100000,Roll=3072)

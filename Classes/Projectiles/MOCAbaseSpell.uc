@@ -51,14 +51,14 @@ function bool OnSpellHitHPawn(Actor HitActor, Vector HitLocation)
 		switch (SpellToActAs)
 		{
 			case SPELL_None:			return False;
-			case SPELL_Flipendo:		return HPawn(aHit).HandleSpellFlipendo(Self,HitLocation);
-			case SPELL_Lumos:			return HPawn(aHit).HandleSpellLumos(Self,HitLocation);
-			case SPELL_Alohomora:		return HPawn(aHit).HandleSpellAlohomora(Self,HitLocation);
-			case SPELL_Skurge:			return HPawn(aHit).HandleSpellSkurge(Self,HitLocation);
-			case SPELL_Rictusempra:		return HPawn(aHit).HandleSpellRictusempra(Self,HitLocation);
-			case SPELL_Diffindo:		return HPawn(aHit).HandleSpellDiffindo(Self,HitLocation);
-			case SPELL_Spongify:		return HPawn(aHit).HandleSpellSpongify(Self,HitLocation);
-			default:					return HPawn(aHit).HandleSpellFlipendo(Self,HitLocation);
+			case SPELL_Flipendo:		return HPawn(HitActor).HandleSpellFlipendo(Self,HitLocation);
+			case SPELL_Lumos:			return HPawn(HitActor).HandleSpellLumos(Self,HitLocation);
+			case SPELL_Alohomora:		return HPawn(HitActor).HandleSpellAlohomora(Self,HitLocation);
+			case SPELL_Skurge:			return HPawn(HitActor).HandleSpellSkurge(Self,HitLocation);
+			case SPELL_Rictusempra:		return HPawn(HitActor).HandleSpellRictusempra(Self,HitLocation);
+			case SPELL_Diffindo:		return HPawn(HitActor).HandleSpellDiffindo(Self,HitLocation);
+			case SPELL_Spongify:		return HPawn(HitActor).HandleSpellSpongify(Self,HitLocation);
+			default:					return HPawn(HitActor).HandleSpellFlipendo(Self,HitLocation);
 		}
 	}
 }
@@ -85,5 +85,5 @@ auto state StateFlying
 
 	begin:
 		// Set velocity
-		Velocity = Vect(Rotation) * Speed;
+		Velocity = Vector(Rotation) * Speed;
 }

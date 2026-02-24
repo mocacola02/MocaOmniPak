@@ -73,7 +73,7 @@ auto state stateIdle
 	event Timer()
 	{
 		// If Harry is near, go to fire state
-		if ( GetDistanceFromHarry() < DistanceToAttack )
+		if ( GetDistanceFromHarry() < AttackDistance )
 		{
 			GotoState('stateFire');
 		}

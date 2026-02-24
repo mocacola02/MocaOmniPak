@@ -21,8 +21,8 @@ event PostBeginPlay()
 {
 	Super.PostBeginPlay();
 
-	// Get a default prevNavP
-	prevNavP = Level.NavigationPointList;
+	// Get a default LastNavP
+	LastNavP = Level.NavigationPointList;
 
 	// Set HomeLocation
 	HomeLocation = Location;
@@ -49,6 +49,11 @@ function bool IsCloseToHome(float DistanceThreshold)
 	return VSize(Location - HomeLocation ) < DistanceThreshold;
 }
 
+function float GetDistanceBetweenActors(Actor A, Actor B)
+{
+	return VSize(A.Location - B.Location);
+}
+
 function bool IsHarryNear(optional float TargetDistance)
 {
 	return GetDistanceFromHarry() <= TargetDistance;
@@ -56,15 +61,24 @@ function bool IsHarryNear(optional float TargetDistance)
 
 function float GetDistanceFromHarry()
 {
-	return MOCAHelpers.GetDistanceBetweenActors(Self,PlayerHarry);
+	return GetDistanceBetweenActors(Self,PlayerHarry);
 }
 
 function float GetDistanceFromSelf(Actor ActorToCheck)
 {
-	return MOCAHelpers.GetDistanceBetweenActors(Self, ActorToCheck);
+	return GetDistanceBetweenActors(Self, ActorToCheck);
 }
 
-function Vector GetNearbyNavPInView(float MaxRange)
+function bool CloseToHome(optional float RequiredDistance)
+{
+	if ( RequiredDistance <= 0.0 )
+	{
+		RequiredDistance = MaxTravelDistance;
+	}
+	return RequiredDistance >= VSize(Location - HomeLocation);
+}
+
+function NavigationPoint GetNearbyNavPInView(float MaxRange)
 {
 	local NavigationPoint TestNav, BestNav;
 	local Vector DirectionToNav, ForwardDirection;
@@ -99,6 +113,27 @@ function Vector GetNearbyNavPInView(float MaxRange)
 	return BestNav;
 }
 
+function NavigationPoint GetFurthestNavPFromActor(Actor ActorToCheck)
+{
+	local NavigationPoint TestNav;
+	local NavigationPoint FurthestNav;
+	local float TestDistance;
+	local float FurthestDistance;
+	
+	foreach AllActors(class'NavigationPoint', TestNav)
+	{
+		TestDistance = GetDistanceBetweenActors(TestNav, ActorToCheck);
+
+		if ( FurthestNav == None || ( TestDistance > FurthestDistance ) )
+		{
+			FurthestNav = TestNav;
+			FurthestDistance = TestDistance;
+		}
+	}
+
+	return FurthestNav;
+}
+
 
 //////////
 // Sight
@@ -106,13 +141,20 @@ function Vector GetNearbyNavPInView(float MaxRange)
 
 function bool CanHarrySeeMe(float MinDot)
 {
-	return MOCAHelpers.IsFacingOther(PlayerHarry,Self,MinDot) && PlayerCanSeeMe();
+	return IsFacingOther(PlayerHarry,Self,MinDot) && PlayerCanSeeMe();
+}
+
+function bool IsFacingOther(Actor SourceActor, Actor Other, float MinDot)
+{
+	local float DotProduct;
+	DotProduct = Vector(Rotation) Dot Normal(Other.Location - Location);
+	return DotProduct > MinDot;
 }
 
 function bool CanISeeHarry(float MinDot, optional bool bRememberLocation)
 {
-	// If Harry can see us and is facing us and we're within 50 units on Z (up & down)
-	if ( PlayerCanSeeMe() && MOCAHelpers.IsFacingOther(Self,PlayerHarry,MinDot) && Abs(PlayerHarry.Location.Z - Location.Z) <= 50.0 )
+	// If Harry can see us and we're facing him and we're within 50 units on Z (up & down)
+	if ( PlayerCanSeeMe() && IsFacingOther(Self,PlayerHarry,MinDot) && Abs(PlayerHarry.Location.Z - Location.Z) <= 50.0 )
 	{
 		if ( bRememberLocation )
 		{
@@ -208,7 +250,7 @@ function ESpellType DetermineSpellType(class<baseSpell> TestSpell)
 	MocaPlayer = MOCAharry(PlayerHarry);
 
 	// For each spell in our spell map
-	for ( i = 0; i < MocaPlayer.SpellMapping.Length; i++ )
+	for ( i = 0; i < ArrayCount(MocaPlayer.SpellMapping); i++ )
 	{
 		// If our spell class matches the spell map entry
 		if ( MocaPlayer.SpellMapping[i].SpellToAssign == TestSpell )
@@ -229,7 +271,7 @@ function ProcessSpell(); // Define in child classes.
 // Misc. Functions
 ////////////////////
 
-function EnterErrorMode(string ErrorMessage)
+function PushError(string ErrorMessage)
 {
 	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: "$ErrorMessage);
 }
@@ -254,6 +296,18 @@ function bool ShouldDie()
 {
 	// If we've taken enough hits and HitsToKill isn't 0
 	return HitsTaken >= HitsToKill && HitsToKill > 0;
+}
+
+function bool DoesActorExist(Class<Actor> ActorToCheck)
+{
+	local Actor A;
+	
+	foreach AllActors(ActorToCheck, A)
+	{
+		return True;
+	}
+
+	return False;
 }
 
 

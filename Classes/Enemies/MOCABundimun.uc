@@ -38,7 +38,7 @@ event PostBeginPlay()
 	// If mapper didn't use MOCAharry, yell at them
 	if ( !PlayerHarry.IsA('MOCAharry') )
 	{
-		EnterErrorMode("MOCABundimun requires MOCAharry. Please replace harry with MOCAharry.");
+		PushError("MOCABundimun requires MOCAharry. Please replace harry with MOCAharry.");
 	}
 }
 
@@ -204,7 +204,7 @@ state stateSpitting
 	{
 		// Disable sound and casting
 		AmbientSound = None;
-		eVulnerableToSpell = None;
+		eVulnerableToSpell = SPELL_None;
 	}
 
 	event Tick(float DeltaTime)

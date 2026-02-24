@@ -17,5 +17,5 @@ defaultproperties
 	CollisionHeight=80
 	CollideType=CT_Box
 	bBlockCamera=False
-	bBlockPlayer=False
+	bBlockPlayers=False
 }

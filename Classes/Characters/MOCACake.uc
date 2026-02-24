@@ -103,16 +103,16 @@ state stateCakeDie
 		LoopAnim('Rest');
 		sleep(2.0);
 		AmbientGlowColor = dieColor;
-		PlaySound(Sound'HPSounds.menu_sfx.timer_1',SLOT_Talk,voiceVolume,,voiceRadius,1.0,True);
+		PlaySound(Sound'HPSounds.menu_sfx.timer_1',SLOT_Talk);
 		sleep(1.0);
 		AmbientGlowColor = MapDefault.AmbientGlowColor;
 		sleep(1.0);
-		PlaySound(Sound'HPSounds.menu_sfx.timer_2',SLOT_Talk,voiceVolume,,voiceRadius,1.0,True);
+		PlaySound(Sound'HPSounds.menu_sfx.timer_2',SLOT_Talk);
 		AmbientGlowColor = dieColor;
 		sleep(1.0);
 		AmbientGlowColor = MapDefault.AmbientGlowColor;
 		sleep(1.0);
-		PlaySound(Sound'HPSounds.menu_sfx.timer_3',SLOT_Talk,voiceVolume,,voiceRadius,1.0,True);
+		PlaySound(Sound'HPSounds.menu_sfx.timer_3',SLOT_Talk);
 		AmbientGlowColor = dieColor;
 		sleep(1.0);
 		AmbientGlowColor = MapDefault.AmbientGlowColor;
@@ -122,7 +122,7 @@ state stateCakeDie
 		// Fly away
 		bAnimMove = True;
 		SpawnFire();
-		PlaySound(Sound'HPSounds.Critters_sfx.Basilisk_scream_death',SLOT_Talk,voiceVolume,,voiceRadius,0.5,false);
+		PlaySound(Sound'HPSounds.Critters_sfx.Basilisk_scream_death',SLOT_Talk,[Pitch]0.5);
 		PlayAnim('FlyAway');
 		FinishAnim();
 		Destroy();
@@ -137,8 +137,6 @@ defaultproperties
 	TimeBetweenBabble=0.1
 	BabbleAnim=Idle
 	DelayBeforeEnding=2.0
-	BabbleVoicePitch=128
-	BabbleVoiceRadius=100000.0
 	bTurnToHarry=False
 	
 	bUseBumpLine=True

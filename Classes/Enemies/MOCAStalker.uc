@@ -59,9 +59,9 @@ event PostBeginPlay()
 	EnableTurnTo(PlayerHarry);
 
 	// If we don't have stalker nodes or MOCAharry, yell at mapper
-	if ( !MOCAHelpers.DoesActorExist(class'MOCAStalkerNode') || !PlayerHarry.IsA('MOCAharry') )
+	if ( !DoesActorExist(class'MOCAStalkerNode') || !PlayerHarry.IsA('MOCAharry') )
 	{
-		MOCAHelpers.PushError("MOCAStalker actors (like MOCABracken) require MOCAStalkerNodes and MOCAharry. Make sure you have these implemented.");
+		PushError("MOCAStalker actors (like MOCABracken) require MOCAStalkerNodes and MOCAharry. Make sure you have these implemented.");
 	}
 }
 
@@ -104,7 +104,7 @@ event Tick(float DeltaTime)
 		CurrentAnger = FClamp(CurrentAnger,0.0,RequiredAnger);
 	}
 	// If we have anger and are not seen by Harry
-	else if ( AngerValue > 0.0 && !bSeenByHarry )
+	else if ( CurrentAnger > 0.0 && !bSeenByHarry )
 	{
 		// Lose anger and clamp it
 		CurrentAnger -= RelaxRate * DeltaTime;
@@ -197,7 +197,7 @@ state stateStalk
 	event BeginState()
 	{
 		// Reset node view distance
-		UpdateNodeViewDistance(MOCAStalkerNode.Default.RequiredDistance);
+		UpdateNodeViewDistance(2000.0);
 		// Loop sneak anim
 		LoopAnim(SneakAnim,SneakAnimRate);
 	}
@@ -257,7 +257,7 @@ state stateRetreat
 		// Play retreat sound
 		PlaySound(RetreatSound,SLOT_Talk,1.0);
 		// Find retreat destination
-		RetreatNavP = GetFurthestNavPoint(PlayerHarry);
+		RetreatNavP = GetFurthestNavPFromActor(PlayerHarry);
 		// Find path to retreat
 		navP = NavigationPoint(FindPathToward(RetreatNavP));
 	}

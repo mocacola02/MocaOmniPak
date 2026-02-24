@@ -32,7 +32,7 @@ event Touch(Actor Other)
 		bCooldown = True;
 		Other.TakeDamage(DamageToDeal,Self,Location,Vect(0,0,0),'BundimunSpray');
 		PlaySound(Sound'spell_hit',SLOT_Interact);
-		SetTimer(1.0);
+		SetTimer(1.0,False);
 	}
 }
 
@@ -46,5 +46,5 @@ event Timer()
 defaultproperties
 {
 	LifeSpan=3.0
-	TransientRadius=2048
+	TransientSoundRadius=2048
 }

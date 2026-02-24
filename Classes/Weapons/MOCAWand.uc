@@ -1,5 +1,5 @@
 //================================================================================
-// MOCAWand. Not really going to touch this further, even for v3.0
+// MOCAWand. Not really going to touch this further, even for v3.0.
 //================================================================================
 class MOCAWand extends baseWand;
 

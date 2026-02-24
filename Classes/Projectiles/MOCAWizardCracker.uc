@@ -2,6 +2,7 @@ class MOCAWizardCracker extends MOCAPawn;
 
 var() bool bActAsSpell;				// Moca: Act as a spell (similar to sword beams). Def: False
 var() bool bBurstFalloff;			// Moca: Apply falloff to burst damage. Def: True
+var() bool bExplodeOnTouch;			// Moca: Should it explode when touched at all? Def: False
 
 var() float BurstDamage;			// Moca: How much damage to deal when bursting? Def: 15.0
 var() float DirectHitDamage;		// Moca: How much damage to deal on a direct hit? Def: 20.0
@@ -15,6 +16,7 @@ var bool bCanHitHarry;	// Can we hit harry right now?
 var bool bDirectHit;	// Was hit a direct hit?
 var bool bIsSwelling;	// Are we swelling right now?
 
+var Sound LandSound;	// Sound to play when landing on ground
 var Sound SwellSound;	// Sound to play when swelling
 var Sound PulseSound;	// Sound to play when pulsing post-swell
 var Sound PopSound;		// Sound to play on burst
@@ -79,7 +81,7 @@ function Burst()
 	GotoState('stateKill');
 }
 
-function AutoHitAreaEffect (float Radius)
+function AutoHitAreaEffect(float Radius)
 {
 	local HPawn Pawn;
 	local spellTrigger spTrigger;
@@ -108,7 +110,7 @@ function AutoHitAreaEffect (float Radius)
 	foreach AllActors(Class'spellTrigger',spTrigger)
 	{
 		// If vulnerable to spell and within range
-		if ( spTrigger.eVulnerableToSpell != SPELL_None && (VSize(spTrigger.Location - Location) < fRadius) )
+		if ( spTrigger.eVulnerableToSpell != SPELL_None && (VSize(spTrigger.Location - Location) < Radius) )
 		{
 			// Activate them
 			spTrigger.Activate(Self,Self);
@@ -227,9 +229,9 @@ state stateSwell
 		if ( !bIsSwelling )
 		{
 			bIsSwelling = True;
-			SetTimer(BurstDelay);
+			SetTimer(BurstDelay,False);
 			PlaySound(SwellSound,SLOT_Misc);
-			PlayAnim('swell',SwellRate);
+			PlayAnim('swell');
 			FinishAnim();
 			PlaySound(PulseSound,SLOT_Misc,[Loop] True);
 			LoopAnim('shake');

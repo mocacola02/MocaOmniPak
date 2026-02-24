@@ -116,7 +116,7 @@ function ESpellType DetermineSpellType(class<baseSpell> TestSpell)
 	MocaPlayer = MOCAharry(PlayerHarry);
 
 	// For each spell in our spell map
-	for ( i = 0; i < MocaPlayer.SpellMapping.Length; i++ )
+	for ( i = 0; i < ArrayCount(MocaPlayer.SpellMapping); i++ )
 	{
 		// If our spell class matches the spell map entry
 		if ( MocaPlayer.SpellMapping[i].SpellToAssign == TestSpell )
@@ -137,7 +137,7 @@ function ProcessSpell(); // Define in child classes.
 // Misc. Functions
 ////////////////////
 
-function EnterErrorMode(string ErrorMessage)
+function PushError(string ErrorMessage)
 {
 	// Crash game with error message
 	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: "$ErrorMessage);
@@ -173,8 +173,13 @@ function DoBob(float DeltaTime)
 	NewRotation.Yaw = Rotation.Yaw + (RotationSpeed * DeltaTime);
 
 	// Set bob location & rotation
-	SetLocation(Home + Vect(0,0,1) * Offset);
+	SetLocation(HomeLocation + Vec(0,0,1) * Offset);
 	SetRotation(NewRotation);
+}
+
+function float GetDistanceBetweenActors(Actor A, Actor B)
+{
+	return VSize(A.Location - B.Location);
 }
 
 

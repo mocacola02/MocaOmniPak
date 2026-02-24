@@ -3,25 +3,26 @@
 //================================================================================
 class MOCAExplodingSpawner extends MOCASpawner;
 
-var() bool bShakeCamera;
-var() float ShakeRange;
-var() float ShakeIntensity;
-var() float ShakeDuration;
+var() bool bShakeCamera;		// Moca: Should camera shake? Def: True
+var() float ShakeRange;			// Moca: How far does the shake effect? Def: 1024.0
+var() float ShakeIntensity;		// Moca: How intense is the shake? Def: 100.0
+var() float ShakeDuration;		// Moca: How long is the shake? Def: 2.0
 
-var() float FloatSpeed;
-var() float FloatDuration;
+var() float FloatSpeed;			// Moca: How fast does it float up when touched? Def: 15.0
+var() float FloatDuration;		// Moca: How long does it float up for? Def: 2.0
 
-var() Sound ExplodeSound;
-var() float ExplodeSoundPitch;
+var Sound ExplodeSound;		// Sound to play on explode
+var float ExplodeSoundPitch;// Explode sound pitch
 
-var() Sound BuildUpSound;
-var() Sound BuildUpSoundPitch;
+var Sound BuildUpSound;		// Sound to play when starting to float
+var float BuildUpSoundPitch;// Build up sound pitch
 
-var() class<ParticleFX> ExplodeParticle;
+var class<ParticleFX> ExplodeParticle;	// Particle class for explosion
 
 
 event Touch(Actor Other)
 {
+	// If other is Harry and we're not bursting already
 	if ( Other == PlayerHarry && !IsInState('stateBurst') )
 	{
 		GotoState('stateBurst');
@@ -30,15 +31,20 @@ event Touch(Actor Other)
 
 function DoShake()
 {
+	// If we should shake camera
 	if ( bShakeCamera )
 	{
 		local float FinalShakeIntensity;
 		local float DistFromHarry;
-
-		DistFromHarry = MOCAHelpers.GetDistanceBetweenActors(Self,PlayerHarry);
+		// Get distance from Harry
+		DistFromHarry = GetDistanceBetweenActors(Self,PlayerHarry);
+		// Calculate shake intensity based on distance from Harry
 		FinalShakeIntensity = 1.0 - ( DistFromHarry / ShakeRange );
+		// Multiply by our base intensity
+		FinalShakeIntensity *= ShakeIntensity;
+		// Clamp intensity to be above 0.0
 		FinalShakeIntensity = FClamp(FinalShakeIntensity,0.0,99999.0);
-
+		// Shake camera
 		PlayerHarry.ShakeView(ShakeDuration,FinalShakeIntensity,FinalShakeIntensity);
 	}
 }
@@ -52,18 +58,27 @@ state stateBurst
 	event Tick(float DeltaTime)
 	{
 		local Vector DesiredLocation;
+		// Calculate desired rotation by adding float speed to our current location
 		DesiredLocation = Location;
 		DesiredLocation.Z += (FloatSpeed * DeltaTime);
+		// Set new location
 		SetLocation(DesiredLocation);
 	}
 
 	begin:
-		PlaySound(BuildUpSound,,BuildUpSoundPitch);
+		// Play build up sound
+		PlaySound(BuildUpSound,[Pitch]BuildUpSoundPitch);
+		// Wait for our float duration
 		Sleep(FloatDuration);
-		PlaySound(ExplodeSound,,ExplodeSoundPitch);
+		// Play explode sound
+		PlaySound(ExplodeSound,[Pitch]ExplodeSoundPitch);
+		// Spawn explode particles
 		Spawn(ExplodeParticle);
+		// Shake camera
 		DoShake();
+		// Kill attached particles
 		KillAttachedParticleFX(0.0);
+		// Spawn items
 		GotoState('stateSpawn');
 }
 
@@ -84,6 +99,8 @@ defaultproperties
 	BuildUpSoundPitch=0.5
 
 	ExplodeParticle=class'HPParticle.BronzePickup'
+
+	ListOfSpawns(0)=(ActorToSpawn=class'Jellybean',SpawnParticles=class'Spawn_flash_1',SpawnSound=Sound'spawn_bean01',SpawnChance=255,SpawnDelay=0.01,SpawnVelocityMult=1.0)
 
 	bHidden=True
 	bPersistent=True

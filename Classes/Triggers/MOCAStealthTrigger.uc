@@ -4,15 +4,19 @@
 
 class MOCAStealthTrigger extends MOCATrigger;
 
-var() float TimeOutDuration;
-var() name EventOnTrigger;
+var() float TimeOutDuration;	// Moca: How long to deactivate trigger after activation. Def: 4.0
 
+
+///////////////////
+// Main Functions
+///////////////////
 
 function ProcessTrigger(Actor Other, Pawn EventInstigator)
 {
-	if ( !IsInState('stateTimeout') && !PlayerHarry.IsInState('stateCaught') )
+	// If not in timeout and harry isn't already caught and harry is a MOCAharry
+	if ( !IsInState('stateTimeout') && !PlayerHarry.IsInState('stateCaught') && PlayerHarry.IsA('MOCAharry') )
 	{
-		PlayerHarry.GetCaught(Self,EventOnTrigger);
+		MOCAharry(PlayerHarry).GetCaught(Self,Event);
 
 		if ( Owner.IsA('MOCAWatcher') && MOCAWatcher(Owner).CanCatchHarry() )
 		{
@@ -23,19 +27,26 @@ function ProcessTrigger(Actor Other, Pawn EventInstigator)
 			GotoState('stateTimeout');
 		}
 	}
+	// If Harry isn't MOCAharry, push error
+	else if ( !PlayerHarry.IsA('MOCAharry') )
+	{
+		PushError("MOCAStealthTrigger requires MOCAharry! Please replace harry with MOCAharry.");
+	}
 }
 
 function Reset()
 {
+	// If in state timeout, go to initial state
 	if ( IsInState('stateTimeout') )
 	{
-		GotoState(LastValidState);
+		GotoState(InitialState);
 	}
 }
 
 state stateTimeout
 {
 	begin:
+		// Sleep for timeout duration, then reset
 		Sleep(TimeOutDuration);
 		Reset();
 }

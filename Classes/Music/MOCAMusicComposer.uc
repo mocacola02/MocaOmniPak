@@ -12,7 +12,7 @@ struct DynamicTrack
 	var() float CrossfadeDuration;	// Moca: Duration of fade in seconds between current and next track
 };
 
-var() array<DynamicTrack> TrackList;	// List of tracks to play
+var() array<DynamicTrack> TrackList;	// Moca: List of tracks to play
 
 var bool bReadyToProgress;	// Are we ready to progress
 var bool bRandomContinuous;	// Are we doing random continuous playback
@@ -95,7 +95,7 @@ function PlayNewTrack()
 	CurrentLoop = 0;
 
 	// If NewTrack is missing .ogg, add it
-	if ( !Right(NewTrack, 4) ~= ".ogg" )
+	if ( !(Right(NewTrack, 4) ~= ".ogg") )
 	{
 		NewTrack = NewTrack$".ogg";
 	}
@@ -249,7 +249,7 @@ state stateContinuous
 		Sleep(GetMusicLength(TrackList[CurrentTrack].Track));
 
 		// If done looping, go to begin
-		if ( LoopCount > TrackList[CurrentTrack].LoopCount )
+		if ( CurrentLoop > TrackList[CurrentTrack].LoopCount )
 		{
 			Goto('begin');
 		}

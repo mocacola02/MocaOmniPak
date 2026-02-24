@@ -46,10 +46,10 @@ event Timer()
 function CheckForHarry()
 {
 	// If Harry is near
-	if ( MOCAHelpers.GetDistanceBetweenActors(Self,PlayerHarry) < RequiredDistance )
+	if ( GetDistanceBetweenActors(Self,PlayerHarry) < RequiredDistance )
 	{
 		// If Harry is facing self, become blocked
-		bBlocked = MOCAHelpers.IsFacingOther(PlayerHarry,Self,MinDot);
+		bBlocked = IsFacingOther(PlayerHarry,Self,MinDot);
 	}
 	// Otherwise, don't be blocked
 	else
@@ -81,6 +81,23 @@ function SetTexture()
 	{
 		Texture = Texture'MocaTexturePak.ICO_BrackenPathGreen';
 	}
+}
+
+
+/////////////////////
+// Helper Functions
+/////////////////////
+
+function float GetDistanceBetweenActors(Actor A, Actor B)
+{
+	return VSize(A.Location - B.Location);
+}
+
+function bool IsFacingOther(Actor SourceActor, Actor Other, float MinDotProd)
+{
+	local float DotProduct;
+	DotProduct = Vector(Rotation) Dot Normal(Other.Location - Location);
+	return DotProduct > MinDotProd;
 }
 
 

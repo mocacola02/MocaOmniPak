@@ -24,7 +24,6 @@ event Touch(Actor Other)
 		local int RandDamage;
 		RandDamage = Round(RandRange(5.0,15.0));
 		PlayerHarry.TakeDamage(RandDamage,Self,Location,Vect(0,0,0),'FireSpot');
-		KillProjectile();
 	}
 }
 

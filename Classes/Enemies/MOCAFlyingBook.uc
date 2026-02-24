@@ -15,18 +15,21 @@ var() WakeMode WakeUpMode;		// Moca: What type of wake up mode to use? Def: WM_P
 var() byte SleepChance;			// Moca: How likely is the book likely to sleep when near home? Higher = More likely Def: 128
 var() float HomeRange;			// Moca: How far do we considered our home area to be (from start location)? Def: 256.0
 var() float WakeUpRange;		// Moca: How far can we be woken up from? Def: 384.0
+var() float AttackRange;		// Moca: How close does Harry have to be to attack him? Def: 384.0
 var() float StunDurationMult;	// Moca: Rate of stun animation. Def: 1.0
 var() float AttackDelay;		// Moca: How long of a delay between attacks? Def: 5.0
+
+var() name SplineTag;			// Moca: Tag of spline we should follow.
 
 var() Sound FlySound;			// Moca: Sound to loop when flying? Def: Sound'MocaSoundPak.book_flap_Multi'
 var() Sound ShootSound;			// Moca: Sound to play when shooting at Harry? Def: Sound'MocaSoundPak.book_flap_Multi'
 
-var bool bCanGoHome;	// Can we go home
-var bool bGoingHome;	// Are we going home
-var bool bHomeCooldown;	// Are we in home cooldown (aka can't go back yet)
+var bool bCanGoHome;			// Can we go home
+var bool bGoingHome;			// Are we going home
+var bool bHomeCooldown;			// Are we in home cooldown (aka can't go back yet)
 
-var Vector ReturnLocation;	// Return location before going to home location
-var Vector TempLocation;	// Temporary location storage
+var Vector ReturnLocation;		// Return location before going to home location
+var Vector TempLocation;		// Temporary location storage
 
 var InterpolationPoint TargetIPoint;	// Target interpolation point
 
@@ -207,7 +210,7 @@ state stateFly
 		// Make us castable
 		eVulnerableToSpell = Default.eVulnerableToSpell;
 		// Set us to follow spline
-		FollowSplinePath(FlySplineTag, [StartPointName] TargetIPoint.Name);
+		FollowSplinePath(SplineTag, [StartPointName] TargetIPoint.Name);
 
 		// If our previous state was idle, enable home cooldown
 		if ( LastValidState == 'stateIdle' )
@@ -239,7 +242,7 @@ state stateFly
 	event Tick(float DeltaTime)
 	{
 		// If Harry is near, attack
-		if ( IsHarryNear(AttackDistance) )
+		if ( IsHarryNear(AttackRange) )
 		{
 			bHomeCooldown = False;
 			GotoState('stateAttack');
@@ -252,7 +255,7 @@ state stateFly
 		}
 
 		// If we're close to home and we can sleep and we're proximity based and Harry isn't near
-		if ( !bHomeCooldown && IsCloseToHome(HomeRange) && CanSleep() && WakeUpMode == WM_Proximity && !IsHarryNear(AttackDistance) )
+		if ( !bHomeCooldown && IsCloseToHome(HomeRange) && CanSleep() && WakeUpMode == WM_Proximity && !IsHarryNear(AttackRange) )
 		{
 			GotoState('stateGoHome');
 		}
@@ -291,7 +294,7 @@ state stateAttack
 		Sleep(AttackDelay);
 
 		// If Harry is still near, shoot again
-		if ( IsHarryNear(AttackDistance) )
+		if ( IsHarryNear(AttackRange) )
 		{
 			Goto('begin');
 		}
@@ -354,7 +357,7 @@ state stateHit
 		FinishAnim();
 
 		// If harry is near, attack again
-		if ( IsHarryNear(AttackDistance) )
+		if ( IsHarryNear(AttackRange) )
 		{
 			GotoState('stateAttack');
 		}
@@ -456,7 +459,7 @@ defaultproperties
 	HitsToKill=3
 
 	SleepChance=128
-	AttackDistance=384.0
+	AttackRange=384.0
 	AttackDelay=5.0
 	StunDurationMult=1.0
 	HomeRange=256.0

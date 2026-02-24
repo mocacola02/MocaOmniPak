@@ -3,20 +3,21 @@
 //================================================================================
 class MOCARandomSpawner extends Trigger;
 
-var() name SpawnedActorTag;
-var() name PatrolPointName;
-var() Vector VelocityModifier;
+var() name SpawnedActorTag;						// Moca: What tag to assign to spawned actors. Def: empty
+var() name PatrolPointName;						// Moca: What patrol point should actors look for.  Def: empty
+var() Vector VelocityModifier;					// Moca: Velocity modifier when spawning. Def: 0.0
 var() array<class<Actor>> CustomSpawnClasses;	// Moca: Configurable list of actors to spawn. If blank, uses preset list.
 
-var class<Actor> PresetSpawnClasses[118];	// Moca: This sucks still but this actor isn't important enough to make a better solution
+var array<class<Actor>> PresetSpawnClasses;		// This sucks still but this actor isn't important enough to make a better solution
 
 
 ///////////
 // Events
 ///////////
 
-event Activate(Other Actor, Pawn Instigator)
+event Activate(Actor Other, Pawn Instigator)
 {
+	// Do spawn
 	SpawnRandom();
 }
 
@@ -28,24 +29,27 @@ event Activate(Other Actor, Pawn Instigator)
 function SpawnRandom()
 {
 	local int RandIdx;
-	local array<class<Actor> SpawnArray;
+	local array<class<Actor>> SpawnArray;
 	local Actor SpawnedActor;
 
-	if ( MOCAHelpers.IsEmpty(CustomSpawnClasses) )
+	// If we don't have any custom classes, use preset list
+	if ( CustomSpawnClasses.Length <= 0 )
 	{
 		SpawnArray = PresetSpawnClasses;
 	}
+	// Otherwise, use custom list
 	else
 	{
 		SpawnArray = CustomSpawnClasses;
 	}
 
+	// Get rand index from list length
 	RandIdx = Rand(SpawnArray.Length);
-
+	// Spawn random actor with tag
 	SpawnedActor = FancySpawn(SpawnArray[RandIdx],,SpawnedActorTag,Location);
-
+	// Set spawn actor velocity from modifier
 	SpawnedActor.Velocity = VelocityModifier;
-
+	// If we have a patrol point name and we spawned a HPawn, set the patrol point
 	if ( PatrolPointName != '' && SpawnedActor.IsA('HPawn') )
 	{
 		HPawn(SpawnedActor).firstPatrolPointObjectName = PatrolPointName;
