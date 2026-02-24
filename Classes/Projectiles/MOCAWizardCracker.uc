@@ -1,3 +1,6 @@
+//================================================================================
+// MOCAWizardCracker.
+//================================================================================
 class MOCAWizardCracker extends MOCAPawn;
 
 var() bool bActAsSpell;				// Moca: Act as a spell (similar to sword beams). Def: False

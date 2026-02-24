@@ -1,7 +1,6 @@
 //============================================================
-// MOCABundimunSpit
+// MOCABundimunSpit.
 //============================================================
-
 class MOCABundimunSpit extends MOCAProjectile;
 
 

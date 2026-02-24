@@ -1,7 +1,6 @@
 //================================================================================
 // MOCADiscoveryPoint.
 //================================================================================
-
 class MOCADiscoveryPoint extends MOCACollectible;
 
 var() Range HoverTime;		// Moca: Min and max value for HoverTime (will choose a random value between the two). Default: Min 2.5 Max 5.0

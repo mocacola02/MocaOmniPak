@@ -1,7 +1,6 @@
 //================================================================================
 // MOCAEssence. the OG custom collectible
 //================================================================================
-
 class MOCAEssence extends MOCACollectible;
 
 defaultproperties

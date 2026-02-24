@@ -1,7 +1,6 @@
 //================================================================================
 // MOCAPotato.
 //================================================================================
-
 class MOCAPotato extends MOCACollectible;
 
 var() bool bFunnyMode; //Moca: Enable the funny :) def: False

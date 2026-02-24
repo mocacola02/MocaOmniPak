@@ -1,3 +1,6 @@
+//================================================================================
+// MOCAStatusGroupCake
+//================================================================================
 class MOCAStatusGroupCake extends StatusGroup;
 
 function GetGroupFinalXY_2 (bool bMenuMode, int nCanvasSizeX, int nCanvasSizeY, int nIconWidth, int nIconHeight, out int nOutX, out int nOutY)

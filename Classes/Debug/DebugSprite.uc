@@ -1,7 +1,6 @@
 //================================================================================
 // DebugSprite. for testing only (THAT'S WHAT DEBUG MEANS DUMMY)
 //================================================================================
-
 class DebugSprite extends Sprite;
 
 var float DespawnDelay;	// How long before despawning

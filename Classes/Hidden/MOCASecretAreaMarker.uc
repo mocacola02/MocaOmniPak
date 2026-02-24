@@ -1,7 +1,6 @@
 //================================================================================
 // MOCASecretAreaMarker.
 //================================================================================
-
 class MOCASecretAreaMarker extends SecretAreaMarker;
 
 var() array<Sound> SoundPool; // Moca: List of possible reveal sounds

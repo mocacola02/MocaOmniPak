@@ -1,7 +1,6 @@
 //============================================================
 // MOCAProjectile.
 //============================================================
-
 class MOCAProjectile extends Projectile;
 
 var bool bNoDespawnEmit;				// Don't emit particles on despawn

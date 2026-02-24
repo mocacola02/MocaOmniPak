@@ -1,7 +1,6 @@
 //================================================================================
 // MOCADraconiforsDragon.
 //================================================================================
-
 class MOCADraconiforsDragon extends MOCABasicCharacter;
 
 defaultproperties

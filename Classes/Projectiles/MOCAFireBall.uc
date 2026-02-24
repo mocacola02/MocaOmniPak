@@ -1,7 +1,6 @@
 //============================================================
 // MOCAFireBall.
 //============================================================
-
 class MOCAFireBall extends MOCAProjectile;
 
 defaultproperties

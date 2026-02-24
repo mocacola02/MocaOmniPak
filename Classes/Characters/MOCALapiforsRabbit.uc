@@ -1,7 +1,6 @@
 //================================================================================
 // MOCALapiforsRabbit.
 //================================================================================
-
 class MOCALapiforsRabbit extends MOCABasicCharacter;
 
 defaultproperties
