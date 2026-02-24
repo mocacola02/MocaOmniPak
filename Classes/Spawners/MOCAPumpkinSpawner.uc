@@ -18,19 +18,6 @@ state stateDone
 		eVulnerableToSpell = SPELL_None;
 		// Finish anim
 		FinishAnim();
-		// If we should die, play DoneIdle anim
-		if ( ShouldDie() )
-		{
-			LoopAnim(SpawnerAnims.DoneIdle);
-		}
-		// Otherwise, do end spawn anim & sound
-		else
-		{
-			PlayAnim(SpawnerAnims.EndSpawning);
-			PlaySound(SpawnerSounds.Closing);
-			FinishAnim();
-		}
-
 		// Sleep for 2 seconds then fade away
 		Sleep(2.0);
 		GotoState('stateFadeAway');
@@ -38,6 +25,12 @@ state stateDone
 
 state stateFadeAway
 {
+	event BeginState()
+	{
+		Log(string(Self)$": Fading away");
+		Opacity = 1.0;
+	}
+
 	event Tick(float DeltaTime)
 	{
 		// Decrease our opacity
@@ -46,10 +39,11 @@ state stateFadeAway
 		// If we're invisible
 		if ( Opacity <= 0.0 )
 		{
+			Log(string(Self)$": Done fading away");
 			// If we should die, destroy self
 			if ( ShouldDie() )
 			{
-				Destroy();
+				GotoState('stateDestroy');
 			}
 			// Otherwise, grow back
 			else

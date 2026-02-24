@@ -36,6 +36,7 @@ auto state stateIdle
 		Super.BeginState();
 		// Loop idle anim
 		LoopAnim(SpawnerAnims.Idle);
+		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
 	}
 }
 
@@ -43,12 +44,13 @@ state stateSpawn
 {
 	event EndState()
 	{
-		Super.EndState();
 		// End anim cooldown
 		bAnimCooldown = False;
+		Super.EndState();
 	}
 
 	begin:
+		Log(string(Self)$": Spawning items!");
 		// If not on anim cooldown
 		if ( !bAnimCooldown )
 		{
@@ -74,6 +76,7 @@ state stateSpawn
 		// If spawn count exceed max spawn count, go to done
 		if ( CurrentSpawnCount >= FinalMaxSpawnCount )
 		{
+			Log(string(Self)$": Finished spawning items, going to stateDone");
 			GotoState('stateDone');
 		}
 		// Otherwise, loop

@@ -324,7 +324,7 @@ state stateSpawn
 		// If we should die, then destroy self
 		if ( ShouldDie() )
 		{
-			Destroy();
+			GotoState('stateDestroy');
 		}
 
 		// Reset spell vulnerability
@@ -349,6 +349,13 @@ state stateSpawn
 		}
 		// Otherwise, loop
 		Goto('begin');
+}
+
+state stateDestroy
+{
+	begin:
+		SleepForTick();
+		Destroy();
 }
 
 defaultproperties

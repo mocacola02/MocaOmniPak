@@ -49,7 +49,7 @@ state stateChangeSize
 		{
 			local Vector HoldLocation;
 			// Hold Harry in place but let him shift up or down
-			HoldLocation = Vec(PreScaleLocation.X,PreScaleLocation.Y,PlayerHarry.Z);
+			HoldLocation = Vec(PreScaleLocation.X,PreScaleLocation.Y,PlayerHarry.Location.Z);
 			PlayerHarry.SetLocation(HoldLocation);
 		}
 

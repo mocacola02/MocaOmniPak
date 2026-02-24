@@ -43,100 +43,94 @@ function WetTexture GetGestureTexture (ESpellType SpellType)
 	}
 }
 
-function UpdateCursor(optional bool bJustStopAtClosestPawnOrWall)
-{
-	// If not emitting and we're not an invisible cursor, return
-	if ( bEmit == False && !bInvisibleCursor )
-	{
-		return;
-	}
+// function UpdateCursor(optional bool bJustStopAtClosestPawnOrWall)
+// {
+// 	local bool bHitActor;
+// 	local float DotProduct;
+// 	local Vector FirstHitPosition;
+// 	local Actor HitActor;
 
-	// We haven't hit anything yet
-	bHitSomething = False;
-	aPossibleTarget = None;
+// 	if ( bEmit == False && !bInvisibleCursor )
+// 	{
+// 		return;
+// 	}
 
-	local Vector TraceStart,TraceEnd;
-	local BaseCam PlayerCam;
-	// Get player cam
-	PlayerCam = PlayerHarry.Cam;
-	// Get trace start from cam location
-	TraceStart = PlayerCam.CamTarget.Location;
-	// Get trace end from in front of trace start multiplied by fLOS_Distance
-	TraceEnd = TraceStart + Vector(PlayerCam.CamTarget.Rotation) * fLOS_Distance;
+// 	aPossibleTarget = None;
+// 	bHitSomething = False;
+// 	vLOS_Start = PlayerHarry.Cam.CamTarget.Location;
 
-	local bool bHitActor;
-	local Actor HitActor;
-	local Vector HitLocation,HitNormal;
-	// Trace for actors
-	foreach TraceActors(Class'Actor', HitActor, HitLocation, HitNormal, TraceEnd, TraceStart)
-	{
-		// If actor is our owner, or harry, or isn't bProjTarget, or is hidden, ignore this actor
-		if ( HitActor == Owner || HitActor.IsA('harry') || !HitActor.bProjTarget || HitActor.bHidden )
-		{
-			continue;
-		}
+// 	if ( PlayerHarry.bInDuelingMode )
+// 	{
+// 		vLOS_End = PlayerHarry.Location + (Vector(PlayerHarry.Cam.Rotation + PlayerHarry.AimRotOffset) * (PlayerHarry.Cam.CurrentSet.fLookAtDistance + fLOS_Distance));
+// 	}
+// 	else
+// 	{
+// 		vLOS_End = PlayerHarry.Cam.Location + (PlayerHarry.Cam.vForward * (PlayerHarry.Cam.CurrentSet.fLookAtDistance + fLOS_Distance));
+// 	}
 
-		// We hit something, so yes
-		bHitActor = True;
-		bHitSomething = True;
+// 	vLOS_Dir = Normal(vLOS_End - vLOS_Start);
+	
+// 	foreach TraceActors(Class'Actor',HitActor,vHitLocation,vHitNormal,vLOS_End,vLOS_Start)
+// 	{
+// 		if ( HitActor != None || HitActor.IsA('harry') || (!HitActor.IsA('Pawn') && !HitActor.IsA('GridMover') && !HitActor.IsA('spellTrigger')) )
+// 		{
+// 			continue;
+// 		}
 
-		// Set hit location
-		vHitLocation = HitLocation;
+// 		if ( !bHitActor && !HitActor.bHidden )
+// 		{
+// 			bHitSomething = True;
+// 			bHitActor = True;
+// 			FirstHitPosition = vHitLocation;
+// 		}
 
-		// If actor isn't vulnerable to a spell, ignore this actor
-		if ( HitActor.eVulnerableToSpell == SPELL_None )
-		{
-			continue;
-		}
+// 		if ( HitActor.eVulnerableToSpell == SPELL_None )
+// 		{
+// 			continue;
+// 		}
 
-		// If we have that spell
-		if ( PlayerHarry.IsInSpellBook(HitActor.eVulnerableToSpell) || (bJustStopAtClosestPawnOrWall) )
-		{
-			// If it's a spell trigger
-			if ( HitActor.IsA('spellTrigger') )
-			{
-				// If not active, ignore it
-				if( !spellTrigger(HitActor).bInitiallyActive )
-				{
-					continue;
-				}
-				// If we aren't in front of it, ignore it
-				if ( spellTrigger(HitActor).bHitJustFromFront && !IsHarryFacingTarget(HitActor) )
-				{
-					continue;
-				} 
-			}
-			// If not bJustStopAtClosestPawnOrWall, set our target
-			if ( !bJustStopAtClosestPawnOrWall )
-			{
-				aPossibleTarget = HitActor;
-				vTargetOffset = vHitLocation - aPossibleTarget.Location;
-			}
-			// Set last valid hit pos
-			vLastValidHitPos = vHitLocation;
-		}
-		// Stop trace
-		break;
-	}
+// 		if ( PlayerHarry.IsInSpellBook(HitActor.eVulnerableToSpell) || (bJustStopAtClosestPawnOrWall) )
+// 		{
+// 			if ( HitActor.IsA('spellTrigger') )
+// 			{
+// 				if ( !spellTrigger(HitActor).bInitiallyActive )
+// 				{
+// 					continue;
+// 				}
 
-	// If we didn't have a target, set LOS end to hit location
-	if ( aPossibleTarget == None && bHitActor )
-	{
-		vLOS_End = HitLocation;
-	}
+// 				if  ( spellTrigger(HitActor).bHitJustFromFront && !IsHarryFacingTarget(HitActor) )
+// 				{
+// 					continue;
+// 				}
+// 			}
 
-	// If we hit nothing, move cursor smoothly
-	if ( aCurrentTarget == None )
-	{
-		MoveSmooth((vLOS_End - (vLOS_Dir * 8.0)) - Location);
+// 			if ( !bJustStopAtClosestPawnOrWall )
+// 			{
+// 				aPossibleTarget = HitActor;
+// 				vTargetOffset = vHitLocation - aPossibleTarget.Location;
+// 			}
 
-		// If we have a possible target, set gesture location
-		if ( aPossibleTarget != None )
-		{
-			SpellGesture.SetLocation(vLOS_End);
-		}
-	}
-}
+// 			vLastValidHitPos = vHitLocation;
+// 		}
+
+// 		vLOS_End = vHitLocation;
+// 		break;
+// 	}
+
+// 	if ( aPossibleTarget == None && bHitActor )
+// 	{
+// 		vLOS_End = FirstHitPosition;
+// 	}
+
+// 	if ( aCurrentTarget == None )
+// 	{
+// 		MoveSmooth((vLOS_End - (vLOS_Dir * 8.0)) - Location);
+// 		if ( aPossibleTarget != None )
+// 		{
+// 			SpellGesture.SetLocation(vLOS_End);
+// 		}
+// 	}
+// }
 
 function StartLockedOnSoundLoop()
 {

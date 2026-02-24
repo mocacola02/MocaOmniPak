@@ -11,7 +11,7 @@ var float DispelLevel;		// Current dispel time buildup
 
 function bool IsHarryNear(float DistCheck)
 {
-	return GetDistanceBetweenActors(Self,PlayerHarry) > DistCheck;
+	return GetDistanceBetweenActors(Self,PlayerHarry) <= DistCheck;
 }
 
 function float GetDistanceBetweenActors(Actor A, Actor B)

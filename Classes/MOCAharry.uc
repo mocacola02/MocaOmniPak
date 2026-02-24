@@ -147,7 +147,7 @@ function SetWeaponByClass(class<Weapon> DesiredWeapon, bool bForceSet)	// If bFo
 	}
 }
 
-function SetWeaponBySlot(byte DesiredSlot)
+exec function SetWeaponBySlot(byte DesiredSlot)
 {
 	// Store previous weapon slot
 	SetPreviousSlot(Weapon.InventoryGroup);
@@ -227,7 +227,7 @@ function ValidateCursor()
 	TurnOffSpellCursor();
 
 	// Set the correct cursor
-	SetCursor(Weapon.Class);
+	SetCursor();
 }
 
 function CreateCursors()
@@ -277,23 +277,26 @@ function CreateCursors()
 			MocaCursor = Spawn(class'MOCASpellCursor');
 		}
 	}
+
+	Log("CreateCursors: StockCursor="$string(StockCursor)$" | MocaCursor="$string(MocaCursor));
 }
 
-function SetCursor(class<Object> WeaponClass) // Breaking this into its own function so it can easily be extended with new classes
+function SetCursor() // Breaking this into its own function so it can easily be extended with new classes
 {
-	// Assign the correct cursor, if any
-	switch (WeaponClass)
+	if ( Weapon.IsA('MOCAWand') )
 	{
-		case class'baseWand':
-			SpellCursor = StockCursor;
-		case class'MOCAWand':
-			SpellCursor = MocaCursor;
-			// Throwing these in here just cuz its convenient
-			MOCAWand(Weapon).DefaultColorToUse = DefaultWandParticleColor;
-			MOCAWand(Weapon).fxChargeParticleFXClass = WandParticleFX;
-		default:
-			SpellCursor = None;
+		SpellCursor = MocaCursor;
 	}
+	else if ( Weapon.IsA('baseWand') )
+	{
+		SpellCursor = StockCursor;
+	}
+	else
+	{
+		SpellCursor = None;
+	}
+
+	Log("MOCAharry using cursor "$string(SpellCursor)$" for weapon "$string(Weapon));
 }
 
 function DeactivateWand(baseWand DesiredWand)
@@ -355,6 +358,20 @@ function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
 
 	Log("No mapping found for "$string(TestSpell));
 	return SPELL_None;
+}
+
+function bool IsInSpellBook (ESpellType SpellType)
+{
+	if ( bNoSpellBookCheck )
+	{
+		return True;
+	}
+	if ( SpellType >= MAX_NUM_SPELLS )
+	{
+		return False;
+	}
+
+	return SpellBook[SpellType] != None;
 }
 
 function StartAimSoundFX()
