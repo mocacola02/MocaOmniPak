@@ -98,7 +98,10 @@ function bool HandleSpellDuelExpelliarmus (optional baseSpell spell, optional Ve
 function bool HandleSpell(optional baseSpell Spell, optional Vector HitLocation)
 {
 	// If we're using MOCAharry (required for new spell system) AND we're vulnerable to the matching spell class
-	if ( PlayerHarry.IsA('MOCAharry') && eVulnerableToSpell == DetermineSpellType(Spell.Class) )
+	// Previous required MOCAharry, but this may be excessive. Let's try without it and see how it goes.
+	// if ( PlayerHarry.IsA('MOCAharry') && eVulnerableToSpell == DetermineSpellType(Spell.Class) )
+
+	if ( eVulnerableToSpell == DetermineSpellType(Spell.Class) )
 	{
 		// React to spell
 		ProcessSpell();

@@ -22,6 +22,7 @@ var Sound ClangSound;		// Clang sound
 var Sound HeadTurnSound;	// Head turn sound
 var MOCAStealthTrigger CatchTrigger;	// Ref to StealthTrigger
 
+var name BackupState;	// Backup state for Harry to enter, if we're not using MOCAharry.
 
 ///////////
 // Events
@@ -32,7 +33,7 @@ event PostBeginPlay()
 	Super.PostBeginPlay();
 
 	// If Harry is not a MOCAharry, yell at mapper
-	if ( !PlayerHarry.IsA('MOCAharry') )
+	if ( !PlayerHarry.IsA('MOCAharry') && BackupState == '' )
 	{
 		PushError("MOCAWatcher requires MOCAharry. Please replace harry with MOCAharry.");
 	}
@@ -43,7 +44,14 @@ event Bump(Actor Other)
 	// If we can catch Harry and other is Harry, catch him
 	if ( CanCatchHarry() && Other == PlayerHarry )
 	{
-		MOCAharry(PlayerHarry).GetCaught(Self,Event);
+		if ( PlayerHarry.IsA('MOCAharry') )
+		{
+			MOCAharry(PlayerHarry).GetCaught(Self,Event);
+		}
+		elif ( BackupState != '' )
+		{
+			PlayerHarry.GotoState(BackupState);
+		}
 		GotoState('stateCatch');
 	}
 }

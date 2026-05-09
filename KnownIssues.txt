@@ -1,0 +1,12 @@
+MOCABabbler resets rotation after a bump
+MOCACake can have spin & death states interrupted by bump
+MOCACollectibles do not spin
+MOCAJellybean do not apply textures
+MOCABundimunSpray does not spawn when spit lands on the ground
+MOCAFireseedPlant fireballs are all over the place and freeze mid-air
+MOCAFlyingBook is not animated if WM_Always
+MOCAFlyingBook never goes home even if sleep chance = 255
+MOCAFlyingBook never dies
+MOCAChar bTiltsOnMovement is not applying
+MOCAHunter will sometimes freeze in place for a while
+MOCAHunter will sometimes skip the wake up animation and chase immediately

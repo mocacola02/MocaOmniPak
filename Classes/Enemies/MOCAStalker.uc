@@ -58,10 +58,9 @@ event PostBeginPlay()
 	// Turn to Harry
 	EnableTurnTo(PlayerHarry);
 
-	// If we don't have stalker nodes or MOCAharry, yell at mapper
-	if ( !DoesActorExist(class'MOCAStalkerNode') || !PlayerHarry.IsA('MOCAharry') )
+	if ( !DoesActorExist(class'MOCAStalkerNode') )
 	{
-		PushError("MOCAStalker actors (like MOCABracken) require MOCAStalkerNodes and MOCAharry. Make sure you have these implemented.");
+		PushError("MOCAStalker actors (like MOCABracken) require MOCAStalkerNodes. Make sure you have these implemented.");
 	}
 }
 
@@ -95,6 +94,8 @@ event Tick(float DeltaTime)
 
 	// Determine if Harry sees us
 	bSeenByHarry = CanHarrySeeMe(MinDot);
+
+	//Log(string(Self)$" can harry see us: "$string(bSeenByHarry));
 
 	// If we're staring and Harry sees us, or Harry is too close to us
 	if ( ( bIsStaring && bSeenByHarry ) || ( GetDistanceFromHarry() < 128.0 ) )
@@ -158,6 +159,15 @@ function UpdateNodeViewDistance(float NewDistance)
 }
 
 
+function ScreenFade(float TargetOpacity, float FadeOutTime)
+{
+	local FadeViewController CamFade;
+	// Spawn fade controller and fade
+	CamFade = Spawn(Class'FadeViewController');
+	CamFade.Init(TargetOpacity,0,0,0,FadeOutTime);
+}
+
+
 ///////////
 // States
 ///////////
@@ -166,6 +176,7 @@ auto state stateWait
 {
 	event BeginState()
 	{
+		Log(string(Self)$": entering stateWait");
 		// Loop wait anim
 		LoopAnim(WaitAnim, WaitAnimRate);
 	}
@@ -196,6 +207,7 @@ state stateStalk
 {
 	event BeginState()
 	{
+		Log(string(Self)$": entering stateStalk");
 		// Reset node view distance
 		UpdateNodeViewDistance(2000.0);
 		// Loop sneak anim
@@ -231,6 +243,7 @@ state stateStalk
 state stateStalkDerailed
 {
 	stalk:
+		Log(string(Self)$": entering stateStalkDerailed");
 		// Stop previous movement
 		StopMoving();
 
@@ -250,6 +263,7 @@ state stateRetreat
 {
 	event BeginState()
 	{
+		Log(string(Self)$": entering stateRetreat");
 		// Shorten node view distance
 		UpdateNodeViewDistance(GetDistanceFromHarry() - 32.0);
 		// Set to chase speed
@@ -283,12 +297,14 @@ state stateRetreat
 	}
 
 	retreat:
+		Log(string(Self)$": start retreating");
 		// Loop retreat anim
 		LoopAnim(RetreatAnim,RetreatAnimRate);
 
 		// While valid navP
 		while ( navP != None && navP != RetreatNavP )
 		{
+			Log(string(Self)$": retreating to new navP");
 			// Strafe towards navP and face Harry
 			StrafeFacing(navP.Location,PlayerHarry);
 
@@ -308,6 +324,7 @@ state stateRetreat
 		GotoState('stateCooldown');
 	
 	stare:
+		Log(string(Self)$": staring");
 		// We are staring
 		bIsStaring = True;
 		// Stop moving
@@ -341,6 +358,7 @@ state stateAttack
 {
 	event BeginState()
 	{
+		Log(string(Self)$": entering stateAttack");
 		// Make node view irrelevant
 		UpdateNodeViewDistance(0.0);
 		// Use chase speed
@@ -387,6 +405,7 @@ state stateAttackDerailed
 {
 	event BeginState()
 	{
+		Log(string(Self)$": entering stateAttackDerailed");
 		// Make sure we are using chase speed
 		GroundSpeed = ChaseSpeed;
 		// Play attack sound
@@ -424,6 +443,7 @@ state stateAttackDerailed
 state stateKill
 {
 	begin:
+		Log(string(Self)$": entering stateKill");
 		// Stop moving
 		StopMoving();
 
@@ -440,7 +460,7 @@ state stateKill
 		// Wait briefly
 		Sleep(0.8);
 		// Fade to black
-		MOCAharry(PlayerHarry).ScreenFade(1.0,0.02);
+		ScreenFade(1.0,0.02);
 		Sleep(2.0);
 		// Wait 2 seconds and reload save
 		ConsoleCommand("LoadGame 0");
@@ -449,6 +469,7 @@ state stateKill
 state stateDie
 {
 	begin:
+		Log(string(Self)$": entering stateDie");
 		// Stop moving
 		StopMoving();
 		// Turn to Harry
@@ -465,6 +486,7 @@ state stateDie
 state stateCooldown
 {
 	begin:
+		Log(string(Self)$": entering stateCooldown");
 		// Stop moving
 		StopMoving();
 		// Wait for our cooldown

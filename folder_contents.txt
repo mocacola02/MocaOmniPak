@@ -1,0 +1,232 @@
+Folder PATH listing
+Volume serial number is 64FD-67E0
+C:\APPS\HP\HP2\MOCAOMNIPAK\CLASSES
+|   MOCAharry.uc
+|   
++---Characters
+|       MOCABabbler.uc
+|       MOCABasicCharacter.uc
+|       MOCACake.uc
+|       MOCAChar.uc
+|       MOCADraconiforsDragon.uc
+|       MOCALapiforsRabbit.uc
+|       MOCAPawn.uc
+|       
++---Collectibles
+|   |   MOCAAirGem.uc
+|   |   MOCACauldronCake.uc
+|   |   MOCAChallengeShield.uc
+|   |   MOCACollectible.uc
+|   |   MOCADiscoveryPoint.uc
+|   |   MOCAEarthGem.uc
+|   |   MOCAEssence.uc
+|   |   MOCAFireGem.uc
+|   |   MOCAJellybean.uc
+|   |   MOCAPotato.uc
+|   |   MOCAPumpkinPasty.uc
+|   |   MOCAStud.uc
+|   |   MOCAWaterGem.uc
+|   |   
+|   +---StatusGroups
+|   |       MOCAStatusGroupAir.uc
+|   |       MOCAStatusGroupCake.uc
+|   |       MOCAStatusGroupDiscovery.uc
+|   |       MOCAStatusGroupEarth.uc
+|   |       MOCAStatusGroupEssence.uc
+|   |       MOCAStatusGroupFire.uc
+|   |       MOCAStatusGroupPasty.uc
+|   |       MOCAStatusGroupPotato.uc
+|   |       MOCAStatusGroupShield.uc
+|   |       MOCAStatusGroupStuds.uc
+|   |       MOCAStatusGroupWater.uc
+|   |       
+|   \---StatusItems
+|           MOCAStatusItemAir.uc
+|           MOCAStatusItemCake.uc
+|           MOCAStatusItemDiscovery.uc
+|           MOCAStatusItemEarth.uc
+|           MOCAStatusItemEssence.uc
+|           MOCAStatusItemFire.uc
+|           MOCAStatusItemPasty.uc
+|           MOCAStatusItemPotato.uc
+|           MOCAStatusItemShield.uc
+|           MOCAStatusItemStuds.uc
+|           MOCAStatusItemWater.uc
+|           
++---Debug
+|       DebugSprite.uc
+|       
++---Enemies
+|       MOCABasilisk.uc
+|       MOCABracken.uc
+|       MOCABundimun.uc
+|       MOCADementor.uc
+|       MOCAFireseedPlant.uc
+|       MOCAFlyingBook.uc
+|       MOCAHunter.uc
+|       MOCAsnail.uc
+|       MOCASnailTrail.uc
+|       MOCAStalker.uc
+|       MOCAWatcher.uc
+|       MOCAWatcherHunter.uc
+|       
++---Hidden
+|       MOCABundimunSpray.uc
+|       MOCASecretAreaMarker.uc
+|       
++---Menu
+|       MOCAWarning.uc
+|       
++---Music
+|       MOCAMusicActors.uc
+|       MOCAMusicComposer.uc
+|       
++---Particles
+|       BundimunDeath.uc
+|       BundimunDig.uc
+|       BundimunHit.uc
+|       BundimunMist.uc
+|       BundimunShrink.uc
+|       BundimunSpitFX.uc
+|       DiscoveryPoint_accent.uc
+|       DiscoveryPoint_fx.uc
+|       DiscoveryPoint_glow.uc
+|       EssenceSpawn.uc
+|       Essence_fx.uc
+|       Firecracker_Burst.uc
+|       Glacius_fly.uc
+|       GreenSplash.uc
+|       groundfire.uc
+|       Iceberg_Grow.uc
+|       IceBerg_Spot.uc
+|       Ice_Break.uc
+|       MOCADiffindo_fly.uc
+|       MOCAFlip_fly.uc
+|       MOCALumos_fly.uc
+|       MOCARictusempra_fly.uc
+|       MOCASkurge_fly.uc
+|       MOCASpongify_fly.uc
+|       MOCAWandParticles.uc
+|       Paper_Fly.uc
+|       Paper_Hit.uc
+|       ShieldCollect.uc
+|       SmokePuff.uc
+|       SmokeShoot.uc
+|       
++---Paths
+|       MOCABasiliskNode.uc
+|       MOCAStalkerNode.uc
+|       
++---Projectiles
+|       MOCAbaseSpell.uc
+|       MOCABundimunSpit.uc
+|       MOCAFireBall.uc
+|       MOCAFireSpot.uc
+|       MOCAPaperBall.uc
+|       MOCAProjectile.uc
+|       MOCAspellGlacius.uc
+|       MOCAWizardCracker.uc
+|       
++---Props
+|   |   MOCACakeObjects.uc
+|   |   MOCAHP3Objects.uc
+|   |   MOCAProp.uc
+|   |   
+|   +---Books
+|   |       HP3Books.uc
+|   |       HP3Books1.uc
+|   |       HP3Books2.uc
+|   |       HP3Books3.uc
+|   |       HP3Books4.uc
+|   |       HP3BookshelfTall.uc
+|   |       RusticBookshelf.uc
+|   |       
+|   +---DADA
+|   |       AnimalSkullDisplay.uc
+|   |       DADADragon.uc
+|   |       DollDisplay.uc
+|   |       HP3DADA.uc
+|   |       MaskDisplay.uc
+|   |       SkullDisplay.uc
+|   |       StaticSkull.uc
+|   |       
+|   +---Functional
+|   |       MOCAForceField.uc
+|   |       MOCAIceSpot.uc
+|   |       MOCAInteractProp.uc
+|   |       MOCAInteractTrigger.uc
+|   |       MOCAPadlock.uc
+|   |       MOCASavePoint.uc
+|   |       MOCASpongifyPad.uc
+|   |       
+|   +---Lights
+|   |       ChainChandelier.uc
+|   |       DeskCandle.uc
+|   |       Fireplace.uc
+|   |       HP3FloorSingleCandle.uc
+|   |       HP3FloorThreeCandles.uc
+|   |       HP3FloorThreeCandlesStraight.uc
+|   |       HP3HangingLamp.uc
+|   |       HP3HogwartsTorch.uc
+|   |       HP3Lights.uc
+|   |       HP3WallTripleCandle.uc
+|   |       
+|   +---Misc
+|   |       Crate.uc
+|   |       DraconiforsStatue.uc
+|   |       FirecrabStatue.uc
+|   |       Globe1.uc
+|   |       Globe2.uc
+|   |       Gramophone.uc
+|   |       HangingCloak.uc
+|   |       HP3Misc.uc
+|   |       HP3StudentCauldron.uc
+|   |       LapiforsStatue.uc
+|   |       ShieldDecoration.uc
+|   |       WallClock.uc
+|   |       
+|   +---Movers
+|   |       HP3Movers.uc
+|   |       Portcullis.uc
+|   |       
+|   \---Outdoors
+|           HP3Outdoors.uc
+|           OutdoorFountain.uc
+|           
++---Spawners
+|       MOCABannerSpawner.uc
+|       MOCACabinetSpawner.uc
+|       MOCAExplodingSpawner.uc
+|       MOCAJackOSpawner.uc
+|       MOCAPumpkinSpawner.uc
+|       MOCARandomSpawner.uc
+|       MOCASkullSpawner.uc
+|       MOCASpawner.uc
+|       MOCATapestrySpawner.uc
+|       MOCAVaseSpawner.uc
+|       MOCAVisibleSpawner.uc
+|       
++---Triggers
+|       MOCACameraTarget.uc
+|       MOCACameraTrigger.uc
+|       MOCAChangeAnimSetTrigger.uc
+|       MOCAChangeSizeTrigger.uc
+|       MOCACollectibleTrigger.uc
+|       MOCAComposerTrigger.uc
+|       MOCADamageTrigger.uc
+|       MOCAKillTrigger.uc
+|       MOCAMenuTrigger.uc
+|       MOCARandomDispatcher.uc
+|       MOCASetRespawnTrigger.uc
+|       MOCAStealthTrigger.uc
+|       MOCASubtitleTrigger.uc
+|       MOCATimelineTrigger.uc
+|       MOCATrigger.uc
+|       MOCAWarnTrigger.uc
+|       MOCAWeaponChangeTrigger.uc
+|       
+\---Weapons
+        MOCAbaseHands.uc
+        MOCASpellCursor.uc
+        MOCAWand.uc
+        

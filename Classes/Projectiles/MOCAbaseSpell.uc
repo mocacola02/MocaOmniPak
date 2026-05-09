@@ -26,6 +26,11 @@ event PostBeginPlay()
 {
 	Super.PostBeginPlay();
 
+	if ( !PlayerHarry.IsA('MOCAharry') )
+	{
+		ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: "$"Any spell of type MOCAbaseSpell must use MOCAharry to be compatible.");
+	}
+
 	// Get MOCAharry
 	MocaPlayer = MOCAharry(PlayerHarry);
 	// Determine spell type

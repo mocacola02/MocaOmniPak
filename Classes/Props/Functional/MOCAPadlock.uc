@@ -53,8 +53,9 @@ defaultproperties
 	CollisionHeight=8.0
 	CollisionWidth=16.0
 	CollideType=CT_OrientedCylinder
-	bBlockActors=True
-	bBlockPlayers=True
+	bBlockActors=False
+	bBlockPlayers=False
+	bAlignBottomAlways=True
 
 	Mesh=SkeletalMesh'MocaModelPak.skPadlock'
 	eVulnerableToSpell=SPELL_Alohomora

@@ -48,8 +48,12 @@ function CheckForHarry()
 	// If Harry is near
 	if ( GetDistanceBetweenActors(Self,PlayerHarry) < RequiredDistance )
 	{
+		local bool bIsOtherFacing,bPlayCanSeeMe;
+		bIsOtherFacing = IsOtherFacing(PlayerHarry,MinDot);
+		bPlayCanSeeMe = PlayerCanSeeMe();
+		//Log(string(bIsOtherFacing)$" | "$string(bPlayCanSeeMe));
 		// If Harry is facing self, become blocked
-		bBlocked = IsFacingOther(PlayerHarry,Self,MinDot);
+		bBlocked = IsOtherFacing(PlayerHarry,MinDot) && PlayerCanSeeMe();
 	}
 	// Otherwise, don't be blocked
 	else
@@ -93,11 +97,12 @@ function float GetDistanceBetweenActors(Actor A, Actor B)
 	return VSize(A.Location - B.Location);
 }
 
-function bool IsFacingOther(Actor SourceActor, Actor Other, float MinDotProd)
+function bool IsOtherFacing(Actor Other, float MinDotProduct)
 {
 	local float DotProduct;
-	DotProduct = Vector(Rotation) Dot Normal(Other.Location - Location);
-	return DotProduct > MinDotProd;
+	DotProduct = Vector(Other.Rotation) Dot Normal(Location - Other.Location);
+
+	return DotProduct > MinDotProduct;
 }
 
 

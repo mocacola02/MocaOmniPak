@@ -30,6 +30,7 @@ auto state stateIdle
 		// If Harry is within range, start calculating force
 		if ( IsHarryNear(ForceRange) )
 		{
+			Log(string(Self)$" going to stateForce");
 			GotoState('stateForce');
 		}
 
@@ -51,6 +52,7 @@ state stateForce
 		// If Harry isn't within range, go back to idle
 		if ( !IsHarryNear(ForceRange) )
 		{
+			Log(string(Self)$" going to stateIdle");
 			GotoState('stateIdle');
 		}
 		// If Harry is within dispel range, increment dispel level

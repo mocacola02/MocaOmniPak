@@ -36,10 +36,39 @@ event PostBeginPlay()
 	DigEmit = Spawn(Class'BundimunDig',Self,,DigLocation,DigRotation);
 
 	// If mapper didn't use MOCAharry, yell at them
-	if ( !PlayerHarry.IsA('MOCAharry') )
-	{
-		PushError("MOCABundimun requires MOCAharry. Please replace harry with MOCAharry.");
-	}
+
+	// if ( !PlayerHarry.IsA('MOCAharry') )
+	// {
+	// 	PushError("MOCABundimun requires MOCAharry. Please replace harry with MOCAharry.");
+	// }
+
+	// I'm going to try removing this restriction, however the player actor must have something that does the equivalent of this:
+
+	// event BaseChanged(Actor OldBase, Actor NewBase)
+	// {
+	// 	Super.BaseChanged(OldBase, NewBase);
+
+	// 	if ( NewBase.IsA('MOCABundimun') )
+	// 	{
+	// 		local MOCABundimun Bundi;
+	// 		Bundi = MOCABundimun(NewBase);
+
+	// 		DoBundiJump(Bundi);
+	// 	}
+	// }
+
+	// function DoBundiJump(MOCABundimun Bundi)
+	// {
+	// 	// If bundi is stunned, KILL
+	// 	if ( Bundi.IsInState('stateStunned') )
+	// 	{
+	// 		fTimeInAir = 0.0;
+	// 		Bundi.ProcessStomp();
+	// 		GotoState('stateStomping');
+	// 	}
+	// }
+
+
 }
 
 event Bump(Actor Other)

@@ -22,6 +22,9 @@ var Sound CaughtSound;			// Sound when catching Harry
 var NavigationPoint RandNavP;	// Random navigation point
 
 
+var name BackupState;	// Backup state for Harry to enter, if we're not using MOCAharry.
+
+
 ///////////
 // Events
 ///////////
@@ -31,9 +34,9 @@ event PostBeginPlay()
 	Super.PostBeginPlay();
 
 	// If there are no path nodes or MOCAharry, yell at mapper
-	if ( !DoesActorExist(Class'PathNode') || !DoesActorExist(Class'MOCAharry') )
+	if ( !DoesActorExist(Class'PathNode') || (!DoesActorExist(Class'MOCAharry') && BackupState == '') )
 	{
-		PushError("MOCAHunter actors (such as MOCAWatcherHunter) require PathNodes and MOCAharry.");
+		PushError("MOCAHunter actors (such as MOCAWatcherHunter) require PathNodes and either MOCAharry or a defined BackupState if using a custom Harry.");
 	}
 }
 
@@ -41,11 +44,17 @@ event Bump(Actor Other)
 {
 	Super.Bump(Other);
 
-	// If we aren't asleep & 
-	if ( !IsInState('stateAsleep') && !PlayerHarry.IsInState('stateCaught') && Other.IsA('MOCAharry') )
+	if ( !IsInState('stateAsleep') && !PlayerHarry.IsInState('stateCaught') )
 	{
-		MOCAharry(PlayerHarry).GetCaught(Self,Event);
-		GotoState('stateCatch');
+		if ( Other.IsA('MOCAharry') )
+		{
+			MOCAharry(PlayerHarry).GetCaught(Self,Event);
+			GotoState('stateCatch');
+		}
+		else if ( BackupState != '' )
+		{
+			PlayerHarry.gotoState(BackupState);
+		}
 	}
 }
 

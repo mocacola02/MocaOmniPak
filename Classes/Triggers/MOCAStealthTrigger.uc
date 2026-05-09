@@ -6,17 +6,41 @@ class MOCAStealthTrigger extends MOCATrigger;
 
 var() float TimeOutDuration;	// Moca: How long to deactivate trigger after activation. Def: 4.0
 
+var name HarryCaughtState;
 
 ///////////////////
 // Main Functions
 ///////////////////
 
+
+event PostBeginPlay()
+{
+	if ( !PlayerHarry.IsA('MOCAharry') && HarryCaughtState == '' )
+	{
+		PushError("MOCAStealthTrigger requires MOCAharry or a defined HarryCaughtState if using a custom Harry.");
+	}
+
+	if ( PlayerHarry.IsA('MOCAharry') )
+	{
+		HarryCaughtState = 'stateCaught';
+	}
+}
+
+
 function ProcessTrigger(Actor Other, Pawn EventInstigator)
 {
-	// If not in timeout and harry isn't already caught and harry is a MOCAharry
-	if ( !IsInState('stateTimeout') && !PlayerHarry.IsInState('stateCaught') && PlayerHarry.IsA('MOCAharry') )
+	// If not in timeout and harry isn't already caught
+	if ( !IsInState('stateTimeout') && !PlayerHarry.IsInState(HarryCaughtState) )
 	{
-		MOCAharry(PlayerHarry).GetCaught(Self,Event);
+		if ( PlayerHarry.IsA('MOCAharry') )
+		{
+			MOCAharry(PlayerHarry).GetCaught(Self,Event);
+		}
+		else
+		{
+			PlayerHarry.GotoState(HarryCaughtState);
+		}
+		
 
 		if ( Owner.IsA('MOCAWatcher') && MOCAWatcher(Owner).CanCatchHarry() )
 		{
@@ -26,11 +50,6 @@ function ProcessTrigger(Actor Other, Pawn EventInstigator)
 		{
 			GotoState('stateTimeout');
 		}
-	}
-	// If Harry isn't MOCAharry, push error
-	else if ( !PlayerHarry.IsA('MOCAharry') )
-	{
-		PushError("MOCAStealthTrigger requires MOCAharry! Please replace harry with MOCAharry.");
 	}
 }
 
