@@ -35,7 +35,10 @@ function MOCAInteractProp TraceForInteractable(Vector TraceStart, Vector TraceEn
 	foreach TraceActors(Class'MOCAInteractProp',HitProp,HitLocation,HitNormal,TraceEnd,TraceStart,TraceExtent)
 	{
 		// End trace if we find one
-		break;
+		if ( HitProp.IsA('MOCAInteractProp') )
+		{
+			break;
+		}
 	}
 
 	// If we have a HitProp, set up interaction
