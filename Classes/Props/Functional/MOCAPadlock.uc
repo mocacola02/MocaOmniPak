@@ -49,12 +49,11 @@ defaultproperties
 	DespawnFX=class'HPParticle.Aloh_hit'
 
 	DrawScale=2.5
+	bAlignBottomAlways=True
 	CollisionRadius=8.0
 	CollisionHeight=8.0
-	CollisionWidth=16.0
+	CollisionWidth=0.0
 	CollideType=CT_OrientedCylinder
-
-	PrePivot=(X=0,Y=0,Z=-12)
 
 	Mesh=SkeletalMesh'MocaModelPak.skPadlock'
 	eVulnerableToSpell=SPELL_Alohomora
