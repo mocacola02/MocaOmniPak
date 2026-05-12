@@ -11,7 +11,6 @@ var() int IncrementAmount;		// Moca: How many of this item to add to our invento
 var() float AttractionDelay;	// Moca: How long to wait before attracting
 var() float AttractionSpeed;	// Moca: How fast should the collectible fly to Harry
 var() float AttractionRange;	// Moca: How far can attraction be activated
-var() float RotationSpeed;		// Moca: How fast should the collectible spin?
 
 var() Vector AttractionOffset;	// Moca: Offset to the position (Harry's location) to fly to
 
@@ -162,11 +161,12 @@ defaultproperties
 	bProjTarget=False
 	bBlockCamera=False
 	bBounce=True
-	RotationSpeed=160
 	bAlignBottom=False
 	AttractionSpeed=300.0
 	bCanFly=True
 	SoundVolMult=1.0
 	IncrementAmount=1.0
 	AttractionRange=128.0
+	bFixedRotationDir=True
+	RotationRate=(Pitch=4096,Yaw=12500,Roll=3072)
 }

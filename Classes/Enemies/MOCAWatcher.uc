@@ -48,7 +48,7 @@ event Bump(Actor Other)
 		{
 			MOCAharry(PlayerHarry).GetCaught(Self,Event);
 		}
-		elif ( BackupState != '' )
+		else if ( BackupState != '' )
 		{
 			PlayerHarry.GotoState(BackupState);
 		}

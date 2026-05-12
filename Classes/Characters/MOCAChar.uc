@@ -318,6 +318,7 @@ function bool DoesActorExist(Class<Actor> ActorToCheck)
 
 defaultproperties
 {
+	AmbientGlow=48.0
 	MaxTravelDistance=1024.0
 	bTiltOnMovement=True
 }

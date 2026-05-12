@@ -54,7 +54,7 @@ defaultproperties
 	CloudSounds(4)=Sound'ss_COS_venomland_05E'
 	CloudSounds(5)=Sound'ss_COS_venomland_06E'
 
-	LifeSpan=1.5
+	LifeSpan=3.0
 	TransientSoundRadius=4096.0
 	attachedParticleClass(0)=Class'MocaOmniPak.groundfire'
 	bReallyDynamicLight=True
