@@ -14,10 +14,11 @@ var() WakeMode WakeUpMode;		// Moca: What type of wake up mode to use? Def: WM_P
 
 var() byte SleepChance;			// Moca: How likely is the book likely to sleep when near home? Higher = More likely Def: 128
 var() float HomeRange;			// Moca: How far do we considered our home area to be (from start location)? Def: 256.0
-var() float WakeUpRange;		// Moca: How far can we be woken up from? Def: 384.0
-var() float AttackRange;		// Moca: How close does Harry have to be to attack him? Def: 384.0
+var() float WakeUpRange;		// Moca: How far can we be woken up from? Def: 512.0
+var() float AttackRange;		// Moca: How close does Harry have to be to attack him? Def: 768.0
 var() float StunDurationMult;	// Moca: Rate of stun animation. Def: 1.0
 var() float AttackDelay;		// Moca: How long of a delay between attacks? Def: 5.0
+var() float DeathDelay;			// Moca: How long to wait before forcing despawn? Def: 10.0
 
 var() name SplineTag;			// Moca: Tag of spline we should follow.
 
@@ -66,6 +67,15 @@ function ShootPaper()
 	PlaySound(ShootSound, SLOT_Talk);
 	// Spawn paper particles
 	Spawn(class'Paper_Hit',Self,,Location);
+}
+
+
+function ProcessSpell()
+{
+	if ( !IsInState('stateDie') )
+	{
+		GotoState('stateHit');
+	}
 }
 
 
@@ -120,6 +130,7 @@ auto state stateIdle
 		if ( WakeUpMode == WM_Always )
 		{
 			GotoState('stateFly');
+			return;
 		}
 
 		// Loop idle anim
@@ -130,6 +141,7 @@ auto state stateIdle
 		// If proximity based and Harry is near, wake up
 		if ( WakeUpMode == WM_Proximity && IsHarryNear(WakeUpRange) )
 		{
+			Log("Harry is near, waking up");
 			Goto('wakeup');
 		}
 
@@ -244,6 +256,7 @@ state stateFly
 		// If Harry is near, attack
 		if ( IsHarryNear(AttackRange) )
 		{
+			Log("Harry is near, attacking from idle");
 			bHomeCooldown = False;
 			GotoState('stateAttack');
 		}
@@ -257,6 +270,7 @@ state stateFly
 		// If we're close to home and we can sleep and we're proximity based and Harry isn't near
 		if ( !bHomeCooldown && IsCloseToHome(HomeRange) && CanSleep() && WakeUpMode == WM_Proximity && !IsHarryNear(AttackRange) )
 		{
+			Log("Going home");
 			GotoState('stateGoHome');
 		}
 	}
@@ -268,7 +282,7 @@ state stateAttack
 	{
 		// Turn to Harry and stay at temp location
 		EnableTurnTo(PlayerHarry);
-		SetLocation(TempLocation);
+		//SetLocation(TempLocation);
 	}
 
 	event EndState()
@@ -296,6 +310,7 @@ state stateAttack
 		// If Harry is still near, shoot again
 		if ( IsHarryNear(AttackRange) )
 		{
+			Log("Harry is near, continuing to attack");
 			Goto('begin');
 		}
 
@@ -314,7 +329,7 @@ state stateHit
 		// Turn to Harry
 		EnableTurnTo(PlayerHarry);
 		// Stay at temp location
-		SetLocation(TempLocation);
+		//SetLocation(TempLocation);
 	}
 
 	event EndState()
@@ -359,6 +374,7 @@ state stateHit
 		// If harry is near, attack again
 		if ( IsHarryNear(AttackRange) )
 		{
+			Log("Harry is near, attack from hit");
 			GotoState('stateAttack');
 		}
 
@@ -371,7 +387,8 @@ state stateDie
 	event BeginState()
 	{
 		// Stay at temp location
-		SetLocation(TempLocation);
+		//SetLocation(TempLocation);
+		bAlignBottomAlways = True;
 	}
 
 	event HitWall(Vector HitNormal, Actor Wall)
@@ -434,6 +451,8 @@ state stateDie
 		FinishAnim();
 		// Loop fall
 		LoopAnim('fall');
+		Sleep(DeathDelay);
+		Goto('die');
 }
 
 defaultproperties
@@ -459,12 +478,13 @@ defaultproperties
 	HitsToKill=3
 
 	SleepChance=128
-	AttackRange=384.0
+	AttackRange=512.0
 	AttackDelay=5.0
 	StunDurationMult=1.0
 	HomeRange=256.0
 	FlySound=Sound'MocaSoundPak.book_flap_Multi'
 	ShootSound=Sound'MocaSoundPak.book_flap_Multi'
 	WakeUpMode=WM_Proximity
-	WakeUpRange=384.0
+	WakeUpRange=768.0
+	DeathDelay=10.0
 }

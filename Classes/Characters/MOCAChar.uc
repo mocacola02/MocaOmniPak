@@ -44,9 +44,13 @@ event AlterDestination()
 // Distance
 /////////////
 
-function bool IsCloseToHome(float DistanceThreshold)
+function bool IsCloseToHome(optional float DistanceThreshold)
 {
-	return VSize(Location - HomeLocation ) < DistanceThreshold;
+	if ( DistanceThreshold <= 0.0 )
+	{
+		DistanceThreshold = MaxTravelDistance;
+	}
+	return VSize( Location - HomeLocation ) < DistanceThreshold;
 }
 
 function float GetDistanceBetweenActors(Actor A, Actor B)
@@ -56,6 +60,11 @@ function float GetDistanceBetweenActors(Actor A, Actor B)
 
 function bool IsHarryNear(optional float TargetDistance)
 {
+	if ( TargetDistance <= 0.0 )
+	{
+		TargetDistance = 256.0;
+	}
+	Log("Distance from Harry: "$string(GetDistanceFromHarry())$" | Target Distance: "$string(TargetDistance));
 	return GetDistanceFromHarry() <= TargetDistance;
 }
 
@@ -67,15 +76,6 @@ function float GetDistanceFromHarry()
 function float GetDistanceFromSelf(Actor ActorToCheck)
 {
 	return GetDistanceBetweenActors(Self, ActorToCheck);
-}
-
-function bool CloseToHome(optional float RequiredDistance)
-{
-	if ( RequiredDistance <= 0.0 )
-	{
-		RequiredDistance = MaxTravelDistance;
-	}
-	return RequiredDistance >= VSize(Location - HomeLocation);
 }
 
 function NavigationPoint GetNearbyNavPInView(float MaxRange)

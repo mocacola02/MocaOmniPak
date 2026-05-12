@@ -159,7 +159,7 @@ state stateIdle
 		Sleep(RandRange(0.75,2.0));
 
 		// If we're far from home, go home
-		if ( !CloseToHome() )
+		if ( !IsCloseToHome() )
 		{
 			Goto('gohome');
 		}
@@ -198,7 +198,7 @@ state stateIdle
 		navP = NavigationPoint(FindPathTo(HomeLocation));
 
 		// While we're not in the inner radius of our home and we have a valid navP
-		while ( !CloseToHome(MaxTravelDistance * 0.5) && navP != None && navP != LastNavP )
+		while ( !IsCloseToHome(MaxTravelDistance * 0.5) && navP != None && navP != LastNavP )
 		{
 			// Move toward navP
 			MoveToward(navP);
