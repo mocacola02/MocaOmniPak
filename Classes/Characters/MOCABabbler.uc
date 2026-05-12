@@ -15,6 +15,7 @@ var int CurrentBumpline;			// Current bumpline we're on
 var int CurrentLetter;				// Current letter we're on
 var array<Sound> LettersToBabble;	// Array of letters to speak
 
+var TimedCue TCue;
 
 /////////////
 // Bumpline
@@ -30,6 +31,9 @@ function DoBumpLine(optional bool bJustTalk, optional string AlternateBumpLineSe
 	local float SoundLen;
 
 	local int NumberOfSpaces;
+
+	// Store our rotation
+	SavedPreBumpRot = Rotation;
 
 	// If we have a specified custom message
 	if ( CustomMessage != "" )
@@ -56,7 +60,6 @@ function DoBumpLine(optional bool bJustTalk, optional string AlternateBumpLineSe
 		if( !bJustTalk )
 		{
 			// Setup cue
-			local TimedCue TCue;
 			TCue = Spawn(class'TimedCue');
 			TCue.CutNotifyActor = Self;
 			TCue.SetupTimer(SoundLen + 0.5, "_BumpLineCue");
@@ -158,25 +161,22 @@ function DoBumpLine(optional bool bJustTalk, optional string AlternateBumpLineSe
 
 	// Handle face expression if needed
 	SayText = HandleFacialExpression(SayText, SoundLen);
-	
-	// Store our rotation
-	SavedPreBumpRot = Rotation;
 
 	// Setup the cue
-	local TimedCue TCue;
 	TCue = Spawn(class'TimedCue');
 	TCue.CutNotifyActor = Self;
 	TCue.SetupTimer(SoundLen + 0.5, "_BumpLineCue");
 
 	// Create subtitle box with message
 	PlayerHarry.myHUD.SetSubtitleText(SayText, SoundLen);
-
 	GotoState('DoingBumpLine');
 }
 
 state DoingBumpLine
 {
-	function CutCue(string cue)
+	event Bump(Actor Other);
+
+	event EndState()
 	{
 		// If we captured Harry, release him
 		if ( bBumpCaptureHarry )
@@ -189,20 +189,25 @@ state DoingBumpLine
 		CutNotifyActor = None;
 		DesiredRotation = SavedPreBumpRot;
 		LastBumpTime = Level.TimeSeconds;
-		GotoState(LastValidState);
+		//Reset array and current letter
+		LettersToBabble.empty();
+		CurrentLetter = 0;
+		DisableTurnTo();
+		// Force end bumpline. Dunno if this is a good method but oh well
+		TCue.Timer();
 	}
 
 	begin:
+		// If bTurnToHarry, turn to him
+		if ( bTurnToHarry )
+		{
+			EnableTurnTo(PlayerHarry);
+		}
+
 		// Loop talk animation
 		LoopAnim(BabbleAnim,,0.5);
 	
 	babble:
-		// If bTurnToHarry, turn to him
-		if ( bTurnToHarry )
-		{
-			TurnTo(LocationSameZ(PlayerHarry.Location));
-		}
-
 		// If we still have more to say
 		if ( CurrentLetter < LettersToBabble.Length )
 		{
@@ -221,8 +226,7 @@ state DoingBumpLine
 		}
 		else
 		{
-			// Go to 'end' label if no more letters
-			goto('end');
+			GotoState(LastValidState);
 		}
 
 		// Increment our current letter
@@ -231,11 +235,6 @@ state DoingBumpLine
 		Sleep(TimeBetweenBabble);
 		// Restart our babble loop
 		goto('babble');
-	
-	end:
-		//Reset array and current letter
-		LettersToBabble.empty();
-		CurrentLetter = 0;
 }
 
 

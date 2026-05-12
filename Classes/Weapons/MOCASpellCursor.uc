@@ -49,18 +49,20 @@ function UpdateCursor(optional bool bJustStopAtClosestPawnOrWall)
     local Vector FirstHitPosition;
     local Actor HitActor;
 
-    if (bEmit == False && !bInvisibleCursor)
-        return;
+    if ( bEmit == False && !bInvisibleCursor )
+	{
+		return;
+	}
 
     aPossibleTarget = None;
     bHitSomething = False;
     vLOS_Start = PlayerHarry.Cam.CamTarget.Location;
 
-    if (PlayerHarry.bInDuelingMode)
+    if ( PlayerHarry.bInDuelingMode )
     {
         vLOS_End = PlayerHarry.Location + (Vector(PlayerHarry.Rotation) * fLOS_Distance);
     }
-    else if (PlayerHarry.bHarryUsingSword)
+    else if ( PlayerHarry.bHarryUsingSword )
     {
         vLOS_End = PlayerHarry.Cam.Location + (Vector(PlayerHarry.Cam.Rotation + PlayerHarry.AimRotOffset) * (PlayerHarry.Cam.CurrentSet.fLookAtDistance + fLOS_Distance));
     }
@@ -73,7 +75,7 @@ function UpdateCursor(optional bool bJustStopAtClosestPawnOrWall)
 
     // Trace against BSP/geometry first to clip vLOS_End to wall hits
     HitActor = Trace(vHitLocation, vHitNormal, vLOS_End, PlayerHarry.Cam.Location);
-    if (HitActor != None && !HitActor.IsA('harry'))
+    if ( HitActor != None && !HitActor.IsA('harry') )
     {
         bHitSomething = True;
         vLOS_End = vHitLocation + (vLOS_Dir * 5.0);
@@ -83,31 +85,38 @@ function UpdateCursor(optional bool bJustStopAtClosestPawnOrWall)
     foreach TraceActors(Class'Actor', HitActor, vHitLocation, vHitNormal, vLOS_End, vLOS_Start)
     {
         // Skip owner, Harry, and non-combat actors
-        if (HitActor == Owner || HitActor.IsA('harry') || HitActor.IsA('MOCACollectible') ||
-            (!HitActor.IsA('Pawn') && !HitActor.IsA('GridMover') && !HitActor.IsA('spellTrigger')))
-            continue;
+        if ( HitActor == Owner || HitActor.IsA('harry') || HitActor.IsA('MOCACollectible') || (!HitActor.IsA('Pawn') && !HitActor.IsA('GridMover') && !HitActor.IsA('spellTrigger')) )
+		{
+			continue;
+		}
 
-        if (!bHitActor && !HitActor.bHidden)
+        if ( !bHitActor && !HitActor.bHidden )
         {
             bHitSomething = True;
             bHitActor = True;
             FirstHitPosition = vHitLocation;
         }
 
-        if (HitActor.eVulnerableToSpell == SPELL_None)
-            continue;
+        if ( HitActor.eVulnerableToSpell == SPELL_None )
+		{
+			continue;
+		}
 
-        if (PlayerHarry.IsInSpellBook(HitActor.eVulnerableToSpell) || bJustStopAtClosestPawnOrWall)
+        if ( PlayerHarry.IsInSpellBook(HitActor.eVulnerableToSpell) || bJustStopAtClosestPawnOrWall )
         {
-            if (HitActor.IsA('spellTrigger'))
+            if ( HitActor.IsA('spellTrigger') )
             {
-                if (!spellTrigger(HitActor).bInitiallyActive)
+                if ( !spellTrigger(HitActor).bInitiallyActive )
+				{
+					continue;
+				}
+                if ( spellTrigger(HitActor).bHitJustFromFront && !IsHarryFacingTarget(HitActor) )
+                {
                     continue;
-                if (spellTrigger(HitActor).bHitJustFromFront && !IsHarryFacingTarget(HitActor))
-                    continue;
+                }
             }
 
-            if (!bJustStopAtClosestPawnOrWall)
+            if ( !bJustStopAtClosestPawnOrWall )
             {
                 aPossibleTarget = HitActor;
                 vTargetOffset = vHitLocation - aPossibleTarget.Location;
@@ -119,16 +128,18 @@ function UpdateCursor(optional bool bJustStopAtClosestPawnOrWall)
         break;
     }
 
-    if (aPossibleTarget == None && bHitActor)
+    if ( aPossibleTarget == None && bHitActor )
 	{
 		vLOS_End = FirstHitPosition;
 	}
     
-    if (aCurrentTarget == None)
+    if ( aCurrentTarget == None )
     {
         MoveSmooth((vLOS_End - (vLOS_Dir * 8.0)) - Location);
-        if (aPossibleTarget != None)
-            SpellGesture.SetLocation(vLOS_End);
+        if ( aPossibleTarget != None )
+		{
+			SpellGesture.SetLocation(vLOS_End);
+		}
     }
 }
 

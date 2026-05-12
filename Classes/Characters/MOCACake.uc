@@ -13,9 +13,6 @@ var Color DieColor;						// Moca: Color to use when die
 
 function ProcessSpell()
 {
-	// Save state
-	SavedPreBumpState = GetStateName();
-
 	// Increase hits taken
 	HitsTaken++;
 
@@ -87,16 +84,20 @@ function SpawnFire()
 
 state stateCakeSpin
 {
+	event Bump(Actor Other);
+
 	begin:
 		// Play spin animation
 		PlayAnim('EmoteTwirl');
 		FinishAnim();
 		// Return to last state
-		GotoState(SavedPreBumpState);
+		GotoState('stateIdle');
 }
 
 state stateCakeDie
 {
+	event Bump(Actor Other);
+
 	begin:
 		// Start blinking
 		eVulnerableToSpell = SPELL_None;
@@ -137,7 +138,6 @@ defaultproperties
 	TimeBetweenBabble=0.1
 	BabbleAnim=Idle
 	DelayBeforeEnding=2.0
-	bTurnToHarry=False
 	
 	bUseBumpLine=True
 	HitsToKill=5
