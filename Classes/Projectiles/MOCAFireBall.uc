@@ -3,14 +3,6 @@
 //============================================================
 class MOCAFireBall extends MOCAProjectile;
 
-
-event PreBeginPlay()
-{
-	super.PreBeginPlay();
-	TargetActor = PlayerHarry;
-}
-
-
 defaultproperties
 {
 	LaunchSpeed=700
@@ -23,7 +15,8 @@ defaultproperties
 	LightSaturation=0
 	ParticleClass=Class'HPParticle.Crabfire'
 	GravityScale=2.0
-	bHomingTowardTarget=True
+	bHomeTowardsHarry=True
 	LandedClass=Class'MOCAFireSpot'
-	HomingStrength=0.8
+	HomingStrength=0.5
+	TargetInaccuracy=256.0
 }

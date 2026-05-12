@@ -14,13 +14,12 @@ var float LaunchSpeed;
 var float GravityScale;
 var float TargetInaccuracy;
 
-var bool bHomingTowardTarget;
+var bool bHomeTowardsHarry;
 var float HomingStrength;   // 0.0 = no homing, 1.0 = instant lock
 
 var Vector Gravity;
 var Vector ShotTarget;
 var harry PlayerHarry;
-var Actor TargetActor;
 
 
 ///////////
@@ -47,9 +46,9 @@ event Tick(float DeltaTime)
 	Velocity += Gravity * DeltaTime;
 
 	// Homing: steer velocity toward the fixed ShotTarget
-	if ( bHomingTowardTarget )
+	if ( bHomeTowardsHarry && PlayerHarry != None )
 	{
-		HomingDir = Normal(ShotTarget - Location);
+		HomingDir = Normal((ShotTarget) - Location);
 		Velocity = Normal(Velocity + HomingDir * HomingStrength) * VSize(Velocity);
 	}
 
@@ -90,30 +89,17 @@ event Touch(Actor Other)
 
 function LaunchProjectile()
 {
-	local Vector AimDir;
 	local Vector Inaccuracy;
 
-	// Compute a fixed shot target at spawn time only
-	if ( TargetActor != None )
-	{
-		Inaccuracy.X = RandRange(-TargetInaccuracy, TargetInaccuracy);
-		Inaccuracy.Y = RandRange(-TargetInaccuracy, TargetInaccuracy);
-		Inaccuracy.Z = RandRange(-TargetInaccuracy, TargetInaccuracy);
-
-		ShotTarget = TargetActor.Location + Inaccuracy;
-
-		Log(string(TargetActor)$" Location: "$string(TargetActor.Location)$" | Inaccuracy: "$string(Inaccuracy)$" | ShotTarget: "$string(ShotTarget));
-
-		// Aim from our location toward the target, plus inaccuracy offset
-		AimDir = Normal(ShotTarget - Location);
-	}
-	else
-	{
-		AimDir = Vector(Rotation);
-	}
-
-	Velocity = AimDir * LaunchSpeed;
+	Velocity = Vector(Rotation) * LaunchSpeed;
 	
+	if ( bHomeTowardsHarry )
+	{
+		Inaccuracy.X = RandRange(-TargetInaccuracy,TargetInaccuracy);
+		Inaccuracy.Y = RandRange(-TargetInaccuracy,TargetInaccuracy);
+		Inaccuracy.Z = RandRange(-TargetInaccuracy,TargetInaccuracy);
+		ShotTarget = PlayerHarry.Location + Inaccuracy;
+	}
 
 	if ( ParticleClass != None && ParticleActor == None )
 	{
