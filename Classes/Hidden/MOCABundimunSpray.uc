@@ -16,9 +16,9 @@ event PostBeginPlay()
 	Super.PostBeginPlay();
 
 	local Vector EmitLocation;
+
 	// Set emit location slightly below our location
 	EmitLocation = Location;
-	EmitLocation.Z -= 16;
 
 	// Spawn mist particles
 	Spawn(Class'BundimunMist',Self,,EmitLocation,,True);
@@ -45,6 +45,8 @@ event Timer()
 
 defaultproperties
 {
+	bCollideActors=True
+	CollisionRadius=20
 	LifeSpan=3.0
 	TransientSoundRadius=2048
 }

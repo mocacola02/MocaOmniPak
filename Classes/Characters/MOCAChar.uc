@@ -64,7 +64,7 @@ function bool IsHarryNear(optional float TargetDistance)
 	{
 		TargetDistance = 256.0;
 	}
-	Log("Distance from Harry: "$string(GetDistanceFromHarry())$" | Target Distance: "$string(TargetDistance));
+	
 	return GetDistanceFromHarry() <= TargetDistance;
 }
 

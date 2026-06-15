@@ -37,6 +37,8 @@ event PostBeginPlay()
 	{
 		PushError("MOCAWatcher requires MOCAharry. Please replace harry with MOCAharry.");
 	}
+
+	Skins[1] = TransparentTexture;
 }
 
 event Bump(Actor Other)
@@ -127,19 +129,32 @@ function ShowBeam()
 	Skins[1] = BeamTexture;
 	
 	// If CatchTrigger is not set
-	if ( CatchTrigger == None )
+	if ( CatchTrigger == None && ValidBone() )
 	{
 		// Spawn catch trigger
 		CatchTrigger = Spawn(class'MOCAStealthTrigger',Self,,BonePos(TriggerBoneName));
-		// Attach it to us
-		CatchTrigger.AttachToBone(Self,TriggerBoneName);
-		// Make the beam glow
-		CatchTrigger.LightBrightness = 128;
-		CatchTrigger.LightHue = 128;
-		CatchTrigger.LightSaturation = 128;
-		CatchTrigger.bDynamicLight = True;
-		CatchTrigger.LightRadius = 8;
-		CatchTrigger.LightType = LT_Steady;
+
+		if ( CatchTrigger != None )
+		{
+			// Attach it to us
+			AttachToBone(CatchTrigger, TriggerBoneName);
+
+			// Make the beam glow
+			CatchTrigger.LightBrightness = 128;
+			CatchTrigger.LightHue = 128;
+			CatchTrigger.LightSaturation = 128;
+			CatchTrigger.bDynamicLight = True;
+			CatchTrigger.LightRadius = 8;
+			CatchTrigger.LightType = LT_Steady;
+		}
+		else
+		{
+			Log(self $ " -> ERROR! Could not spawn stealth trigger");
+		}
+	}
+	else
+	{
+		Log(self $ " has a catch trigger already OR we don't have a valid bone name");
 	}
 }
 
@@ -175,6 +190,14 @@ function Reset()
 	// Reset our catch trigger and go to idle
 	CatchTrigger.Reset();
 	GotoState('stateIdle');
+}
+
+function bool ValidBone()
+{
+	local int BoneIdx;
+	BoneIdx = BoneNumber(TriggerBoneName);
+
+	return BoneIdx >= 0;
 }
 
 
@@ -220,8 +243,10 @@ state stateIdle
 		
 		// Wait for sleep time
 		Sleep(GetLookTime());
+
 		// Turn back to idle position
 		TurnHead(IdleAnim,0.75);
+
 		// When done, do this all again
 		FinishAnim();
 		goto('begin');
@@ -249,13 +274,14 @@ defaultproperties
 	TurnRightAnim=IdleRight
 	CatchAnim=StandHit
 
-	TriggerBoneName=TriggerPoint
+	TriggerBoneName="TriggerPoint2"
 
 	BeamTexture=Texture'MocaTexturePak.Skins.beam'
 	SqueakSound=MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move'
 	ClangSound=MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks'
 	HeadTurnSound=MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move'
 
+	Skins(0)=Texture'HProps.Skins.skArmorWholeSuitTex0'
 	Mesh=SkeletalMesh'MocaModelPak.skKnightWatcher'
 	CollisionHeight=58.0
 	ShadowScale=0.5

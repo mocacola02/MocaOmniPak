@@ -27,20 +27,15 @@ event PostBeginPlay()
 
 	// Dig location is our current position
 	DigLocation = Location;
+
 	// Subtract half height plus 1 for clearance
 	DigLocation.Z -= (CollisionHeight * 0.5) + 1;
+
 	// Set correct dig rotation
 	DigRotation.Pitch = 16384;
 
 	// Create dig emitter
 	DigEmit = Spawn(Class'BundimunDig',Self,,DigLocation,DigRotation);
-
-	// If mapper didn't use MOCAharry, yell at them
-
-	// if ( !PlayerHarry.IsA('MOCAharry') )
-	// {
-	// 	PushError("MOCABundimun requires MOCAharry. Please replace harry with MOCAharry.");
-	// }
 
 	// I'm going to try removing this restriction, however the player actor must have something that does the equivalent of this:
 
@@ -67,8 +62,6 @@ event PostBeginPlay()
 	// 		GotoState('stateStomping');
 	// 	}
 	// }
-
-
 }
 
 event Bump(Actor Other)
@@ -93,8 +86,10 @@ function DoBumpDamage(Vector DamageLocation, name DamageName)
 	{
 		// Deal damage
 		PlayerHarry.TakeDamage(BumpDamage,Self,DamageLocation,Velocity,DamageName);
+
 		// We can't hit Harry anymore right now
 		bCanHit = False;
+
 		// Set timer to reset bCanHit
 		SetTimer(1.0,False,'ResetBumpHit');
 	}
@@ -122,6 +117,7 @@ function Puke()
 	
 	// Spawn spit projectile
 	NewSpit = Spawn(Class'MocaOmniPak.MOCABundimunSpit',Self,,PukeLocation,Rotation);
+
 	// Set spit damage
 	NewSpit.DamageToDeal = PukeDamage;
 }
@@ -133,6 +129,7 @@ function SpawnKillParticles()
 	SpawnRotation.Pitch = 16384;
 	SpawnRotation.Yaw = 0;
 	SpawnRotation.Roll = 0;
+
 	// Spawn emitter
 	KillEmit = Spawn(class'MocaOmniPak.BundimunDeath',Self,,Location,SpawnRotation,True);
 }
@@ -160,6 +157,7 @@ state stateUnderGround
 	{
 		// Loop underground anim
 		LoopAnim('Underground');
+
 		// Hide self
 		bHidden = True;
 	}
@@ -182,6 +180,7 @@ state stateDig
 	{
 		// Emit dig emitter
 		DigEmit.bEmit = True;
+
 		// Unhide self
 		bHidden = False;
 	}
@@ -195,22 +194,28 @@ state stateDig
 	rise:
 		// Enable our collision
 		SetCollision(True,True,True);
+
 		// Play rise sound
 		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_rise');
+
 		// Play rise anim and wait to finish it
 		PlayAnim('Rise');
 		FinishAnim();
+
 		// Start spitting
 		GotoState('stateSpitting');
 	
 	sink:
 		// Disable our collision
 		SetCollision(False,False,False);
+
 		// Play sink sound
 		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_sink');
+
 		// Play sink anim and wait to finish it
 		PlayAnim('Sink');
 		FinishAnim();
+
 		// Go to underground state
 		GotoState('stateUnderGround');
 }
@@ -221,10 +226,13 @@ state stateSpitting
 	{
 		// Make sure we're allowed to hit Harry
 		bCanHit = True;
+
 		// Set ambient sound to spit sound
 		AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_shoot';
+
 		// Make us shootable
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+
 		// Loop attack anim
 		LoopAnim('Attack');
 	}
@@ -257,12 +265,16 @@ state stateStunned
 	{
 		// Disable emitter
 		DigEmit.bEmit = False;
+
 		// Make us able to be stood on
 		bCantStandOnMe = False;
+
 		// Play hit sound
 		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_hit');
+
 		// Loop dazed sound
 		AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_dazed';
+
 		// Loop dazed anim
 		LoopAnim('Dazed');
 	}
@@ -276,6 +288,7 @@ state stateStunned
 	begin:
 		// Wait for the stun duration
 		Sleep(StunDuration);
+
 		// Start attacking again
 		GotoState('stateSpitting');
 }
@@ -286,12 +299,16 @@ state stateDie
 	{
 		// Disable tick event
 		Disable('Tick');
+
 		// Spawn shrink emitter
 		ShrinkEmit = Spawn(class'BundimunShrink',Self,,Location,,True);
+
 		// Play death sound
 		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_smash');
+
 		// Play bounced on anim
 		PlayAnim('Bounce');
+
 		// Spawn kill particles
 		SpawnKillParticles();
 	}
@@ -305,12 +322,16 @@ state stateDie
 	begin:
 		// Delay for two seconds
 		Sleep(2.0);
+
 		// Can't stand on me anymore
 		bCantStandOnMe = True;
+
 		// Stop emitting
 		KillEmit.bEmit = False;
+
 		// Finish anim
 		FinishAnim();
+		
 		// Go to shrink
 		Goto('shrink');
 

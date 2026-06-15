@@ -1,17 +1,29 @@
 //================================================================================
 // MOCAJellybean.
+//
+// Custom Jellybean class that has the benefits of MOCACollectibles
+// and allows you to set an array of available bean textures.
 //================================================================================
 class MOCAJellybean extends MOCACollectible;
 
+//=General Variables==/
 var() array<Texture> BeanTextures;	// Array of bean textures to use
 
-function PreBeginPlay()
-{
-	Super.PreBeginPlay();
 
-	// Set random bean texture
-	Texture = BeanTextures[Rand(BeanTextures.Length)];
+//=========
+// Events
+//=========
+
+event PostBeginPlay()
+{
+	Super.PostBeginPlay();
+	Skin = BeanTextures[ Rand(BeanTextures.Length) ];
 }
+
+
+//=====================
+// Default Properties
+//=====================
 
 defaultproperties
 {

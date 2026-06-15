@@ -8,18 +8,13 @@ var() float TimeOutDuration;	// Moca: How long to deactivate trigger after activ
 
 var name HarryCaughtState;
 
-///////////////////
-// Main Functions
-///////////////////
 
+//=========
+// Events
+//=========
 
 event PostBeginPlay()
 {
-	if ( !PlayerHarry.IsA('MOCAharry') && HarryCaughtState == '' )
-	{
-		PushError("MOCAStealthTrigger requires MOCAharry or a defined HarryCaughtState if using a custom Harry.");
-	}
-
 	if ( PlayerHarry.IsA('MOCAharry') )
 	{
 		HarryCaughtState = 'stateCaught';
@@ -27,8 +22,13 @@ event PostBeginPlay()
 }
 
 
+//===================
+// Trigger Handling
+//===================
+
 function ProcessTrigger(Actor Other, Pawn EventInstigator)
 {
+	Log("Stealth trigger processing: " $ Other);
 	// If not in timeout and harry isn't already caught
 	if ( !IsInState('stateTimeout') && !PlayerHarry.IsInState(HarryCaughtState) )
 	{
@@ -36,7 +36,7 @@ function ProcessTrigger(Actor Other, Pawn EventInstigator)
 		{
 			MOCAharry(PlayerHarry).GetCaught(Self,Event);
 		}
-		else
+		else if (HarryCaughtState != '')
 		{
 			PlayerHarry.GotoState(HarryCaughtState);
 		}
@@ -46,10 +46,8 @@ function ProcessTrigger(Actor Other, Pawn EventInstigator)
 		{
 			Owner.GotoState('stateCatch');
 		}
-		else
-		{
-			GotoState('stateTimeout');
-		}
+
+		GotoState('stateTimeout');
 	}
 }
 
@@ -62,6 +60,11 @@ function Reset()
 	}
 }
 
+
+//=========
+// States
+//=========
+
 state stateTimeout
 {
 	begin:
@@ -70,12 +73,17 @@ state stateTimeout
 		Reset();
 }
 
+
+//=====================
+// Default Properties
+//=====================
+
 defaultproperties
 {
 	TimeOutDuration=4.0
 
 	CollisionHeight=35
 	CollisionRadius=42
-	CollisionWidth=0
+
 	CollideType=CT_Box
 }    

@@ -12,7 +12,7 @@ function OnLand(Vector HitNormal)
 	if ( HitNormal.Z > 0.7 )
 	{
 		BundiSpray = Spawn(class'MOCABundimunSpray',Self,,Location);
-
+		
 		if ( BundiSpray != None )
 		{
 			BundiSpray.DamageToDeal = DamageToDeal;
