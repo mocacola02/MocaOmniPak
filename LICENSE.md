@@ -35,4 +35,4 @@ If you need an SPDX identifier for external referencing, the closest match is:
 
 ---
 
-© 2025 LunaMoca (aka Moca Cola)
+© 2025-2026 LunaMoca (aka Moca Cola)
