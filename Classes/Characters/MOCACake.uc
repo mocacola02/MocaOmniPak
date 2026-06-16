@@ -84,7 +84,7 @@ function SpawnFire()
 
 state stateCakeSpin
 {
-	event Bump(Actor Other);
+	ignores Bump;
 
 	begin:
 		// Play spin animation
@@ -96,7 +96,7 @@ state stateCakeSpin
 
 state stateCakeDie
 {
-	event Bump(Actor Other);
+	ignores Bump;
 
 	begin:
 		// Start blinking
