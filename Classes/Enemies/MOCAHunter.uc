@@ -3,6 +3,8 @@
 //================================================================================
 class MOCAHunter extends MOCAChar;
 
+var(MOCADebug) bool bDebugLogging;
+
 var() bool bNeverSleep;		// Should we never sleep? Def: False
 var() int MaxChaseAttempts;	// Make attempts to find Harry after losing him in a chase. Def: 3
 var() float WakeUpDistance;	// Distance we can be woken up from. Def: 400.0
@@ -21,13 +23,12 @@ var name CaughtTransAnim;	// Caught transition animation
 var Sound CaughtSound;			// Sound when catching Harry
 var NavigationPoint RandNavP;	// Random navigation point
 
-
 var name BackupState;	// Backup state for Harry to enter, if we're not using MOCAharry.
 
 
-///////////
+//=========
 // Events
-///////////
+//=========
 
 event PostBeginPlay()
 {
@@ -84,9 +85,10 @@ event Trigger(Actor Other, Pawn EventInstigator)
 	}
 }
 
-///////////////////
-// Functions
-///////////////////
+
+//==================
+// Misc. Functions
+//==================
 
 function ProcessSpell()
 {
@@ -104,22 +106,35 @@ function float GetWalkSpeed()
 }
 
 
-///////////
+//=========
 // States
-///////////
+//=========
 
 auto state stateSleep
 {
+	event BeginState()
+	{
+		eVulnerableToSpell = SPELL_None;
+		LoopAnim(SleepAnim);
+
+		if ( bNeverSleep )
+		{
+			GotoState('stateIdle');
+		}
+	}
+
 	begin:
 		// Be uncastable while sleeping
 		eVulnerableToSpell = SPELL_None;
+
 		// Loop sleep anim
 		LoopAnim(SleepAnim);
 	
 	loop:
-		// If Harry is near or we never sleep, wake up
-		if ( IsHarryNear(WakeUpDistance) || bNeverSleep == True )
+		// If Harry is near, wake up
+		if ( IsHarryNear(WakeUpDistance) )
 		{
+			LastHarryLocation = PlayerHarry.Location;
 			GotoState('stateIdle','awaken');
 		}
 
@@ -130,6 +145,14 @@ auto state stateSleep
 
 state stateIdle
 {
+	event BeginState()
+	{
+		if ( bDebugLogging )
+		{
+			Log("Entering stateIdle");
+		}
+	}
+
 	event Tick(float DeltaTime)
 	{
 		// If we see Harry, store current destination as previous and chase Harry
@@ -141,19 +164,21 @@ state stateIdle
 	}
 
 	begin:
+		if ( bDebugLogging )
+		{
+			Log("stateIdle -> begin");
+		}
+
 		// Make sure we're walking at normal speed
 		GroundSpeed = MapDefault.GroundSpeed;
+
 		// Make us castable
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
 
+		StopMoving();
+
 		// Loop idle anim
 		LoopAnim(IdleAnim);
-
-		// If we were previously asleep, turn to Harry's location (aka our stimulus)
-		if ( LastValidState == 'stateSleep' )
-		{
-			TurnTo(LastHarryLocation);
-		}
 
 		// Wait for a small bit
 		Sleep(RandRange(0.75,2.0));
@@ -170,10 +195,28 @@ state stateIdle
 		}
 	
 	gosomewhere:
+		if ( bDebugLogging )
+		{
+			Log("stateIdle -> gosomewhere");
+		}
+		
 		// Loop walk anim
 		LoopAnim(WalkAnim);
+
 		// Get random destination
 		RandNavP = FindRandomDest();
+
+		if ( bDebugLogging )
+		{
+			Log("RandNavP = " $ RandNavP $ " | NearestNavP = " $ GetNearestNavP());
+		}
+
+		while ( RandNavP == GetNearestNavP() )
+		{
+			RandNavP = FindRandomDest();
+			SleepForTick();
+		}
+
 		// Find path to our random destination
 		navP = NavigationPoint(FindPathToward(RandNavP));
 
@@ -182,8 +225,10 @@ state stateIdle
 		{
 			// Move toward navP
 			MoveToward(navP);
+
 			// Find next path to destination
 			navP = NavigationPoint(FindPathToward(RandNavP));
+
 			// Sleep for a tick
 			SleepForTick();
 		}
@@ -192,8 +237,14 @@ state stateIdle
 		goto('begin');
 	
 	gohome:
+		if ( bDebugLogging )
+		{
+			Log("stateIdle -> gohome");
+		}
+
 		// Loop walk anim
 		LoopAnim(WalkAnim);
+
 		// Find path to home location
 		navP = NavigationPoint(FindPathTo(HomeLocation));
 
@@ -202,8 +253,10 @@ state stateIdle
 		{
 			// Move toward navP
 			MoveToward(navP);
+
 			// Find next path to destination
 			navP = NavigationPoint(FindPathTo(HomeLocation));
+
 			// Sleep for a tick
 			SleepForTick();
 		}
@@ -214,8 +267,17 @@ state stateIdle
 	awaken:
 		// Play wake up anim with Anim Move
 		PlayAnim(AwakenAnim,,,,'Move');
+
 		// Finish anim
 		FinishAnim();
+
+		LoopAnim(IdleAnim);
+
+		TurnTo(LastHarryLocation);
+
+		// Wait for a small bit
+		Sleep(RandRange(0.75,2.0));
+
 		// Go to idle start
 		Goto('begin');
 }
@@ -224,10 +286,17 @@ state stateChase
 {
 	event BeginState()
 	{
+		if ( bDebugLogging )
+		{
+			Log("Entering stateChase");
+		}
+
 		// Change speed to chase speed
 		GroundSpeed = ChaseSpeed;
+
 		// Loop walk anim but adjust for our new speed
 		LoopAnim(WalkAnim,GetWalkSpeed());
+
 		// Set "can see harry" timer
 		SetTimer(1.0,True);
 	}
@@ -245,6 +314,7 @@ state stateChase
 		{
 			// Increase chase attempt
 			ChaseAttempts++;
+
 			// If exceeded max attempts, go to idle
 			if ( ChaseAttempts >= MaxChaseAttempts )
 			{
@@ -260,6 +330,7 @@ state stateChase
 		// If we see Harry, reset chase attempts and derail
 		if ( CanISeeHarry(0.25,True) )
 		{
+			Log("SHOULD DERAIL!!!!!!!!!!!!!!!");
 			ChaseAttempts = 0;
 			GotoState('stateDerailed');
 		}
@@ -296,7 +367,17 @@ state stateChase
 
 state stateDerailed
 {
+	event EndState()
+	{
+		StopMoving();
+	}
+
 	begin:
+		if ( bDebugLogging )
+		{
+			Log("Entering stateDerailed");
+		}
+
 		// Make sure we're at chase speed
 		GroundSpeed = ChaseSpeed;
 
@@ -314,10 +395,17 @@ state stateDerailed
 state stateCatch
 {
 	begin:
+		if ( bDebugLogging )
+		{
+			Log("Entering stateCatch");
+		}
+
 		// Stop moving
 		StopMoving();
-		// Turn toward harry
-		TurnToward(PlayerHarry);
+
+		// Turn to Harry's location, using the same Z to avoid tilting forward
+		TurnTo(LocationSameZ(PlayerHarry.Location));
+
 		// Play caught sound
 		PlaySound(CaughtSound);
 
@@ -331,6 +419,7 @@ state stateCatch
 		// Loop caught anim
 		LoopAnim(CaughtAnim);
 		Sleep(3.0);
+
 		// Go home and idle
 		SetLocation(HomeLocation);
 		GotoState('stateIdle');

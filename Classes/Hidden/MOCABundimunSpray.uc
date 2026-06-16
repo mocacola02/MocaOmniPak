@@ -7,9 +7,9 @@ var bool bCooldown;		// Are we cooling down
 var float DamageToDeal;	// How much damage to deal
 
 
-///////////
+//=========
 // Events
-///////////
+//=========
 
 event PostBeginPlay()
 {
@@ -42,6 +42,10 @@ event Timer()
 	bCooldown = False;
 }
 
+
+//=====================
+// Default Properties
+//=====================
 
 defaultproperties
 {

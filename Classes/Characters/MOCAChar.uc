@@ -78,6 +78,39 @@ function float GetDistanceFromSelf(Actor ActorToCheck)
 	return GetDistanceBetweenActors(Self, ActorToCheck);
 }
 
+function NavigationPoint GetNearestNavP()
+{
+	local float Distance, ClosestDist;
+	local NavigationPoint TestNav, BestNav;
+	local Vector DirectionToNav, ForwardDirection;
+
+	// Default to something high
+	ClosestDist = 999999.0;
+
+	// Get forward direction
+	ForwardDirection = Vector(Rotation);
+	
+	// For each NavigationPoint in level
+	foreach AllActors(class'NavigationPoint', TestNav)
+	{
+		// Get direction to the tested navigation point
+		DirectionToNav = Normal(TestNav.Location - Location);
+		// Get distance between self and tested nav p
+		Distance = GetDistanceFromSelf(TestNav);
+
+		// If distance is larger than our recorded ClosestDist
+		if ( Distance < ClosestDist )
+		{
+			// Set new distance and best nav
+			ClosestDist = Distance;
+			BestNav = TestNav;
+		}
+	}
+
+	// Return our best nav
+	return BestNav;
+}
+
 function NavigationPoint GetNearbyNavPInView(float MaxRange)
 {
 	local NavigationPoint TestNav, BestNav;

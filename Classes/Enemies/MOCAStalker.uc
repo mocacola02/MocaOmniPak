@@ -472,8 +472,8 @@ state stateDie
 		Log(string(Self)$": entering stateDie");
 		// Stop moving
 		StopMoving();
-		// Turn to Harry
-		TurnToward(PlayerHarry);
+		// Turn to Harry's location, using the same Z to avoid tilting forward
+		TurnTo(LocationSameZ(PlayerHarry.Location));
 		// Play death anim &  sound
 		PlayAnim(DieAnim,DieAnimRate);
 		PlaySound(DieSound,SLOT_Talk,1.0,,TransientSoundRadius);
