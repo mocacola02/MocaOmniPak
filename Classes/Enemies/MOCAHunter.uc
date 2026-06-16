@@ -206,15 +206,20 @@ state stateIdle
 		// Get random destination
 		RandNavP = FindRandomDest();
 
-		if ( bDebugLogging )
-		{
-			Log("RandNavP = " $ RandNavP $ " | NearestNavP = " $ GetNearestNavP());
-		}
-
 		while ( RandNavP == GetNearestNavP() )
 		{
+			if ( bDebugLogging )
+			{
+				Log(self $ " -> Rerolling RandNavP");
+			}
+
 			RandNavP = FindRandomDest();
 			SleepForTick();
+		}
+
+		if ( bDebugLogging )
+		{
+			Log(self $ " -> Going from " $ GetNearestNavP() $ " to " $ RandNavP);
 		}
 
 		// Find path to our random destination
@@ -231,6 +236,11 @@ state stateIdle
 
 			// Sleep for a tick
 			SleepForTick();
+		}
+
+		if ( bDebugLogging )
+		{
+			Log(self $ " -> Done going somewhere");
 		}
 
 		// Once there, go back to idle start
