@@ -1,13 +1,18 @@
-class MOCAForceField extends HProp;
+class MOCAForceField extends MOCAProp;
 
 var() float ForceRange;		// Moca: How far does our force have influence? Def: 512.0
 var() float ForceStrength;	// Moca: How strong is our force? Def: 128.0
 var() float DispelRange;	// Moca: How close does Harry have to be to start preparing to dispel him? Def: 128.0
 var() float DispelTime;		// Moca: How long does Harry have to be close to start dispelling him?	Def: 3.0
 var() float DispelStrength;	// Moca: How strong should our dispel be? Def: -256.0
+var() float PickupRatio;
 
 var float DispelLevel;		// Current dispel time buildup
 
+
+//==========
+// Helpers
+//==========
 
 function bool IsHarryNear(float DistCheck)
 {
@@ -30,7 +35,7 @@ auto state stateIdle
 		// If Harry is within range, start calculating force
 		if ( IsHarryNear(ForceRange) )
 		{
-			Log(string(Self)$" going to stateForce");
+			DebugLog("Going to stateForce");
 			GotoState('stateForce');
 		}
 
@@ -43,7 +48,7 @@ state stateForce
 {
 	event EndState()
 	{
-		//  Reset despel time
+		//  Reset dispel time
 		DispelLevel = 0.0;
 	}
 
@@ -52,13 +57,14 @@ state stateForce
 		// If Harry isn't within range, go back to idle
 		if ( !IsHarryNear(ForceRange) )
 		{
-			Log(string(Self)$" going to stateIdle");
+			DebugLog("Going to stateIdle");
 			GotoState('stateIdle');
 		}
 		// If Harry is within dispel range, increment dispel level
 		else if ( IsHarryNear(DispelRange) )
 		{
 			DispelLevel += DeltaTime;
+			DebugLog("Dispel level: " $ DispelLevel);
 		}
 		// Otherwise, decrease our dispel level
 		else
@@ -72,34 +78,53 @@ state stateForce
 		// If dispel level exceeds our dispel time, switch over to dispel strength
 		if ( DispelLevel >= DispelTime )
 		{
-			ForceRange = DispelStrength;
+			ForceStrength = DispelStrength;
 		}
-		// If dispel time is now 0.0, reset to normal force
-		else if ( DispelTime <= 0.0 )
+		// If dispel level is now 0.0, reset to normal force
+		else if ( DispelLevel <= 0.0 )
 		{
-			ForceRange = MapDefault.ForceRange;
+			ForceStrength = MapDefault.ForceRange;
 		}
 
-		local vector Direction;
+		local vector Direction, FinalForce;
 		local float Distance, Strength;
+
 		// Prep direction and get distance from it
-		Direction = PlayerHarry.Location - Location;
+		Direction = Location - PlayerHarry.Location;
 		Distance = VSize(Direction);
+		DebugLog("Distance: " $ Distance);
+
 		// Normalize direction
 		Direction = Normal(Direction);
+
 		// Calculate strength based on Harry's distance to force center
 		Strength = (1.0 - (Distance / ForceRange)) * ForceStrength;
+
 		// Set Harry's velocity
-		PlayerHarry.Velocity += Direction * Strength * DeltaTime;
+		FinalForce = Direction * Strength * DeltaTime;
+
+		if ( Distance <= ForceRange * PickupRatio )
+		{
+			PlayerHarry.SetPhysics(PHYS_Flying);
+			PlayerHarry.LoopAnim(PlayerHarry.HarryAnims[PlayerHarry.HarryAnimSet].fall);
+		}
+		else if ( PlayerHarry.Physics == PHYS_Flying )
+		{
+			PlayerHarry.SetPhysics(PHYS_Walking);
+		}
+
+		PlayerHarry.Velocity += FinalForce;
 	}
 }
 
 
 defaultproperties
 {
+	bStatic=False
 	ForceRange=512.0
-	ForceStrength=128.0
+	ForceStrength=768.0
 	DispelRange=128.0
-	DispelTime=3.0
-	DispelStrength=-256.0
+	DispelTime=2.0
+	DispelStrength=-1024.0
+	PickupRatio=0.45
 }

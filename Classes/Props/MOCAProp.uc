@@ -1,8 +1,10 @@
 class MOCAProp extends Actor;
 
-var(Display) float DrawDistance; // Moca: From how far away can the actor be seen? If 0.0, this isn't applied. Disable bStatic in the Advanced properties for this to work! Def: 0.0
+var(MOCADisplay) float DrawDistance; // Moca: From how far away can the actor be seen? If 0.0, this isn't applied. Disable bStatic in the Advanced properties for this to work! Def: 0.0
+var(MOCADebug) bool bDebugLogging;
 
 var harry PlayerHarry;
+
 
 event PostBeginPlay()
 {
@@ -16,9 +18,6 @@ event PostBeginPlay()
 	}
 	
 	GetDetail();
-
-	local float DetailTimer;
-
 	SetTimer(3.0,true);
 }
 
@@ -63,6 +62,15 @@ function GetDetail()
 		default: break;
 	}
 }
+
+function DebugLog(string Msg)
+{
+	if ( bDebugLogging )
+	{
+		Log(self $ ": " $ Msg);
+	}
+}
+
 
 defaultproperties
 {
