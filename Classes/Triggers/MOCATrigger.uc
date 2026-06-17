@@ -1,5 +1,6 @@
 class MOCATrigger extends Trigger;
 
+var(MOCADebug) bool bDebugLogging;
 var harry PlayerHarry;
 
 event PostBeginPlay()
@@ -21,6 +22,14 @@ function PushError(string ErrorMessage)
 {
 	// Crash game with message
 	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT THIS TO M212 ENGINE! Error Message: "$ErrorMessage);
+}
+
+function DebugLog(string Msg)
+{
+	if ( bDebugLogging )
+	{
+		Log(self $ ": " $ Msg);
+	}
 }
 
 
