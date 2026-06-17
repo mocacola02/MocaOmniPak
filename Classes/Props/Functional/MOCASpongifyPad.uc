@@ -6,12 +6,15 @@ var() Sound JumpSFX;			// Moca: What sound to play for jump. Def: JumpSFX=Sound'
 
 function UpdateSpecialFX (float fTimeDelta)
 {
+	local Vector DDS;
+
 	fxSparkles.SetRotation(Rotation);
 	fxSparkles.SetLocation(Location);
 	fxSheet.DesiredRotation = Rotation;
 	fxSheet.DesiredRotation.Yaw += 16383;
 	fxSheet.SetRotation(fxSheet.DesiredRotation);
 	fxSheet.SetLocation(Location);
+	
 	if ( bBouncing )
 	{
 		if ( fxSheet.DrawScale > DrawScale )
@@ -20,7 +23,10 @@ function UpdateSpecialFX (float fTimeDelta)
 		}
 		else
 		{
-			fxSheet.DrawScale = DrawScale;
+			DDS = Vec(fxSheet.Default.CollisionRadius, fxSheet.Default.CollisionRadius, fxSheet.Default.CollisionHeight);
+			DDS = Vec(CollisionRadius / DDS.X, CollisionRadius / DDS.Y, CollisionHeight / DDS.Z);
+			Log(DDS);
+			fxSheet.DrawScale3D = DDS * 0.35;
 			bBouncing = False;
 		}
 	}
@@ -30,11 +36,15 @@ function TurnOnSpecialFX()
 {
 	local Vector hwd;
 	local Vector hwdRotated;
+	local Vector DDS;
 
 	if ( fxSheet == None )
 	{
 		fxSheet = Spawn(Class'SpongifySheet',Self,,Location);
-		fxSheet.DrawScale = DrawScale;
+		DDS = Vec(fxSheet.Default.CollisionRadius, fxSheet.Default.CollisionRadius, fxSheet.Default.CollisionHeight);
+		DDS = Vec(CollisionRadius / DDS.X, CollisionRadius / DDS.Y, CollisionHeight / DDS.Z);
+		Log(DDS);
+		fxSheet.DrawScale3D = DDS * 0.35;
 		fxSheet.SetCollisionSize(CollisionRadius,CollisionHeight,CollisionWidth);
 		fxSheet.DesiredRotation = rot(0,0,0);
 		fxSheet.DesiredRotation.Yaw += 16383;
@@ -54,9 +64,11 @@ function TurnOnSpecialFX()
 
 		hwdRotated = hwd >> Rotation;
 		fxSparkles = Spawn(fxSparklesClass,Self,,Location);
-		fxSparkles.SourceDepth.Base = hwdRotated.X * 2.0;
-		fxSparkles.SourceWidth.Base = hwdRotated.Y * 2.0;
-		fxSparkles.SourceHeight.Base = hwdRotated.Z * 1.0;
+		fxSparkles.SourceDepth.Base = CollisionRadius * 2;
+		fxSparkles.SourceWidth.Base = CollisionRadius * 2;
+		fxSparkles.SourceHeight.Base = CollisionHeight;
+		fxSparkles.ParticlesPerSec.Base *= (DDS.X + DDS.Y) / 3;
+		fxSparkles.ParticlesMax *= (DDS.X + DDS.Y) / 3;
 	}
 }
 
