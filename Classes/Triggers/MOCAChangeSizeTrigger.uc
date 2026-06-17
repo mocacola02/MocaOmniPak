@@ -14,23 +14,29 @@ var float CurrentTime;	// Current time accrued
 var Vector PreScaleLocation; // Location of Harry before scaling
 
 
-///////////////////
-// Main Functions
-///////////////////
+//===================
+// Trigger Handling
+//===================
 
 function ProcessTrigger(Actor Other, Pawn EventInstigator)
 {
 	// If not changing size, change size
-	if ( !IsInState('stateChangeSize') )
+	if ( !IsInState('stateChangeSize') && ChangeTime > 0.0 )
 	{
+		PreScaleLocation = PlayerHarry.Location;
+		TargetScale = FClamp(TargetScale, 0.1, 99999.0);
 		GotoState('stateChangeSize');
+	}
+	else if ( !IsInState('stateChangeSize') )
+	{
+		InstantChange(TargetScale == 1.0 || TargetScale <= 0.0);
 	}
 }
 
 
-///////////
+//=========
 // States
-///////////
+//=========
 
 state stateChangeSize
 {
@@ -81,6 +87,34 @@ state stateChangeSize
 		{
 			GotoState(InitialState);
 		}
+	}
+}
+
+function InstantChange(bool bUseDefaults)
+{
+	if ( bUseDefaults )
+	{
+		PlayerHarry.SetCollisionSize(PlayerHarry.MapDefault.CollisionRadius, PlayerHarry.MapDefault.CollisionHeight);
+		PlayerHarry.DrawScale = PlayerHarry.MapDefault.DrawScale;
+		PlayerHarry.GroundSpeed = PlayerHarry.MapDefault.GroundSpeed;
+		PlayerHarry.GroundRunSpeed = PlayerHarry.MapDefault.GroundRunSpeed;
+		PlayerHarry.GroundJumpSpeed = PlayerHarry.MapDefault.GroundJumpSpeed;
+		PlayerHarry.GroundEctoSpeed = PlayerHarry.MapDefault.GroundEctoSpeed;
+		PlayerHarry.JumpZ = PlayerHarry.MapDefault.JumpZ;
+		PlayerHarry.Cam.SetDistance(PlayerHarry.Cam.CamSetStandard.fLookAtDistance);
+		PlayerHarry.Cam.SetZOffset(PlayerHarry.Cam.CamSetStandard.vLookAtOffset.Z);
+	}
+	else
+	{
+		PlayerHarry.SetCollisionSize(CollisionRadius * TargetScale, CollisionHeight * TargetScale);
+		PlayerHarry.DrawScale = TargetScale;
+		PlayerHarry.GroundSpeed = PlayerHarry.GroundSpeed * TargetScale;
+		PlayerHarry.GroundRunSpeed = PlayerHarry.GroundRunSpeed * TargetScale;
+		PlayerHarry.GroundJumpSpeed = PlayerHarry.GroundJumpSpeed * TargetScale;
+		PlayerHarry.GroundEctoSpeed = PlayerHarry.GroundEctoSpeed * TargetScale;
+		PlayerHarry.JumpZ = PlayerHarry.JumpZ * TargetScale;
+		PlayerHarry.Cam.SetDistance(PlayerHarry.Cam.CurrentSet.fLookAtDistance * TargetScale);
+		PlayerHarry.Cam.SetZOffset(PlayerHarry.Cam.CamTarget.vOffset.Z * TargetScale);
 	}
 }
 
