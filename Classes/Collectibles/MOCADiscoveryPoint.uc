@@ -122,6 +122,7 @@ state stateCircle
 
 defaultproperties
 {
+	bFallsToGround=False
 	AttractionOffset=(X=0.0,Y=0.0,Z=42.0)
 	HoverTime=(Min=2.5,Max=5.0)
 	AttractionRange=99999.0

@@ -11,8 +11,8 @@ defaultproperties
 	DrawScale=3.0
 	PrePivot=(Z=-297)
 	AmbientGlow=32
-	CollisionRadius=8
-	CollisionHeight=10
+	CollisionRadius=12
+	CollisionHeight=21
 	CollideType=CT_OrientedCylinder
 	bAlignBottomAlways=True
 	SpawnerAnims=(Spawning=Jostle,EndSpawning=None,Idle=Idle,DoneIdle=BreakIdle,FinalSpawnEnd=Break)

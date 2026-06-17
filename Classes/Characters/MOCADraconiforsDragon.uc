@@ -5,6 +5,8 @@ class MOCADraconiforsDragon extends MOCABasicCharacter;
 
 defaultproperties
 {
+	bAlignBottom=False
+	
 	Mesh=SkeletalMesh'skDraconisforsMesh'
 
 	IdleAnimName=Idle
