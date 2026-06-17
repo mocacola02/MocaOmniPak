@@ -3,6 +3,15 @@
 //=============================================================================
 class MOCAPopUp extends basePopup;
 
+const BASE_X = 1024.0;
+const BASE_Y = 768.0;
+
+struct Vector2
+{
+	var float X;
+	var float Y;
+};
+
 
 event Timer()
 {

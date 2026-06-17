@@ -3,8 +3,6 @@
 //================================================================================
 class MOCAHunter extends MOCAChar;
 
-var(MOCADebug) bool bDebugLogging;
-
 var() bool bNeverSleep;		// Should we never sleep? Def: False
 var() int MaxChaseAttempts;	// Make attempts to find Harry after losing him in a chase. Def: 3
 var() float WakeUpDistance;	// Distance we can be woken up from. Def: 400.0
@@ -22,6 +20,7 @@ var name CaughtTransAnim;	// Caught transition animation
 
 var Sound CaughtSound;			// Sound when catching Harry
 var NavigationPoint RandNavP;	// Random navigation point
+var NavigationPoint PrevRandNavP;
 
 var name BackupState;	// Backup state for Harry to enter, if we're not using MOCAharry.
 
@@ -145,14 +144,6 @@ auto state stateSleep
 
 state stateIdle
 {
-	event BeginState()
-	{
-		if ( bDebugLogging )
-		{
-			Log("Entering stateIdle");
-		}
-	}
-
 	event Tick(float DeltaTime)
 	{
 		// If we see Harry, store current destination as previous and chase Harry
@@ -164,10 +155,7 @@ state stateIdle
 	}
 
 	begin:
-		if ( bDebugLogging )
-		{
-			Log("stateIdle -> begin");
-		}
+		DebugLog("Idling before moving again");
 
 		// Make sure we're walking at normal speed
 		GroundSpeed = MapDefault.GroundSpeed;
@@ -195,35 +183,23 @@ state stateIdle
 		}
 	
 	gosomewhere:
-		if ( bDebugLogging )
-		{
-			Log("stateIdle -> gosomewhere");
-		}
-		
+		DebugLog("Going to move somewhere random");
+
 		// Loop walk anim
 		LoopAnim(WalkAnim);
 
-		// Get random destination
-		RandNavP = FindRandomDest();
-
-		while ( RandNavP == GetNearestNavP() )
+		while ( RandNavP == PrevRandNavP )
 		{
-			if ( bDebugLogging )
-			{
-				Log(self $ " -> Rerolling RandNavP");
-			}
-
 			RandNavP = FindRandomDest();
 			SleepForTick();
 		}
 
-		if ( bDebugLogging )
-		{
-			Log(self $ " -> Going from " $ GetNearestNavP() $ " to " $ RandNavP);
-		}
+		PrevRandNavP = RandNavP;
 
 		// Find path to our random destination
 		navP = NavigationPoint(FindPathToward(RandNavP));
+
+		DebugLog("navP: " $ navP $ " | RandNavP: " $ RandNavP);
 
 		// While we have a valid navP
 		while ( navP != RandNavP && navP != None )
@@ -234,23 +210,24 @@ state stateIdle
 			// Find next path to destination
 			navP = NavigationPoint(FindPathToward(RandNavP));
 
+			DebugLog("navP: " $ navP $ " | RandNavP: " $ RandNavP $ " | LastNavP: " $ LastNavP);
+
 			// Sleep for a tick
 			SleepForTick();
 		}
 
-		if ( bDebugLogging )
+		if ( navP != None )
 		{
-			Log(self $ " -> Done going somewhere");
+			DebugLog("Moving to destination navP (RandNavP)");
+			MoveToward(navP);
+			SleepForTick();
 		}
 
 		// Once there, go back to idle start
 		goto('begin');
 	
 	gohome:
-		if ( bDebugLogging )
-		{
-			Log("stateIdle -> gohome");
-		}
+		DebugLog("Returning home as I've wandered too far");
 
 		// Loop walk anim
 		LoopAnim(WalkAnim);
@@ -275,6 +252,8 @@ state stateIdle
 		goto('begin');
 	
 	awaken:
+		DebugLog("I am waking up from slumber");
+
 		// Play wake up anim with Anim Move
 		PlayAnim(AwakenAnim,,,,'Move');
 
@@ -296,10 +275,7 @@ state stateChase
 {
 	event BeginState()
 	{
-		if ( bDebugLogging )
-		{
-			Log("Entering stateChase");
-		}
+		DebugLog("Entering path-based chase");
 
 		// Change speed to chase speed
 		GroundSpeed = ChaseSpeed;
@@ -317,6 +293,17 @@ state stateChase
 		GroundSpeed = MapDefault.GroundSpeed;
 	}
 
+	event Tick(float DeltaTime)
+	{
+		// If we see Harry, reset chase attempts and derail
+		if ( CanISeeHarry(0.25,True) )
+		{
+			DebugLog("Saw Harry, going to stateDerailed!");
+			ChaseAttempts = 0;
+			GotoState('stateDerailed');
+		}
+	}
+
 	event Timer()
 	{
 		// If we can't see harry
@@ -330,19 +317,6 @@ state stateChase
 			{
 				GotoState('stateIdle');
 			}
-		}
-	}
-
-	event AlterDestination()
-	{
-		Super.AlterDestination();
-
-		// If we see Harry, reset chase attempts and derail
-		if ( CanISeeHarry(0.25,True) )
-		{
-			Log("SHOULD DERAIL!!!!!!!!!!!!!!!");
-			ChaseAttempts = 0;
-			GotoState('stateDerailed');
 		}
 	}
 
@@ -371,23 +345,26 @@ state stateChase
 			SleepForTick();
 		}
 
+		// This prevents immediately leaving the state if we have no path to Harry (most likely he is directly visible, so we should derail)
+		SleepForTick();
+
 		// Go to idle
 		GotoState('stateIdle');
 }
 
 state stateDerailed
 {
+	event BeginState()
+	{
+		DebugLog("Entering derailed chase");
+	}
+
 	event EndState()
 	{
 		StopMoving();
 	}
 
 	begin:
-		if ( bDebugLogging )
-		{
-			Log("Entering stateDerailed");
-		}
-
 		// Make sure we're at chase speed
 		GroundSpeed = ChaseSpeed;
 
@@ -405,10 +382,7 @@ state stateDerailed
 state stateCatch
 {
 	begin:
-		if ( bDebugLogging )
-		{
-			Log("Entering stateCatch");
-		}
+		DebugLog("I have caught Harry");
 
 		// Stop moving
 		StopMoving();

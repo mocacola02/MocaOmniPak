@@ -4,6 +4,7 @@
 class MOCAChar extends HChar;
 
 var() bool bTiltOnMovement;		// Should we tilt with movement like Pawns usually do? Def: True
+var(MOCADebug) bool bDebugLogging;
 var() int HitsToKill;			// How many hits does it take to kill me? If 0, can't die. Def: 0
 var() float MaxTravelDistance;	// How far can we travel from home? Def: 1024.0
 
@@ -346,6 +347,14 @@ function bool DoesActorExist(Class<Actor> ActorToCheck)
 	}
 
 	return False;
+}
+
+function DebugLog(string Msg)
+{
+	if ( bDebugLogging )
+	{
+		Log(self $ ": " $ Msg);
+	}
 }
 
 
