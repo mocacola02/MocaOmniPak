@@ -25,9 +25,10 @@ var(MOCAPopUpGeneral) Sound PopUpSound;								// Moca: Sound to play on pop up
 
 //= Display Vars =//
 var(MOCAPopUpDisplay) float PopUpOpacity;
-var(MOCAPopUpDisplay) float BoxMarginPct;
-var(MOCAPopUpDisplay) float ScreenMarginPct;
+var(MOCAPopUpDisplay) float BoxMarginPx;
+var(MOCAPopUpDisplay) float ScreenMarginPx;
 var(MOCAPopUpDisplay) float FontScaleMult;							// Moca: Size multiplier of pop up
+var(MOCAPopUpDisplay) Texture BannerTexture;
 var(MOCAPopUpDisplay) Font PopUpFont;								// Moca: Font to use for message text
 var(MOCAPopUpDisplay) EHoriAlign HorizontalAlignment;		// Moca: How to align pop up on the screen horizontally
 var(MOCAPopUpDisplay) EVertAlign VerticalAlignment;		// Moca: How to align pop up on the screen vertically
@@ -56,9 +57,9 @@ function ProcessTrigger(Actor Other, Pawn Instigator)
 		if ( PopUp != None )
 		{
 			PopUp.OwningTrigger = self;
-			PopUp.LifeSpan = PopUpDuration;
-			PopUp.SetTextProperties(PopUpMessage, PopUpFont);
-			PopUp.SetSizeProperties(FontScaleMult, BoxMarginPct, ScreenMarginPct);
+			PopUp.SetTimer(PopUpDuration, False);
+			PopUp.SetTextProperties(PopUpMessage, PopUpFont, BannerTexture);
+			PopUp.SetSizeProperties(FontScaleMult, BoxMarginPx, ScreenMarginPx);
 
 			// Casting to an int here probably isn't ideal
 			PopUp.SetAlignProperties(HorizontalAlignment, VerticalAlignment);
@@ -75,6 +76,10 @@ function ProcessTrigger(Actor Other, Pawn Instigator)
 			}
 		}
 	}
+	else
+	{
+		Log("We already have a pop up");
+	}
 }
 
 
@@ -90,9 +95,10 @@ defaultproperties
 	PopUpMessage="Edit the message from MOCAPopUpTrigger properties."
 	
 	PopUpOpacity=1.0
-	BoxMarginPct=0.125
-	ScreenMarginPct=0.075
-	FontScaleMult=1.0
+	BoxMarginPx=4.0
+	ScreenMarginPx=64.0
+	FontScaleMult=1.5
+	BannerTexture=Texture'leftPanel'
 	HorizontalAlignment=HA_Center
 	VerticalAlignment=VA_Top
 

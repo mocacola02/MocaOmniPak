@@ -3,6 +3,15 @@
 //=============================================================================
 class MOCABannerPopUp extends MOCAPopUp;
 
+const BASE_X = 1024.0;
+const BASE_Y = 768.0;
+
+struct Vector2
+{
+	var float X;
+	var float Y;
+};
+
 //= Text Vars =//
 var string Text;
 var Font TextFont;
@@ -28,7 +37,27 @@ var float CurFade;
 var MOCABannerPopUpTrigger OwningTrigger;
 
 //= Misc. Vars =//
+var float Duration;
 var float CurrentTime;
+
+
+//=========
+// Events
+//=========
+
+event Tick(float DeltaTime)
+{
+	CurrentTime += DeltaTime;
+
+	CurFade = CalculateFade(DeltaTime);
+	CurBlinkFade = CalculateBlink(DeltaTime);
+}
+
+event Destroyed()
+{
+	OwningTrigger.PopUp = None;
+	super.Destroyed();
+}
 
 
 //===================
@@ -39,25 +68,57 @@ function Draw(Canvas C)
 {
 	local float BanX, BanY, BanW, BanH;
 	local float MsgX, MsgY, MsgW, MsgH;
-	local Vector TempPos;
+	local Vector2 Ratios;
+	local Vector2 Margins;
 	local Texture Background;
 
 	Background = BannerTexture;
 	Background.Alpha = BannerOpacity * CurFade * CurBlinkFade;
 	Background.bTransparent = Background.Alpha < 1.0;
 
+	Ratios = GetScreenRatio(C);
+
 	C.Font = TextFont;
-	C.FontScale = FontScale;
+	C.FontScale = FClamp(FontScale * Ratios.X, 0.05, FontScale);
 	C.TextSize(Text, MsgW, MsgH);
 
-	BanW = MsgW + BoxMargin;
-	BanH = MsgH + BoxMargin;
+	BanW = MsgW + (BoxMargin * 2.0);
+	BanW *= Ratios.X;
+	BanH = MsgH + (BoxMargin * 2.0);
+	BanH *= Ratios.Y;
 
-	GetBannerPosition(C.SizeX, C.SizeY, BanW, BanH, BanX, BanY);
-	C.SetPos(BanX, BanW);
+	Margins = GetScreenMargin(Ratios);
+
+	switch(HAlignment)
+	{
+		case HA_Left:
+			BanX = Margins.X;
+		case HA_Right:
+			BanX = C.SizeX - BanW - Margins.X;
+		default:
+			BanX = (C.SizeX - BanW) * 0.5;
+	}
+
+	switch(VAlignment)
+	{
+		case VA_Center:
+			BanY = (C.SizeY - BanH) * 0.5;
+			break;
+
+		case VA_Bottom:
+			BanY = C.SizeY - BanH - Margins.Y;
+			break;
+
+		default: // VA_Top or fallback
+			BanY = Margins.Y;
+			break;
+	}
+
+	C.SetPos(BanX, BanY);
 	C.DrawTile(Background, BanW, BanH, 0.0, 0.0, Background.USize, Background.VSize);
 
-	GetTextPosition(BanW, BanH, MsgW, MsgH, MsgX, MsgY);
+	MsgX = BanX + (BanW * 0.5) - (MsgW * 0.5);
+	MsgY = BanY + (BanH * 0.5) - (MsgH * 0.5);
 	C.SetPos(MsgX, MsgY);
 	C.DrawText(Text);
 }
@@ -66,14 +127,6 @@ function Draw(Canvas C)
 //================
 // Fade Handling
 //================
-
-event Tick(float DeltaTime)
-{
-	CurrentTime += DeltaTime;
-
-	CurFade = CalculateFade(DeltaTime);
-	CurBlinkFade = CalculateBlink(DeltaTime);
-}
 
 function float CalculateFade(float DeltaTime)
 {
@@ -104,22 +157,28 @@ function float CalculateBlink(float DeltaTime)
 // Setter Helpers
 //=================
 
-function SetTextProperties(string Message, Font MessageFont)
+function SetTextProperties(string Message, Font MessageFont, Texture BannerTex)
 {
 	Text = Message;
 	TextFont = MessageFont;
+	BannerTexture = BannerTex;
 
 	if ( TextFont == None )
 	{
 		TextFont = baseConsole(PlayerHarry.Player.Console).LocalBigFont;
 	}
+
+	if ( BannerTexture == None )
+	{
+		BannerTexture = Texture'leftPanel';
+	}
 }
 
-function SetSizeProperties(float FontScaleMult, float BoxMarginPct, float ScreenMarginPct)
+function SetSizeProperties(float FontScaleMult, float BoxMarginPx, float ScreenMarginPx)
 {
 	FontScale =  FontScaleMult;
-	BoxMargin = BoxMarginPct;
-	ScreenMargin = ScreenMarginPct;
+	BoxMargin = BoxMarginPx;
+	ScreenMargin = ScreenMarginPx;
 }
 
 function SetAlignProperties(MOCABannerPopUpTrigger.EHoriAlign HorizontalAlignment, MOCABannerPopUpTrigger.EVertAlign VerticalAlignment)
@@ -147,40 +206,18 @@ function SetBlinkProperties(float BlinkStartTime, float BlinkFrequency, float Bl
 // Getter Helpers
 //=================
 
-function float GetScreenMargin(float CanvasSize)
+function Vector2 GetScreenRatio(Canvas C)
 {
-	return CanvasSize * ScreenMargin;
+	local Vector2 Ratios;
+	Ratios.X = C.SizeX / BASE_X;
+	Ratios.Y = C.SizeY / BASE_Y;
+	return Ratios;
 }
 
-function GetBannerPosition(float CanvW, float CanvH, float BanW, float BanH, out float X, out float Y)
+function Vector2 GetScreenMargin(Vector2 Ratios)
 {
-	GetElementPosition(CanvW, CanvH, BanW, BanH, CanvW * ScreenMargin, CanvH * ScreenMargin, X, Y);
-}
-
-function GetTextPosition(float CanvW, float CanvH, float TextW, float TextH, out float X, out float Y)
-{
-	GetElementPosition(CanvW, CanvH, TextW, TextH, CanvW * BoxMargin, CanvH * BoxMargin, X, Y);
-}
-
-function GetElementPosition(float CanvW, float CanvH, float BanW, float BanH, float XMargin, float YMargin, out float X, out float Y)
-{
-	switch(HAlignment)
-	{
-		case HA_Left:
-			X = XMargin;
-		case HA_Right:
-			X = CanvW - BanW - XMargin;
-		default:
-			X = (CanvW - BanW) * 0.5 + XMargin;
-	}
-
-	switch(VAlignment)
-	{
-		case VA_Center:
-			Y = (CanvH - BanH) * 0.5;
-		case VA_Bottom:
-			Y = CanvH - (BanH + YMargin);
-		default:
-			Y = BanH + YMargin;
-	}
+	local Vector2 Margins;
+	Margins.X = ScreenMargin * Ratios.X;
+	Margins.Y = ScreenMargin * Ratios.Y;
+	return Margins;
 }
