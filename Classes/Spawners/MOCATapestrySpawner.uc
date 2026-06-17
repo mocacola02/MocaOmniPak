@@ -5,6 +5,7 @@ class MOCATapestrySpawner extends MOCAVisibleSpawner;
 
 defaultproperties
 {
+	bRemoveCollisionWhenDone=True
 	SpawnerAnims=(Spawning=Hit,EndSpawning=None,Idle=Idle,DoneIdle=HitEndIdle,FinalSpawnEnd=HitEnd)
 	SpawnerSounds=(Opening=MultiSound'MocaSoundPak.Spawners.multi_banner_hit',Ending=MultiSound'MocaSoundPak.Spawners.multi_rollup_sound')
 

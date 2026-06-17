@@ -3,6 +3,8 @@
 //================================================================================
 class MOCAPawn extends HPawn;
 
+var(MOCADebug) bool bDebugLogging;
+
 var(MOCAFloating) bool bFloatingActor;	// Moca: Is this actor a floating actor? Use this for stuff like floating torches. Uses RotationSpeed, BobSpeed, & BobIntensity.
 var(MOCAFloating) float RotationSpeed;	// Moca: How fast to rotate if bFloatingActor
 var(MOCAFloating) float BobSpeed;		// Moca: How fast to bob up and down if bFloatingActor
@@ -144,6 +146,14 @@ function PushError(string ErrorMessage)
 {
 	// Crash game with error message
 	ErrorMsg("THIS IS A MOCA OMNI PAK ERROR, DO NOT REPORT TO M212! Error Message: "$ErrorMessage);
+}
+
+function DebugLog(string Msg)
+{
+	if ( bDebugLogging )
+	{
+		Log(self $ ": " $ Msg);
+	}
 }
 
 function EnableTurnTo(Actor TurnTarget)

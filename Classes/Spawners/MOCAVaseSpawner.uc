@@ -6,6 +6,7 @@ class MOCAVaseSpawner extends MOCAVisibleSpawner;
 
 defaultproperties
 {
+	bRemoveCollisionWhenDone=True
 	Physics=PHYS_None
 	Mesh=SkeletalMesh'MocaModelPak.skVase'
 	DrawScale=3.0

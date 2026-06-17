@@ -19,6 +19,8 @@ struct SpawnAnimations
 	var() name FinalSpawnEnd;// Animation to play on final spawn
 };
 
+var() bool bRemoveCollisionWhenDone;
+
 var SpawnAnimations SpawnerAnims;	// Spawner animations
 var SpawnSounds SpawnerSounds;		// Spawner sounds
 
@@ -46,17 +48,34 @@ state stateSpawn
 	{
 		// End anim cooldown
 		bAnimCooldown = False;
-		Super.EndState();
+
+		if ( !ShouldDie() )
+		{
+			// Reset spell vulnerability
+			eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+		}
+
+		// Reset spawn count
+		CurrentSpawnCount = 0;
+		// Disable turn to harry
+		DisableTurnTo();
 	}
 
 	begin:
-		Log(string(Self)$": Spawning items!");
 		// If not on anim cooldown
 		if ( !bAnimCooldown )
 		{
 			// If we should die, play final spawn anim and sound
 			if ( ShouldDie() )
 			{
+				eVulnerableToSpell = SPELL_None;
+
+				if ( bRemoveCollisionWhenDone )
+				{
+					SetCollision(False, False, False);
+					bBlockCamera = False;
+				}
+				
 				PlayAnim(SpawnerAnims.FinalSpawnEnd);
 				PlaySound(SpawnerSounds.Ending);
 			}
@@ -76,7 +95,6 @@ state stateSpawn
 		// If spawn count exceed max spawn count, go to done
 		if ( CurrentSpawnCount >= FinalMaxSpawnCount )
 		{
-			Log(string(Self)$": Finished spawning items, going to stateDone");
 			GotoState('stateDone');
 		}
 		// Otherwise, loop
@@ -116,4 +134,5 @@ defaultproperties
 	bHidden=False
 	bBlockPlayers=True
 	bBlockCamera=True
+	bBlockActors=True
 }

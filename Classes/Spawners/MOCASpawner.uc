@@ -61,14 +61,16 @@ event PostBeginPlay()
 	if ( ListOfSpawns.Length <= 0 )
 	{
 		// Log error and destroy self
-		Log("Error! "$string(Self)$" does not have anything in its spawn list! Destroying!");
+		DebugLog(" I do not have anything in my spawn list! Destroying!");
 		Destroy();
 	}
 
-	// Determine spawn weights
-	SetSpawnWeights();
 	// Store spawn list length
 	ListLength = ListOfSpawns.Length;
+
+	// Determine spawn weights
+	SetSpawnWeights();
+
 }
 
 event Trigger(Actor Other, Pawn EventInstigator)
@@ -139,8 +141,12 @@ function SpawnItem()
 		RandVelocityMult = 1.0;
 	}
 
+	DebugLog("SpawnDirection: " $ SpawnDirection $ " | RandVelocityMult: " $ RandVelocityMult $ " | Current SpawnVelocityMult: " $ ListOfSpawns[CurrentSpawnIdx].SpawnVelocityMult);
+
 	// Set actor velocity to our Spawn direction * velocity multiplier * spawn-specific velocity
 	SpawnedActor.Velocity = SpawnDirection * RandVelocityMult * ListOfSpawns[CurrentSpawnIdx].SpawnVelocityMult;
+
+	DebugLog("Velocity: " $ Velocity);
 
 	// If we have spawn properties, set them
 	if ( ListOfSpawns[CurrentSpawnIdx].SpawnProperties.Length > 0 )
@@ -162,9 +168,9 @@ function ProcessSpell()
 }
 
 
-/////////////////////
-// Helper Functions
-/////////////////////
+//==========
+// Helpers
+//==========
 
 function SetSpawnProperties(Actor SpawnedActor)
 {
@@ -201,7 +207,7 @@ function SetSpawnWeights()
 	// Determine final weight for each item
 	for ( i = 0; i < ListLength; i++ )
 	{
-		ListOfSpawns[i].FinalWeight = ListOfSpawns[i].SpawnChance / TotalWeight;
+		ListOfSpawns[i].FinalWeight = float(ListOfSpawns[i].SpawnChance) / float(TotalWeight);
 	}
 }
 
@@ -295,9 +301,9 @@ function class<ParticleFX> GetSpawnParticles()
 }
 
 
-///////////
+//=========
 // States
-///////////
+//=========
 
 auto state stateIdle
 {
@@ -311,6 +317,8 @@ state stateSpawn
 		eVulnerableToSpell = SPELL_None;
 		// Decrease lives
 		MaxLives--;
+
+		FinalMaxSpawnCount = GetMaxSpawnCount();
 
 		// If we should face harry, face turn to him
 		if ( bSpawnerFacesHarry )
@@ -336,8 +344,6 @@ state stateSpawn
 	}
 
 	begin:
-		// Get number of actors to spawn
-		FinalMaxSpawnCount = GetMaxSpawnCount();
 		// Spawn actor
 		SpawnItem();
 		// Wait for spawn delay
@@ -354,13 +360,14 @@ state stateSpawn
 state stateDestroy
 {
 	begin:
+		DebugLog("Can't spawn anymore, destroying");
 		SleepForTick();
 		Destroy();
 }
 
 defaultproperties
 {
-	ListOfSpawns(0)=(ActorToSpawn=class'Jellybean',SpawnParticles=class'Spawn_flash_1',SpawnSound=Sound'spawn_bean01',SpawnChance=255,SpawnDelay=1.0,SpawnVelocityMult=1.0)
+	ListOfSpawns(0)=(ActorToSpawn=class'Jellybean',SpawnParticles=class'Spawn_flash_1',SpawnSound=Sound'spawn_bean01',SpawnChance=255,SpawnDelay=0.1,SpawnVelocityMult=1.0)
 
 	bRandomSpawnOrder=True
 	bVaryVelocity=True

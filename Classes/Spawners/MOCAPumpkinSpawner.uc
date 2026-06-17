@@ -71,6 +71,7 @@ defaultproperties
 {
 	FadeSpeed=0.5
 
+	bRemoveCollisionWhenDone=True
 	bRandomSpawnDirection=True
 	SpawnerAnims=(Spawning=Hit,EndSpawning=Grow,Idle=None,DoneIdle=HitIdle,FinalSpawnEnd=None)
 	SpawnerSounds=(Opening=Sound'MocaSoundPak.pumpkin_explode',Closing=Sound'MocaSoundPak.pumpkin_spawn',Ending=Sound'MocaSoundPak.pumpkin_explode')
