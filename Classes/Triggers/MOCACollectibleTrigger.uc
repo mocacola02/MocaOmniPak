@@ -11,9 +11,9 @@ var() class<MOCACollectible> CollectibleGiven;	// Moca: What collectible class s
 var Vector SpawnPoint;	// Spawn point of collectibles
 
 
-///////////////////
-// Main Functions
-///////////////////
+//===================
+// Trigger Handling
+//===================
 
 event Activate(Actor Other, Pawn Instigator)
 {
@@ -27,6 +27,11 @@ event Activate(Actor Other, Pawn Instigator)
 	// Give collectibles
 	GotoState('stateGiveCollectible');
 }
+
+
+//=================
+// Spawn Handling
+//=================
 
 function SpawnCollectible()
 {
@@ -80,6 +85,11 @@ state stateGiveCollectible
 		Goto('begin');
 }
 
+
+//=====================
+// Default Properties
+//=====================
+
 defaultproperties
 {
 	NumberToGive=8
@@ -87,5 +97,6 @@ defaultproperties
 	TimeBetweenSpawns=0.1
 	CollectibleGiven=class'MOCAJellybean'
 
+	bDoActionWhenTriggered=True
 	bTriggerOnceOnly=True
 }
