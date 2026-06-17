@@ -120,6 +120,7 @@ state stateForce
 
 defaultproperties
 {
+	bHidden=True
 	bStatic=False
 	ForceRange=512.0
 	ForceStrength=768.0
