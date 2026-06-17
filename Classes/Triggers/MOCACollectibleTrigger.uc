@@ -15,8 +15,10 @@ var Vector SpawnPoint;	// Spawn point of collectibles
 // Main Functions
 ///////////////////
 
-function ProcessTrigger(Actor Other, Pawn EventInstigator)
+event Activate(Actor Other, Pawn Instigator)
 {
+	Super.Activate(Other, Instigator);
+
 	// If spawn sound is none, use default sound
 	if ( SpawnSound == None )
 	{
@@ -56,6 +58,15 @@ state stateGiveCollectible
 		// If done giving collectibles, go to initial state
 		if ( NumberToGive <= 0 )
 		{
+			if ( bTriggerOnceOnly )
+			{
+				eVulnerableToSpell = SPELL_None;
+			}
+			else
+			{
+				NumberToGive = MapDefault.NumberToGive;
+			}
+
 			GotoState(InitialState);
 		}
 
@@ -75,4 +86,6 @@ defaultproperties
 	IncrementPerCollectible=1
 	TimeBetweenSpawns=0.1
 	CollectibleGiven=class'MOCAJellybean'
+
+	bTriggerOnceOnly=True
 }
