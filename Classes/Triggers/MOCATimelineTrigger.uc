@@ -33,6 +33,7 @@ function ProcessTrigger(Actor Other, Pawn EventInstigator)
 	{
 		Log(string(Self)$" has no events in its timeline. Destroying!");
 		Destroy();
+		return;
 	}
 
 	// If set to loop and destroy, disable destroy
@@ -57,12 +58,10 @@ function SortEvents()
 	for ( i = 0; i < Timeline.Length; i++ )
 	{
 		// Search through each item again
-		for ( j = 0; j < Timeline.Length; j++ )
+		for ( j = 0; j < Timeline.Length - 1; j++ )
 		{
-			// If current time is greater than next time
 			if ( Timeline[j].TimeToSendEvent > Timeline[j + 1].TimeToSendEvent )
 			{
-				// Swap positions in the array
 				EventToSort = Timeline[j];
 				Timeline[j] = Timeline[j + 1];
 				Timeline[j + 1] = EventToSort;
@@ -91,6 +90,7 @@ function StopTimeline()
 	if ( bDestroyWhenDone && ( CurrentIndex >= Timeline.Length ) )
 	{
 		Destroy();
+		return;
 	}
 
 	// If loop when done and we're out of indices, reset index and replay
@@ -113,19 +113,22 @@ function StopTimeline()
 
 function float GetWaitTime()
 {
-	local float StartTime,EndTime;
-	// Get start time from current index
-	StartTime = Timeline[CurrentIndex].TimeToSendEvent;
-	// Get end time from next index
-	EndTime = Timeline[CurrentIndex + 1].TimeToSendEvent;
+    local float StartTime, EndTime;
 
-	// If this is our first index, use 0.0
-	if ( CurrentIndex == 0 )
-	{
-		StartTime = 0.0;
-	}
-	// Calculate difference in times to determine wait time
-	return Abs(StartTime - EndTime);
+    // Time of the event we're about to send
+    EndTime = Timeline[CurrentIndex].TimeToSendEvent;
+
+    // Time of the previous event (0.0 if this is the first one)
+    if ( CurrentIndex == 0 )
+    {
+        StartTime = 0.0;
+    }
+    else
+    {
+        StartTime = Timeline[CurrentIndex - 1].TimeToSendEvent;
+    }
+
+    return Abs(EndTime - StartTime);
 }
 
 ///////////
@@ -135,8 +138,16 @@ function float GetWaitTime()
 state statePlayTimeline
 {
 	begin:
-		// Sleep for wait time
-		Sleep(GetWaitTime());
+		if( GetWaitTime() > 0.0 )
+		{
+			// Sleep for wait time
+			Sleep(GetWaitTime());
+		}
+		else
+		{
+			SleepForTick();
+		}
+
 		// Send event
 		SendEvent();
 		// Loop
@@ -147,4 +158,5 @@ state statePlayTimeline
 defaultproperties
 {
 	bDestroyWhenDone=True
+	ReTriggerDelay=1.0
 }
