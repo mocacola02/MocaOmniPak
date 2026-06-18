@@ -3,9 +3,15 @@ class MOCATrigger extends Trigger;
 var(MOCADebug) bool bDebugLogging;
 var harry PlayerHarry;
 
+
+//=========
+// Events
+//=========
+
 event PostBeginPlay()
 {
 	Super.PostBeginPlay();
+
 	// Get player ref
 	PlayerHarry = harry(Level.PlayerHarryActor);
 }
@@ -17,6 +23,11 @@ event Activate(Actor Other, Pawn Instigator)
 }
 
 function ProcessTrigger(Actor Other, Pawn EventInstigator);
+
+
+//============
+// Debugging
+//============
 
 function PushError(string ErrorMessage)
 {
@@ -32,6 +43,10 @@ function DebugLog(string Msg)
 	}
 }
 
+
+//=====================
+// Default Properties
+//=====================
 
 defaultproperties
 {
