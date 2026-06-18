@@ -59,7 +59,7 @@ function ProcessTrigger(Actor Other, Pawn EventInstigator)
 	if ( !IsInState('stateChangeSize') && StartScale != EndScale )
 	{
 		StopOtherScales();
-		
+
 		if ( ChangeTime > 0.0 )
 		{
 			DebugLog("Preparing to scale over " $ ChangeTime $ " seconds");

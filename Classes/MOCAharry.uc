@@ -1,7 +1,6 @@
 //================================================================================
 // MOCAharry. because regular harry is BUSTED and so will mine be. now slightly less bad in v3.0
 //================================================================================
-
 class MOCAharry extends harry;
 
 struct SpellMap
@@ -13,6 +12,8 @@ struct SpellMap
 };
 
 var() bool bSaveOnLoad;										// Moca: Should the game save when we load in? Def: False
+
+var(MOCADebug) bool bDebugLogging;
 
 var(MOCAMagic) bool bLoadWithAllSpells;						// Moca: Add all spells to spellbook on load. Def: False
 var(MOCAMagic) bool bUseDefaultSpellbook;					// Moca: Whether or not the custom default spellbook will be applied. Def: False
@@ -143,7 +144,7 @@ function SetWeaponByClass(class<Weapon> DesiredWeapon, bool bForceSet)	// If bFo
 	}
 	else
 	{
-		Log("Could not set weapon as we do not have it in our inventory.");
+		DebugLog("Could not set weapon as we do not have it in our inventory.");
 	}
 }
 
@@ -196,12 +197,12 @@ function Weapon SpawnWeaponActor(class<Weapon> WeaponToSpawn)
 
 	if ( AddInventory(WeaponActor) )	// If successfully added, return the weapon
 	{
-		Log("Added Weapon "$string(WeaponActor)$" to Inventory");
+		DebugLog("Added Weapon " $ WeaponActor $ " to Inventory");
 		return WeaponActor;
 	}
 	else	// Otherwise, destroy what we made and return nothing
 	{
-		Log("Could not add Weapon"$string(WeaponActor)$"to Inventory. It may already exist");
+		DebugLog("Could not add Weapon" $ WeaponActor $ " to Inventory. It may already exist");
 		WeaponActor.Destroy();
 		return None;
 	}
@@ -278,7 +279,7 @@ function CreateCursors()
 		}
 	}
 
-	Log("CreateCursors: StockCursor="$string(StockCursor)$" | MocaCursor="$string(MocaCursor));
+	DebugLog("CreateCursors: StockCursor= " $ StockCursor $ " | MocaCursor= " $ MocaCursor);
 }
 
 function SetCursor() // Breaking this into its own function so it can easily be extended with new classes
@@ -296,7 +297,7 @@ function SetCursor() // Breaking this into its own function so it can easily be 
 		SpellCursor = None;
 	}
 
-	Log("MOCAharry using cursor "$string(SpellCursor)$" for weapon "$string(Weapon));
+	DebugLog("MOCAharry using cursor " $ SpellCursor $ " for weapon " $ Weapon);
 }
 
 function DeactivateWand(baseWand DesiredWand)
@@ -351,12 +352,12 @@ function ESpellType DetermineSpellType (class<baseSpell> TestSpell)
 	{
 		if ( SpellMapping[i].SpellToAssign == TestSpell )
 		{
-			Log("Found mapping at index "$i$" with slot "$SpellMapping[i].SpellSlot);
+			DebugLog("Found mapping at index " $ i $ " with slot " $ SpellMapping[i].SpellSlot);
 			return SpellMapping[i].SpellToActAs;
 		}
 	}
 
-	Log("No mapping found for "$string(TestSpell));
+	DebugLog("No mapping found for " $ TestSpell);
 	return SPELL_None;
 }
 
@@ -552,7 +553,7 @@ function DoBundiJump(MOCABundimun Bundi)
 function SetAnimSet(enumHarryAnimSet NewSet)
 {
 	// Set animation set
-	Log("Changing anim set to "$string(NewSet));
+	DebugLog("Changing anim set to " $ NewSet);
 	HarryAnimSet = NewSet;
 }
 
@@ -690,6 +691,14 @@ state stateCaught
 		Sleep(0.5);
 		// End caught
 		EndCaught();
+}
+
+function DebugLog(string Msg)
+{
+	if ( bDebugLogging )
+	{
+		Log(self $ ": " $ Msg);
+	}
 }
 
 defaultproperties

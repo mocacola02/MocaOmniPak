@@ -13,14 +13,13 @@ function WetTexture GetGestureTexture (ESpellType SpellType)
 
 	// Get wand ref
 	PlayerWand = baseWand(PlayerHarry.Weapon);
+	
 	// Get current spell
 	SpellToCheck = PlayerWand.CurrentSpell;
 
 	// If spell isn't a MOCAbaseSpell, match it to stock spell
 	if ( !ClassIsChildOf(SpellToCheck, class'MOCAbaseSpell') )
 	{
-		Log("Our gesture isn't for a Moca spell! "$string(SpellToCheck));
-
 		switch (SpellType)
 		{
 			case SPELL_None:			return None;
