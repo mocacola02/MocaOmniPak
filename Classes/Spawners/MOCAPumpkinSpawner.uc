@@ -4,6 +4,7 @@
 class MOCAPumpkinSpawner extends MOCAVisibleSpawner;
 
 var() bool bDespawnWhenDone;	// Moca: Should pumpkin disappear and destroy when lives run out
+var() float RespawnDelay;		// Moca: How long to wait before fading out to respawn?
 var() float FadeSpeed;			// Moca: Speed to fade out if bDespawnWhenDone
 
 
@@ -16,10 +17,8 @@ state stateDone
 	begin:
 		// Make us uncastable
 		eVulnerableToSpell = SPELL_None;
-		// Finish anim
-		FinishAnim();
-		// Sleep for 2 seconds then fade away
-		Sleep(2.0);
+
+		Sleep(RespawnDelay);
 		GotoState('stateFadeAway');
 }
 
@@ -69,13 +68,16 @@ state stateGrow
 
 defaultproperties
 {
+	RespawnDelay=3.0
 	FadeSpeed=0.5
 
 	bRemoveCollisionWhenDone=True
 	bRandomSpawnDirection=True
-	SpawnerAnims=(Spawning=Hit,EndSpawning=Grow,Idle=None,DoneIdle=HitIdle,FinalSpawnEnd=None)
+	SpawnerAnims=(Spawning=Hit,EndSpawning=Grow,Idle=None,DoneIdle=HitIdle,FinalSpawnEnd=Hit)
 	SpawnerSounds=(Opening=Sound'MocaSoundPak.pumpkin_explode',Closing=Sound'MocaSoundPak.pumpkin_spawn',Ending=Sound'MocaSoundPak.pumpkin_explode')
-
+	GlobalSpawnOffset=(X=0,Y=0,Z=8)
+	GlobalSpawnRotation=(Pitch=16384,Yaw=0,Roll=0)
+	SpawnAngle=(Min=-60,Max=60)
 	Mesh=SkeletalMesh'MocaModelPak.skPumpkinSpawner'
 	DrawScale=1.3
 	AmbientGlow=32

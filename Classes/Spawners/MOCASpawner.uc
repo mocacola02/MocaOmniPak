@@ -11,42 +11,44 @@ struct SpawnedProperty
 
 struct SpawnSetting
 {
-	var() class<Actor> ActorToSpawn;		// Moca: Class of actor to spawn
-	var() class<ParticleFX> SpawnParticles;	// Moca: Particle class to use when spawning
-	var() Sound SpawnSound;					// Moca: Sound to play when spawning
+	var() class<Actor> ActorToSpawn;				// Moca: Class of actor to spawn.
+	var() class<ParticleFX> SpawnParticles;			// Moca: Particle class to use when spawning.
+	var() Sound SpawnSound;							// Moca: Sound to play when spawning.
 
-	var() byte SpawnChance;					// Moca: Chance of spawning versus other spawn options. Higher = more likely.
-	var float FinalWeight;					// Final calculated weight
+	var() byte SpawnChance;							// Moca: Chance of spawning versus other spawn options. Higher = more likely.
+	var float FinalWeight;							// Moca: Final calculated weight.
 
-	var() float SpawnDelay;					// Moca: How long of a delay to have after spawning.
-	var() float SpawnVelocityMult;			// Moca: Intensity of velocity on spawned actor.
+	var() float SpawnDelay;							// Moca: How long of a delay to have after spawning.
+	var() float SpawnVelocityMult;					// Moca: Intensity of velocity on spawned actor.
 
-	var() Vector SpawnOffset;				// Moca: Location offset to spawn location.
-	var() Rotator SpawnRotation;			// Moca: Rotation to use on spawned actor.
+	var() Vector SpawnOffset;						// Moca: Location offset to spawn location.
+	var() Rotator SpawnRotation;					// Moca: Rotation to use on spawned actor.
 
 	var() array<SpawnedProperty> SpawnProperties;	// Moca: List of properties to set on spawned actor.
 };
 
 var() array<SpawnSetting> ListOfSpawns;	// Moca: List of actors that can be spawned.
 
-var() bool bRandomSpawnOrder;		// Moca: Should spawn order be random? If false, spawns in the order of ListOfSpawns. Def: True
-var() bool bRandomSpawnDirection;	// Moca: Spawn actors in random directions? Def: False
-var() bool bVaryVelocity;			// Moca: Automatically vary velocity so actors don't fly into the same positions? Def: True
-var() bool bSpawnerFacesHarry;		// Moca: Should the spawner face Harry so actors spawn in his direction? Def: False
+var() bool bRandomSpawnOrder;			// Moca: Should spawn order be random? If false, spawns in the order of ListOfSpawns. Def: True
+var() bool bRandomSpawnDirection;		// Moca: Spawn actors in random directions? Def: False
+var() bool bVaryVelocity;				// Moca: Automatically vary velocity so actors don't fly into the same positions? Def: True
+var() bool bSpawnerFacesHarry;			// Moca: Should the spawner face Harry so actors spawn in his direction? Def: False
 
-var() Range SpawnCount;				// Moca: Min/Max range for how many actors can be spawned in one life. Def: Min 3 Max 6
-var() int MaxLives;					// Moca: Maximum number of lives (aka how many times spawner can be triggered). Def: 3
-var() float VaryVelocityIntensity;	// Moca: How intense should the variability of bVaryVelocity be? Def: 1.5
+var() Range SpawnCount;					// Moca: Min/Max range for how many actors can be spawned in one life. Def: Min 3 Max 6
+var() Range SpawnAngle;					// Moca: Min/Max angle spread to spawn at.
+var() int MaxLives;						// Moca: Maximum number of lives (aka how many times spawner can be triggered). Def: 3
+var() float BaseSpeed;					// Moca: Base speed (magnitude) applied along the spawn direction. Def: 128.0
+var() float VaryVelocityIntensity;		// Moca: How intense should the variability of bVaryVelocity be? Def: 1.5
 
-var() Vector GlobalSpawnOffset;		// Moca: Offset to apply to all spawns, combines with spawn-specific offsets. Def: (0,0,0)
-var() Rotator GlobalSpawnRotation;	// Moca: Rotation to apply to all spawns, combines with spawn-specific rotations. Def: (0,0,0)
+var() Vector GlobalSpawnOffset;			// Moca: Offset to apply to all spawns, combines with spawn-specific offsets. Def: (0,0,0)
+var() Rotator GlobalSpawnRotation;		// Moca: Rotation to apply to all spawns, combines with spawn-specific rotations. Def: (0,0,0)
 
 
-var int CurrentSpawnCount;	// Current spawn count
-var int CurrentSpawnIdx;	// Current spawn index
-var int TotalWeight;		// Total of all spawn weights
-var int FinalMaxSpawnCount;	// Calculated max spawn count
-var int ListLength;			// Length of spawn list
+var int CurrentSpawnCount;		// Moca: Current spawn count.
+var int CurrentSpawnIdx;		// Moca: Current spawn index.
+var int TotalWeight;			// Moca: Total of all spawn weights.
+var int FinalMaxSpawnCount;		// Moca: Calculated max spawn count.
+var int ListLength;				// Moca: Length of spawn list.
 
 
 ///////////
@@ -63,6 +65,7 @@ event PostBeginPlay()
 		// Log error and destroy self
 		DebugLog(" I do not have anything in my spawn list! Destroying!");
 		Destroy();
+		return;
 	}
 
 	// Store spawn list length
@@ -70,7 +73,6 @@ event PostBeginPlay()
 
 	// Determine spawn weights
 	SetSpawnWeights();
-
 }
 
 event Trigger(Actor Other, Pawn EventInstigator)
@@ -92,6 +94,8 @@ function SpawnItem()
 	local ParticleFX SpawnedParticle;
 	local Actor SpawnedActor;
 	local float RandVelocityMult;
+	local float FinalSpawnAngle;
+	local float FinalSpeed;
 	local Vector SpawnLocation;
 	local Vector SpawnDirection;
 	local Rotator SpawnRotation;
@@ -110,22 +114,26 @@ function SpawnItem()
 	{
 		// Get a random direction
 		SpawnDirection = GetRandomDirection();
+
 		// Get rotation from our direction
 		SpawnRotation = Rotator(SpawnDirection);
 	}
 	// Otherwise
 	else
 	{
-		// Get spawn rotation from spawner rotation + global spawn rotation + spawn-specific rotation
 		SpawnRotation = Rotation + GlobalSpawnRotation + ListOfSpawns[CurrentSpawnIdx].SpawnRotation;
-		// Get direction from rotation
+
 		SpawnDirection = Vector(SpawnRotation);
+
+		SpawnDirection = GetConeSpreadDirection(SpawnDirection, SpawnAngle.Min, SpawnAngle.Max);
 	}
 
 	// Spawn particles at spawn location
 	SpawnedParticle = Spawn(GetSpawnParticles(),,,SpawnLocation);
+
 	// Play spawn sound
 	SpawnedParticle.PlaySound(GetSpawnSound());
+
 	// Spawn actor with proper location & rotation
 	SpawnedActor = Spawn(ListOfSpawns[CurrentSpawnIdx].ActorToSpawn,,,SpawnLocation,SpawnRotation);
 
@@ -141,12 +149,11 @@ function SpawnItem()
 		RandVelocityMult = 1.0;
 	}
 
-	DebugLog("SpawnDirection: " $ SpawnDirection $ " | RandVelocityMult: " $ RandVelocityMult $ " | Current SpawnVelocityMult: " $ ListOfSpawns[CurrentSpawnIdx].SpawnVelocityMult);
+	// Get speed scale
+	FinalSpeed = BaseSpeed * RandVelocityMult * ListOfSpawns[CurrentSpawnIdx].SpawnVelocityMult;
 
-	// Set actor velocity to our Spawn direction * velocity multiplier * spawn-specific velocity
-	SpawnedActor.Velocity = SpawnDirection * RandVelocityMult * ListOfSpawns[CurrentSpawnIdx].SpawnVelocityMult;
-
-	DebugLog("Velocity: " $ Velocity);
+	// Set actor velocity along the spawn direction at the computed speed
+	SpawnedActor.Velocity = SpawnDirection * FinalSpeed;
 
 	// If we have spawn properties, set them
 	if ( ListOfSpawns[CurrentSpawnIdx].SpawnProperties.Length > 0 )
@@ -197,6 +204,9 @@ function SetSpawnWeights()
 {
 	local int i;
 
+	// Reset total weight in case this is ever recalculated
+	TotalWeight = 0;
+
 	// For each item in the spawn list
 	for ( i = 0; i < ListLength; i++ )
 	{
@@ -221,12 +231,16 @@ function int GetMaxSpawnCount()
 {
 	local float FloatCount;
 	local int RandCount;
+
 	// Get random number between our min and max spawn count
 	FloatCount = RandRange(SpawnCount.Min,SpawnCount.Max);
+
 	// Round our result into an integer
 	RandCount = Round(FloatCount);
-	// Make sure its a valid integer for this operation
-	RandCount = Clamp(RandCount,1,MAXINT);
+
+	// Make sure we always spawn at least 1
+	RandCount = Max(RandCount,1);
+
 	// Return final int
 	return RandCount;
 }
@@ -235,7 +249,7 @@ function int GetWeightedRandomIndex()
 {
 	local int i;
 	local float IndexRoll;
-	
+
 	// Roll a random number between 0.0 and 1.0 multiplied by total weight
 	IndexRoll = FRand() * TotalWeight;
 
@@ -250,6 +264,7 @@ function int GetWeightedRandomIndex()
 
 		// Subtract our weight from index roll
 		IndexRoll -= ListOfSpawns[i].FinalWeight;
+
 		// If index roll is now 0.0 or less, return this item
 		if ( IndexRoll <= 0.0 )
 		{
@@ -276,16 +291,52 @@ function Vector GetRandomDirection()
 
 	// Calculate theta with randomness
 	Theta = FRand() * (2 * Pi);
+
 	// Calculate Z with randomness
 	Z = (FRand() * 2) - 1.0;
+
 	// Calculate direction radius
 	Radius = Sqrt(1.0 - Z * Z);
+
 	// Calculate final direction
 	Direction.X = Radius * Cos(Theta);
 	Direction.Y = Radius * Sin(Theta);
 	Direction.Z = Z;
+
 	// Return random direction
 	return Direction;
+}
+
+function Vector GetConeSpreadDirection(Vector BaseDirection, float MinAngleDeg, float MaxAngleDeg)
+{
+	local Vector Forward;
+	local Vector Right;
+	local Vector Up;
+	local Vector WorldUpRef;
+	local float ConeAngleRad;
+	local float RollAngleRad;
+	local float SinCone;
+	local float CosCone;
+
+	Forward = Normal(BaseDirection);
+
+	WorldUpRef = vect(0,0,1);
+	if ( Abs(Forward dot WorldUpRef) > 0.999 )
+	{
+		WorldUpRef = vect(1,0,0);
+	}
+
+	// Build an orthonormal basis around Forward
+	Right = Normal(Forward cross WorldUpRef);
+	Up = Normal(Right cross Forward);
+
+	ConeAngleRad = RandRange(MinAngleDeg, MaxAngleDeg) * Pi / 180.0;
+	RollAngleRad = FRand() * (2 * Pi);
+
+	SinCone = Sin(ConeAngleRad);
+	CosCone = Cos(ConeAngleRad);
+
+	return (Forward * CosCone) + ((Right * Cos(RollAngleRad) + Up * Sin(RollAngleRad)) * SinCone);
 }
 
 function Sound GetSpawnSound()
@@ -315,6 +366,7 @@ state stateSpawn
 	{
 		// Make us uncastable during spawn
 		eVulnerableToSpell = SPELL_None;
+
 		// Decrease lives
 		MaxLives--;
 
@@ -337,8 +389,10 @@ state stateSpawn
 
 		// Reset spell vulnerability
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+
 		// Reset spawn count
 		CurrentSpawnCount = 0;
+
 		// Disable turn to harry
 		DisableTurnTo();
 	}
@@ -346,13 +400,16 @@ state stateSpawn
 	begin:
 		// Spawn actor
 		SpawnItem();
+
 		// Wait for spawn delay
 		Sleep(GetSpawnDelay());
+
 		// If we've exceeded max spawn count, go to idle
 		if ( CurrentSpawnCount >= FinalMaxSpawnCount )
 		{
 			GotoState('stateIdle');
 		}
+
 		// Otherwise, loop
 		Goto('begin');
 }
@@ -371,10 +428,12 @@ defaultproperties
 
 	bRandomSpawnOrder=True
 	bVaryVelocity=True
+	BaseSpeed=128.0
 	VaryVelocityIntensity=1.5
 
 	SpawnCount=(Min=3.0,Max=6.0)
-	MaxLives=3
+	SpawnAngle=(Min=-35.0,Max=35.0)
+	MaxLives=2
 
 	Physics=PHYS_None
 	eVulnerableToSpell=SPELL_Flipendo

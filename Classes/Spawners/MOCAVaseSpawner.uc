@@ -6,6 +6,9 @@ class MOCAVaseSpawner extends MOCAVisibleSpawner;
 
 defaultproperties
 {
+	GlobalSpawnOffset=(X=0,Y=0,Z=32)
+	GlobalSpawnRotation=(Pitch=16384,Yaw=0,Roll=0)
+	SpawnAngle=(Min=-50,Max=50)
 	bRemoveCollisionWhenDone=True
 	Physics=PHYS_None
 	Mesh=SkeletalMesh'MocaModelPak.skVase'

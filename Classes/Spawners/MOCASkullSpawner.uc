@@ -6,6 +6,7 @@ class MOCASkullSpawner extends MOCAVisibleSpawner;
 
 defaultproperties
 {
+	GlobalSpawnOffset=(X=0,Y=0,Z=8)
 	SpawnerAnims=(Spawning=Hit1,EndSpawning=None,Idle=Idle,DoneIdle=IdleEnd,FinalSpawnEnd=HitEnd)
 	SpawnerSounds=(Opening=Sound'MocaSoundPak.Spawners.skull_hit',Ending=Sound'MocaSoundPak.Spawners.skull_hitend')
 	Mesh=SkeletalMesh'MocaModelPak.skCacklingSkull'
