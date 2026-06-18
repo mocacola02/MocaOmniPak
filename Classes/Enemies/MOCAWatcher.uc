@@ -48,7 +48,7 @@ event Bump(Actor Other)
 	{
 		if ( PlayerHarry.IsA('MOCAharry') )
 		{
-			MOCAharry(PlayerHarry).GetCaught(Self,Event);
+			//MOCAharry(PlayerHarry).GetCaught(Self,Event);
 		}
 		else if ( BackupState != '' )
 		{
@@ -188,7 +188,7 @@ function TurnHead(name TurnAnimation, float TweenRate)
 function Reset()
 {
 	// Reset our catch trigger and go to idle
-	CatchTrigger.Reset();
+	//CatchTrigger.Reset();
 	GotoState('stateIdle');
 }
 

@@ -6,7 +6,7 @@ class MOCASetRespawnTrigger extends MOCATrigger;
 
 var() bool bUseTriggerTransform;// Moca: If true, use the location and rotation of this trigger instead of RespawnLocation and RespawnRotation. Def: True
 var() Vector RespawnLocation;	// Moca: Location to respawn Harry at
-var() Rotator RespawnRotation;	// Moca: Rotation to respawn Harry at
+var() float RespawnYaw;			// Moca: Rotation to respawn Harry at
 
 
 event PostBeginPlay()
@@ -17,7 +17,7 @@ event PostBeginPlay()
 	if ( bUseTriggerTransform )
 	{
 		RespawnLocation = Location;
-		RespawnRotation = Rotation;
+		RespawnYaw = Rotation.Yaw;
 	}
 }
 
@@ -26,12 +26,12 @@ function ProcessTrigger(Actor Other, Pawn EventInstigator)
 	// If Harry is MOCAharry, set respawn pos
 	if ( PlayerHarry.IsA('MOCAharry') )
 	{
-		MOCAharry(PlayerHarry).SetRespawnPosition(RespawnLocation,RespawnRotation);
+		MOCAharry(PlayerHarry).SetRespawnPosition(RespawnLocation, RespawnYaw);
 	}
-	// Otherwise, push error
+	// Otherwise, use an unused vector on Harry as our respawn location
 	else
 	{
-		PushError("MOCASetRespawnTrigger requires MOCAharry to work! Please replace harry with MOCAharry.");
+		PlayerHarry.ChessTargetLocation = RespawnLocation;
 	}
 }
 

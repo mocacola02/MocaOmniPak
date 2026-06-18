@@ -283,21 +283,21 @@ function bool HandleSpell(optional baseSpell Spell, optional Vector HitLocation)
 
 function ESpellType DetermineSpellType(class<baseSpell> TestSpell)
 {
-	local int i;
-	local MOCAharry MocaPlayer;
+	// local int i;
+	// local MOCAharry MocaPlayer;
 
-	MocaPlayer = MOCAharry(PlayerHarry);
+	// MocaPlayer = MOCAharry(PlayerHarry);
 
-	// For each spell in our spell map
-	for ( i = 0; i < ArrayCount(MocaPlayer.SpellMapping); i++ )
-	{
-		// If our spell class matches the spell map entry
-		if ( MocaPlayer.SpellMapping[i].SpellToAssign == TestSpell )
-		{
-			// Return the proper spell slot
-			return MocaPlayer.SpellMapping[i].SpellSlot;
-		}
-	}
+	// // For each spell in our spell map
+	// for ( i = 0; i < ArrayCount(MocaPlayer.SpellMapping); i++ )
+	// {
+	// 	// If our spell class matches the spell map entry
+	// 	if ( MocaPlayer.SpellMapping[i].SpellToAssign == TestSpell )
+	// 	{
+	// 		// Return the proper spell slot
+	// 		return MocaPlayer.SpellMapping[i].SpellSlot;
+	// 	}
+	// }
 
 	// Default to no spell otherwise
 	return SPELL_None;

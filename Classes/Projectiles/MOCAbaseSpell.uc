@@ -13,26 +13,7 @@ var Color AimParticleEndColor;
 var Texture AimParticleTexture;
 var WetTexture SpellWetTexture;
 
-var MOCAharry MocaPlayer;
-
 var ESpellType SpellToActAs;
-
-
-///////////
-// Events
-///////////
-
-event PostBeginPlay()
-{
-	Super.PostBeginPlay();
-
-	if ( PlayerHarry.IsA('MOCAharry') )
-	{
-		MocaPlayer = MOCAharry(PlayerHarry);
-		// Determine spell type
-		SpellToActAs = MocaPlayer.DetermineSpellType(Self.Class);
-	}
-}
 
 
 ///////////////////
