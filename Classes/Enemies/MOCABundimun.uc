@@ -10,7 +10,6 @@ var() float SpinRate;			// Moca: How fast do we spin? Def: 5500.0
 var() float BumpDamage;			// Moca: How much damage do we deal on a bump? Def: 15.0
 var() float PukeDamage;			// Moca: How much damage does puke do? Def: 7.5
 
-
 var bool bCanHit;				// Can we hit Harry right now
 
 var BundimunDeath KillEmit;		// Particles for kill
@@ -36,40 +35,24 @@ event PostBeginPlay()
 
 	// Create dig emitter
 	DigEmit = Spawn(Class'BundimunDig',Self,,DigLocation,DigRotation);
-
-	// I'm going to try removing this restriction, however the player actor must have something that does the equivalent of this:
-
-	// event BaseChanged(Actor OldBase, Actor NewBase)
-	// {
-	// 	Super.BaseChanged(OldBase, NewBase);
-
-	// 	if ( NewBase.IsA('MOCABundimun') )
-	// 	{
-	// 		local MOCABundimun Bundi;
-	// 		Bundi = MOCABundimun(NewBase);
-
-	// 		DoBundiJump(Bundi);
-	// 	}
-	// }
-
-	// function DoBundiJump(MOCABundimun Bundi)
-	// {
-	// 	// If bundi is stunned, KILL
-	// 	if ( Bundi.IsInState('stateStunned') )
-	// 	{
-	// 		fTimeInAir = 0.0;
-	// 		Bundi.ProcessStomp();
-	// 		GotoState('stateStomping');
-	// 	}
-	// }
 }
 
 event Bump(Actor Other)
 {
-	// If other is harry and we're not stunned or anything, deal bump damage
-	if ( Other == PlayerHarry && IsInState('stateSpitting') )
+	if ( Other == PlayerHarry )
 	{
-		DoBumpDamage(Location,'BundiBody');
+		DebugLog("Harry bumped me...");
+		if ( IsInState('stateStunned') && IsValidJump() )
+		{
+			DebugLog("He stomped on me!");
+			ProcessStomp();
+		}
+		// If  we're not stunned or anything, deal bump damage
+		else if ( IsInState('stateSpitting') )
+		{
+			DebugLog("Not a stomp, dealing damage");
+			DoBumpDamage(Location,'BundiBody');
+		}
 	}
 }
 
@@ -132,6 +115,21 @@ function SpawnKillParticles()
 
 	// Spawn emitter
 	KillEmit = Spawn(class'MocaOmniPak.BundimunDeath',Self,,Location,SpawnRotation,True);
+}
+
+function bool IsValidJump()
+{
+	local bool Check1, Check2;
+	local float ColDiameter;
+
+	Check1 = (PlayerHarry.Location.Z - PlayerHarry.CollisionHeight) > Location.Z + CollisionHeight;
+
+	ColDiameter = CollisionRadius * 2.0;
+	Check2 = PlayerHarry.Location.X - Location.X <= ColDiameter && PlayerHarry.Location.Y - Location.Y <= ColDiameter;
+
+	DebugLog("Location Check: " $ Check1 $ " | Distance Check: " $ Check2 );
+
+	return Check1 && Check2;
 }
 
 auto state stateIdle
@@ -242,6 +240,7 @@ state stateSpitting
 		// Disable sound and casting
 		AmbientSound = None;
 		eVulnerableToSpell = SPELL_None;
+		DebugLog("eVulnerableToSpell = " $ eVulnerableToSpell);
 	}
 
 	event Tick(float DeltaTime)
@@ -320,8 +319,24 @@ state stateDie
 	}
 
 	begin:
-		// Delay for two seconds
-		Sleep(2.0);
+		// Before this was a MOCAharry state, but I'm moving it here
+		// to make it compatible with stock Harry. This whole portion
+		// kinda sucks but if it works then it works. MocaHGame will
+		// have a better solution for this (if I make it lol)
+		PlayerHarry.GotoState('stateInactive');
+		PlayerHarry.SetPhysics(PHYS_Flying);
+		PlayerHarry.StopMoving();
+		PlayerHarry.bStationary = True;
+		PlayerHarry.LoopAnim('Land');
+		Sleep(0.5);
+		PlayerHarry.bStationary = False;
+		PlayerHarry.SetPhysics(PHYS_Walking);
+		PlayerHarry.GotoState('PlayerWalking');
+		// For some reason, DoJump doesn't work here (probably due to physics modes? idk), so I'm doing it manually
+		PlayerHarry.PlayAnim(PlayerHarry.HarryAnims[PlayerHarry.HarryAnimSet].Jump);
+		PlayerHarry.Velocity.Z += PlayerHarry.JumpZ * 0.5;
+
+		Sleep(1.5);
 
 		// Can't stand on me anymore
 		bCantStandOnMe = True;
