@@ -3,7 +3,9 @@
 //================================================================================
 class MOCASpellCursor extends SpellCursor;
 
+var bool bDebugLogging;
 var array<name> BlacklistedClasses;
+
 
 // Update the cursor position and trace for a target.
 function UpdateCursor (optional bool bJustStopAtClosestPawnOrWall)
@@ -158,6 +160,52 @@ function UpdateCursor (optional bool bJustStopAtClosestPawnOrWall)
 	}
 }
 
+
+//==============
+// FX Handling
+//==============
+
+function WetTexture GetGestureTexture(ESpellType SpellType)
+{
+	local baseWand PlayerWand;
+	local class<baseSpell> SpellToCheck;
+
+	PlayerWand = baseWand(PlayerHarry.Weapon);
+
+	if ( PlayerWand != None )
+	{
+		SpellToCheck = PlayerWand.CurrentSpell;
+
+		DebugLog("Attempting to match gesture for " $ SpellToCheck);
+
+		if ( ClassIsChildOf(SpellToCheck, Class'MOCAbaseSpell') )
+		{
+			local class<MOCAbaseSpell> MSpell;
+			MSpell = class<MOCAbaseSpell>(SpellToCheck);
+
+			DebugLog("Moca spell gesture returned " $ MSpell.Default.SpellWetTexture);
+
+			return MSpell.Default.SpellWetTexture;
+		}
+		else
+		{
+			DebugLog("Not a Moca spell, matching for spell type " $ SpellType);
+			
+			switch (SpellType)
+			{
+				case SPELL_None:			return None;
+				case SPELL_Flipendo:		return FlipendoWetTexture;
+				case SPELL_Lumos:			return LumosWetTexture;
+				case SPELL_Alohomora:		return AlohomoraWetTexture;
+				case SPELL_Skurge:			return SkurgeWetTexture;
+				case SPELL_Rictusempra:		return RictusempraWetTexture;
+				case SPELL_Diffindo:		return DiffindoWetTexture;
+				case SPELL_Spongify:		return SpongifyWetTexture;
+			}
+		}
+	}
+}
+
 function StartLockedOnSoundLoop()
 {
 	// Play locked on sound
@@ -185,6 +233,19 @@ function bool IsBlacklisted(Actor HitActor)
 	}
 
 	return False;
+}
+
+
+//========
+// Debug
+//========
+
+function DebugLog(string Msg)
+{
+	if ( bDebugLogging )
+	{
+		Log(self $ ": " $ Msg);
+	}
 }
 
 

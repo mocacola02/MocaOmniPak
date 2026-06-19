@@ -99,10 +99,6 @@ function bool HandleSpellDuelExpelliarmus (optional baseSpell spell, optional Ve
 
 function bool HandleSpell(optional baseSpell Spell, optional Vector HitLocation)
 {
-	// If we're using MOCAharry (required for new spell system) AND we're vulnerable to the matching spell class
-	// Previous required MOCAharry, but this may be excessive. Let's try without it and see how it goes.
-	// if ( PlayerHarry.IsA('MOCAharry') && eVulnerableToSpell == DetermineSpellType(Spell.Class) )
-
 	if ( eVulnerableToSpell == DetermineSpellType(Spell.Class) )
 	{
 		// React to spell
@@ -115,24 +111,14 @@ function bool HandleSpell(optional baseSpell Spell, optional Vector HitLocation)
 
 function ESpellType DetermineSpellType(class<baseSpell> TestSpell)
 {
-	// local int i;
-	// local MOCAharry MocaPlayer;
-
-	// MocaPlayer = MOCAharry(PlayerHarry);
-
-	// // For each spell in our spell map
-	// for ( i = 0; i < ArrayCount(MocaPlayer.SpellMapping); i++ )
-	// {
-	// 	// If our spell class matches the spell map entry
-	// 	if ( MocaPlayer.SpellMapping[i].SpellToAssign == TestSpell )
-	// 	{
-	// 		// Return the proper spell slot
-	// 		return MocaPlayer.SpellMapping[i].SpellSlot;
-	// 	}
-	// }
-
-	// Default to no spell otherwise
-	return SPELL_None;
+	if ( PlayerHarry.IsA('MOCAharry') )
+	{
+		return MOCAharry(PlayerHarry).GetSpellType(TestSpell);
+	}
+	else
+	{
+		return TestSpell.Default.SpellType;
+	}
 }
 
 function ProcessSpell(); // Define in child classes.

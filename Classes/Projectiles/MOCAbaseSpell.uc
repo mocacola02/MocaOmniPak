@@ -13,8 +13,23 @@ var Color AimParticleEndColor;
 var Texture AimParticleTexture;
 var WetTexture SpellWetTexture;
 
-var ESpellType SpellToActAs;
 
+event PostBeginPlay()
+{
+	super.PostBeginPlay();
+
+	if ( PlayerHarry.IsA('MOCAharry') )
+	{
+		SpellType = MOCAharry(PlayerHarry).GetSpellToReplicate(self.Class);
+
+		if ( SpellType == SPELL_None )
+		{
+			SpellType = MOCAharry(PlayerHarry).GetSpellType(self.Class);
+		}
+	}
+
+	GotoState('StateFlying');
+}
 
 ///////////////////
 // Main Functions
@@ -22,6 +37,7 @@ var ESpellType SpellToActAs;
 
 function bool OnSpellHitHPawn(Actor HitActor, Vector HitLocation)
 {
+	local bool bResult;
 	// If MOCAPawn or MOCAChar, HandleSpell
 	if ( HitActor.IsA('MOCAPawn') )
 	{
@@ -34,19 +50,30 @@ function bool OnSpellHitHPawn(Actor HitActor, Vector HitLocation)
 	// Otherwise, use stock behavior
 	else
 	{
-		switch (SpellToActAs)
+		switch (SpellType)
 		{
-			case SPELL_None:			return False;
-			case SPELL_Flipendo:		return HPawn(HitActor).HandleSpellFlipendo(Self,HitLocation);
-			case SPELL_Lumos:			return HPawn(HitActor).HandleSpellLumos(Self,HitLocation);
-			case SPELL_Alohomora:		return HPawn(HitActor).HandleSpellAlohomora(Self,HitLocation);
-			case SPELL_Skurge:			return HPawn(HitActor).HandleSpellSkurge(Self,HitLocation);
-			case SPELL_Rictusempra:		return HPawn(HitActor).HandleSpellRictusempra(Self,HitLocation);
-			case SPELL_Diffindo:		return HPawn(HitActor).HandleSpellDiffindo(Self,HitLocation);
-			case SPELL_Spongify:		return HPawn(HitActor).HandleSpellSpongify(Self,HitLocation);
-			default:					return HPawn(HitActor).HandleSpellFlipendo(Self,HitLocation);
-		}
+				case SPELL_Rictusempra:
+					return HPawn(HitActor).HandleSpellRictusempra(None,HitLocation);
+				case SPELL_Alohomora:
+					return HPawn(HitActor).HandleSpellAlohomora(None,HitLocation);
+				case SPELL_Diffindo:
+					return HPawn(HitActor).HandleSpellDiffindo(None,HitLocation);
+				case SPELL_Ecto:
+					return HPawn(HitActor).HandleSpellEcto(None,HitLocation);
+				case SPELL_Flipendo:
+					return HPawn(HitActor).HandleSpellFlipendo(None,HitLocation);
+				case SPELL_Lumos:
+					return HPawn(HitActor).HandleSpellLumos(None,HitLocation);
+				case SPELL_Rictusempra:
+					return HPawn(HitActor).HandleSpellRictusempra(None,HitLocation);
+				case SPELL_Skurge:
+					return HPawn(HitActor).HandleSpellSkurge(None,HitLocation);
+				case SPELL_Spongify:
+					return HPawn(HitActor).HandleSpellSpongify(None,HitLocation);
+			}
 	}
+
+	return False;
 }
 
 

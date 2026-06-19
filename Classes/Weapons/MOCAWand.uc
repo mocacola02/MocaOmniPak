@@ -3,6 +3,8 @@
 //================================================================================
 class MOCAWand extends baseWand;
 
+//= Visual FX Vars =//
+var bool bNoCustomFX;
 var bool bIsAiming;
 var byte TargetLightBrightness, PrevLightBrightness;
 var byte TargetLightHue, 		PrevLightHue;
@@ -10,6 +12,7 @@ var byte TargetLightSaturation, PrevLightSaturation;
 var float BrightnessFadeTime;
 var float HueFadeTime;
 var float SaturationFadeTime;
+
 
 //=========
 // Events
@@ -19,24 +22,61 @@ event Tick(float DeltaTime)
 {
 	Super.Tick(DeltaTime);
 
-	if( bIsAiming )
+	if ( !bNoCustomFX )
 	{
-		ResetWandEffects();
-
-		if( PlayerHarry.SpellCursor.aCurrentTarget != None )
+		if ( bIsAiming )
 		{
-			if( CurrentSpell.IsA('MOCAbaseSpell') )
+			ResetWandEffects();
+
+			if ( PlayerHarry.SpellCursor.aCurrentTarget != None )
 			{
-				SetupMocaWandEffects(class<MOCAbaseSpell>(CurrentSpell));
+				if ( ClassIsChildOf(CurrentSpell, Class'MOCAbaseSpell') )
+				{
+					SetupMocaWandEffects(class<MOCAbaseSpell>(CurrentSpell));
+				}
+				else
+				{
+					SetupStockWandEffects(CurrentSpell);
+				}
 			}
-			else
+		}
+
+		HandleLightValues(DeltaTime);
+	}
+}
+
+function Class<baseSpell> GetClassFromSpellType (ESpellType SpellType)
+{
+	if ( PlayerHarry.IsA('MOCAharry') )
+	{
+		return MOCAharry(PlayerHarry).GetSpellClass(SpellType);
+	}
+	else
+	{
+		Super.GetClassFromSpellType(SpellType);
+	}
+}
+
+function SetCurrentSpell (Class<baseSpell> spellClass, optional bool bForceSelection)
+{
+	if ( Owner.IsA('harry') )
+	{
+		if ( (Owner.IsA('MOCAharry') && MOCAharry(Owner).IsInSpellBook(MOCAharry(Owner).GetSpellType(spellClass))) ||harry(Owner).IsInSpellBook(spellClass.Default.SpellType) || bForceSelection )
+		{
+			CurrentSpell = spellClass;
+		}
+		else
+		{
+			if ( bUseDebugMode )
 			{
-				SetupStockWandEffects(CurrentSpell);
+				PlayerHarry.ClientMessage("HARRY CAN NOT USE THIS SPELL YET!!!! -> " $ string(spellClass));
 			}
 		}
 	}
-
-	HandleLightValues(DeltaTime);
+	else
+	{
+		CurrentSpell = spellClass;
+	}
 }
 
 
@@ -61,7 +101,7 @@ function HandleLightValues(float DeltaTime)
 {
 	local float Alpha;
 
-	if( LightBrightness != TargetLightBrightness )
+	if ( LightBrightness != TargetLightBrightness )
 	{
 		BrightnessFadeTime += DeltaTime;
 		Alpha = BrightnessFadeTime / MapDefault.BrightnessFadeTime;
@@ -75,7 +115,7 @@ function HandleLightValues(float DeltaTime)
 		BrightnessFadeTime = 0.0;
 	}
 
-	if( LightHue != TargetLightHue )
+	if ( LightHue != TargetLightHue )
 	{
 		HueFadeTime += DeltaTime;
 		Alpha = HueFadeTime / MapDefault.HueFadeTime;
@@ -89,7 +129,7 @@ function HandleLightValues(float DeltaTime)
 		HueFadeTime = 0.0;
 	}
 
-	if( LightSaturation != TargetLightSaturation )
+	if ( LightSaturation != TargetLightSaturation )
 	{
 		SaturationFadeTime += DeltaTime;
 		Alpha = SaturationFadeTime / MapDefault.SaturationFadeTime;
@@ -106,7 +146,7 @@ function HandleLightValues(float DeltaTime)
 
 function SetupMocaWandEffects(class<MOCAbaseSpell> MSpell)
 {
-	if( MSpell != None )
+	if ( MSpell != None )
 	{
 		fxChargeParticles.Textures[0] = MSpell.Default.AimParticleTexture;
 
@@ -303,9 +343,10 @@ defaultproperties
 	HueFadeTime=0.2
 	SaturationFadeTime=0.2
 
-	LightBrightness=128
-	LightSaturation=255
+	LightBrightness=0
 	LightHue=0
+	LightSaturation=255
+	
 	bReallyDynamicLight=True
 	LightType=LT_Steady
 	LightEffect=LE_WateryShimmer
