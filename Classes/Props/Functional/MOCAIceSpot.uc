@@ -36,9 +36,9 @@ function Reset()
 	// Make us "invisible"
 	DrawScale = 0.0;
 	// Set collision size to 0.0
-	SetCollisionSize(0.0,0.0,0.0);
+	SetCollisionSize(32.0, 4.0, 0.0);
 	// Set our collision to no collision
-	SetCollision(False,False,False);
+	SetCollision(True,False,False);
 }
 
 function SetBergSize(float DeltaTime, Vector StartSize, Vector EndSize, float StartScale, float EndScale)
