@@ -3,287 +3,213 @@
 //================================================================================
 class MOCAWatcher extends MOCAChar;
 
-var const Texture TransparentTexture;	// Constant transparent texture
+enum eTurnMode
+{
+	TM_Random,
+	TM_InOrder,
+	TM_AlwaysLeft,
+	TM_AlwaysRight,
+	TM_Scan
+};
 
-var() bool bAwakeOnSpawn;	// Should we be awake on spawn? Def: False
+var() bool bResetHuntersOnCatch;	// Moca: Should MOCAKnightHunters be reset when caught to avoid unfair player situations when using these actors together? Def: True
+var() float HoldTime;				// Moca: How long to hold Harry in place before respawning him. Def: 5.0
+var() float FadeTime;				// Moca: How long to fade out after caught, should be less than HoldTime. Def: 2.0
+var() Range LookTime;				// Moca: Minimum and maximum time to spend looking in a direction, random value is picked between min and max. Def: Min = 0.75 Max = 2.0
+var() Range TurnSpeed;				// Moca: Minimum and maximum time to it takes to turn in a directon, random value is picked between min and max. Def: Min = 0.334 Max = 0.667
+var() name HarryCaughtAnim;			// Moca: Animation to play on Harry when he gets caught. Def: webstuck
+var() Color CameraFadeColor;		// Moca: Color of screen fade after caught. Def: R=0 G=0 B=0
+var() eTurnMode TurnMode;			// Moca: Turn mode for knight, FYI TM_Scan means it always turns side to side without ever centering. Def: TM_Random
 
-var() Range LookTime;		// Range to determine time spent looking in a direction. Def: Min 1.5 Max 5.0
-var() Range TurnSpeed;		// Range to determine how quickly we look side to side. Def: Min 0.667 Max 1.667
+var bool bJustTurned;
+var bool bLastWasRight;
 
-var name IdleAnim;			// Idle anim
-var name TurnLeftAnim;		// Turn left anim
-var name TurnRightAnim;		// Turn right anim
-var name CatchAnim;			// Catch anim
-var name TriggerBoneName;	// Name of bone to attach StealthTrigger to
+var name TurnLeftAnim;
+var name TurnRightAnim;
+var name HitAnim;
 
-var Texture BeamTexture;	// Texture for search beam
-var Sound SqueakSound;		// Squeak sound
-var Sound ClangSound;		// Clang sound
-var Sound HeadTurnSound;	// Head turn sound
-var MOCAStealthTrigger CatchTrigger;	// Ref to StealthTrigger
 
-var name BackupState;	// Backup state for Harry to enter, if we're not using MOCAharry.
-
-///////////
+//=========
 // Events
-///////////
-
-event PostBeginPlay()
-{
-	Super.PostBeginPlay();
-
-	// If Harry is not a MOCAharry, yell at mapper
-	if ( !PlayerHarry.IsA('MOCAharry') && BackupState == '' )
-	{
-		PushError("MOCAWatcher requires MOCAharry. Please replace harry with MOCAharry.");
-	}
-
-	Skins[1] = TransparentTexture;
-}
-
-event Bump(Actor Other)
-{
-	// If we can catch Harry and other is Harry, catch him
-	if ( CanCatchHarry() && Other == PlayerHarry )
-	{
-		if ( PlayerHarry.IsA('MOCAharry') )
-		{
-			//MOCAharry(PlayerHarry).GetCaught(Self,Event);
-		}
-		else if ( BackupState != '' )
-		{
-			PlayerHarry.GotoState(BackupState);
-		}
-		GotoState('stateCatch');
-	}
-}
+//=========
 
 event Trigger(Actor Other, Pawn EventInstigator)
 {
-	// If asleep, awaken
-	if ( IsInState('stateAsleep') )
+	super.Trigger(Other, EventInstigator);
+
+	if ( !IsInState('stateSleep') )
 	{
-		Awaken();
+		GoToSleep();
 	}
-	// Otherwise, go to sleep
 	else
 	{
-		UnAwaken();
+		GoToAwake();
 	}
 }
 
 
-///////////////////
-// Main Functions
-///////////////////
+//=================
+// Harry Handling
+//=================
 
-function bool CanCatchHarry()
+function GoToSleep()
 {
-	// Return true if not asleep and harry isn't already caught
-	return !IsInState('stateAsleep') && !PlayerHarry.IsInState('stateCaught');
+	GotoState('stateSleep');
 }
+
+function GoToAwake()
+{
+	GotoState('stateLook');
+}
+
+function LockHarry()
+{
+	PlayerHarry.bStationary = True;
+	PlayerHarry.LoopAnim(HarryCaughtAnim);
+}
+
+function UnlockHarry()
+{
+	PlayerHarry.bStationary = False;
+	PlayerHarry.LoopAnim(PlayerHarry.GetCurrIdleAnimName());
+}
+
+function ResetHunters()
+{
+	if ( bResetHuntersOnCatch )
+	{
+		local MOCAWatcherHunter A;
+		
+		foreach AllActors(class'MOCAWatcherHunter', A)
+		{
+			A.Reset();
+		}
+	}
+}
+
+function FadeScreen(float Alpha, float FadeTime)
+{
+	local FadeViewController Fader;
+	Fader.Init(Alpha, CameraFadeColor.R, CameraFadeColor.G, CameraFadeColor.B, FadeTime);
+}
+
+//==========
+// Helpers
+//==========
 
 function float GetLookTime()
 {
-	return RandRange(LookTime.Min,LookTime.Max);
+	return RandRange(LookTime.Min, LookTime.Max);
 }
 
 function float GetTurnSpeed()
 {
-	return RandRange(TurnSpeed.Min,TurnSpeed.Max);
+	return RandRange(TurnSpeed.Min, TurnSpeed.Max);
 }
 
-function Awaken(optional bool bNoSound)
+function name GetTurnAnim()
 {
-	// Unhide beam
-	ShowBeam();
-
-	//  If not bNoSound, Play armor clang wake up sound
-	if ( !bNoSound )
+	if ( bJustTurned && TurnMode != TM_Scan )
 	{
-		PlayArmorSound(ClangSound,0.667,1.334);
+		bJustTurned = False;
+		return IdleAnimName;
 	}
 
-	// Go to idle
-	GotoState('stateIdle');
-}
+	bJustTurned = True;
 
-function UnAwaken(optional bool bNoSound)
-{
-	// Hide beam
-	HideBeam();
-
-	// If not bNoSound, play armor clang asleep sound
-	if ( !bNoSound )
+	switch(TurnMode)
 	{
-		PlayArmorSound(ClangSound,0.667,1.334);
+		TM_Random:
+			return GetRandomTurnAnim();
+		TM_Scan:
+		TM_InOrder:
+			return GetOrderedTurnAnim();
+		TM_AlwaysLeft:
+			return TurnLeftAnim;
+		TM_AlwaysRight:
+			return TurnRightAnim;
 	}
 
-	// Go to sleep
-	GotoState('stateAsleep');
+	return TurnRightAnim;
 }
 
-function ShowBeam()
+function name GetRandomTurnAnim()
 {
-	// Set beam texture
-	Skins[1] = BeamTexture;
-	
-	// If CatchTrigger is not set
-	if ( CatchTrigger == None && ValidBone() )
+	local float RandF;
+	RandF = FRand();
+
+	if ( RandF >= 0.5 )
 	{
-		// Spawn catch trigger
-		CatchTrigger = Spawn(class'MOCAStealthTrigger',Self,,BonePos(TriggerBoneName));
-
-		if ( CatchTrigger != None )
-		{
-			// Attach it to us
-			AttachToBone(CatchTrigger, TriggerBoneName);
-
-			// Make the beam glow
-			CatchTrigger.LightBrightness = 128;
-			CatchTrigger.LightHue = 128;
-			CatchTrigger.LightSaturation = 128;
-			CatchTrigger.bDynamicLight = True;
-			CatchTrigger.LightRadius = 8;
-			CatchTrigger.LightType = LT_Steady;
-		}
-		else
-		{
-			Log(self $ " -> ERROR! Could not spawn stealth trigger");
-		}
+		return TurnLeftAnim;
 	}
-	else
+
+	return TurnRightAnim;
+}
+
+function name GetOrderedTurnAnim()
+{
+	if ( bLastWasRight )
 	{
-		Log(self $ " has a catch trigger already OR we don't have a valid bone name");
+		return TurnLeftAnim;
 	}
-}
 
-function HideBeam()
-{
-	// Set beam to transparent
-	Skins[1] = TransparentTexture;
-
-	// If we have a trigger, destroy it
-	if ( CatchTrigger != None )
-	{
-		CatchTrigger.Destroy();
-	}
-}
-
-function PlayArmorSound(Sound SoundToPlay, float MinPitch, float MaxPitch)
-{
-	// Play sound with pitch variance
-	local float RandPitch;
-	RandPitch = RandRange(MinPitch,MaxPitch);
-	PlaySound(SoundToPlay,SLOT_Interact,,,,RandPitch);
-}
-
-function TurnHead(name TurnAnimation, float TweenRate)
-{
-	// Turn head and play armor sound
-	PlayAnim(TurnAnimation,,TweenRate);
-	PlayArmorSound(SqueakSound,0.667,1.334);
-}
-
-function Reset()
-{
-	// Reset our catch trigger and go to idle
-	//CatchTrigger.Reset();
-	GotoState('stateIdle');
-}
-
-function bool ValidBone()
-{
-	local int BoneIdx;
-	BoneIdx = BoneNumber(TriggerBoneName);
-
-	return BoneIdx >= 0;
+	return TurnRightAnim;
 }
 
 
-///////////
+//=========
 // States
-///////////
+//=========
 
-auto state stateAsleep
+auto state stateSleep()
 {
-	event BeginState()
-	{
-		// If should be awake on spawn, awaken without sound
-		if ( bAwakeOnSpawn )
-		{
-			Awaken(True);
-		}
-		// Otherwise, loop idle anim
-		else
-		{
-			LoopAnim('Idle');
-		}
-	}
 }
 
-state stateIdle
+state stateLook()
 {
 	begin:
-		// Loop idle anim and wait for look time
-		LoopAnim('Idle');
 		Sleep(GetLookTime());
+		GotoState('stateTurn');
+}
 
-		// Choose left or right
-		if ( Rand(1) == 0 )
-		{
-			TurnHead(TurnLeftAnim,GetTurnSpeed());	// IdleLeft
-			FinishAnim();
-		}
-		else
-		{
-			TurnHead(TurnRightAnim,GetTurnSpeed()); // IdleRight
-			FinishAnim();
-		}
-		
-		// Wait for sleep time
-		Sleep(GetLookTime());
-
-		// Turn back to idle position
-		TurnHead(IdleAnim,0.75);
-
-		// When done, do this all again
+state stateTurn
+{
+	begin:
+		PlayAnim(GetTurnAnim(), [TweenTime] GetTurnSpeed());
 		FinishAnim();
-		goto('begin');
+		GotoState('stateLook');
 }
 
 state stateCatch
 {
 	begin:
-		// Loop catch anim
-		LoopAnim(CatchAnim);
-		// Play clang sound
-		PlayArmorSound(ClangSound,0.667,1.334);
+		LockHarry();
+
+		Sleep(HoldTime - FadeTime);
+		FadeScreen(1.0, FadeTime);
+		Sleep(FadeTime + 0.5);
+
+		TeleportHarry();
+		UnlockHarry();
+
+		FadeScreen(0.0, FadeTime);
+
+		TriggerEvent(Event, self, PlayerHarry);
+		GotoState('stateLook');
 }
 
 
+//=====================
+// Default Properties
+//=====================
+
 defaultproperties
 {
-	TransparentTexture=Texture'MocaTexturePak.Misc.transparent'
+	bResetHuntersOnCatch=True
+	LookTime=(Min=0.75,Max=2.0)
+	TurnSpeed=(Min=0.334,Max=0.667)
+	HarryCaughtAnim="webstuck"
+	CameraFadeColor=(R=0,G=0,B=0)
 
-	LookTime=(Min=1.5,Max=5.0)
-	TurnSpeed=(Min=0.667,Max=1.667)
-
-	IdleAnim=Idle
-	TurnLeftAnim=IdleLeft
-	TurnRightAnim=IdleRight
-	CatchAnim=StandHit
-
-	TriggerBoneName="TriggerPoint2"
-
-	BeamTexture=Texture'MocaTexturePak.Skins.beam'
-	SqueakSound=MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move'
-	ClangSound=MultiSound'MocaSoundPak.Creatures.Multi_Armour_Clinks'
-	HeadTurnSound=MultiSound'MocaSoundPak.Creatures.Multi_armor_head_move'
-
-	Skins(0)=Texture'HProps.Skins.skArmorWholeSuitTex0'
-	Mesh=SkeletalMesh'MocaModelPak.skKnightWatcher'
-	CollisionHeight=58.0
-	ShadowScale=0.5
-	TransientSoundRadius=1024.0
+	DrawScale=1.15
 }

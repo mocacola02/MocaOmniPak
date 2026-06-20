@@ -98,6 +98,12 @@ function ProcessSpell()
 	}
 }
 
+function Reset()
+{
+	SetLocation(HomeLocation);
+	GotoState('stateIdle');
+}
+
 function float GetWalkSpeed()
 {
 	// Get speed rate from current speed over default speed
@@ -404,9 +410,7 @@ state stateCatch
 		LoopAnim(CaughtAnim);
 		Sleep(3.0);
 
-		// Go home and idle
-		SetLocation(HomeLocation);
-		GotoState('stateIdle');
+		Reset();
 }
 
 defaultproperties
