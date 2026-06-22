@@ -58,12 +58,12 @@ function name GetBabbleAnim()
 function MakeAngry()
 {
 	// Set skins to appropriate angry ones
-	Skins[0] = Texture'MocaTexturePak.AngryCake.Angry_Top';
-	Skins[1] = Texture'MocaTexturePak.AngryCake.Angry_Side';
-	Skins[2] = Texture'MocaTexturePak.AngryCake.Angry_InSide';
-	Skins[3] = Texture'MocaTexturePak.AngryCake.Angry_crown_shine';
-	Skins[4] = Texture'MocaTexturePak.AngryCake.Angry_eyes';
-	Skins[5] = Texture'MocaTexturePak.AngryCake.Angry_jewel';
+	Skins[0] = Texture'MocaOmniResources.CakeSkins.cake_angry_top';
+	Skins[1] = Texture'MocaOmniResources.CakeSkins.cake_angry_side';
+	Skins[2] = Texture'MocaOmniResources.CakeSkins.cake_angry_inside';
+	Skins[3] = Texture'MocaOmniResources.CakeSkins.cake_angry_crown_shine';
+	Skins[4] = Texture'MocaOmniResources.CakeSkins.cake_angry_eyes';
+	Skins[5] = Texture'MocaOmniResources.CakeSkins.cake_angry_jewel';
 }
 
 function SpawnFire()
@@ -143,6 +143,6 @@ defaultproperties
 	HitsToKill=5
 
 	AmbientGlow=128
-	Mesh=SkeletalMesh'MocaModelPak.skCake'
+	Mesh=SkeletalMesh'MocaOmniResources.skCake'
 	eVulnerableToSpell=SPELL_Flipendo
 }

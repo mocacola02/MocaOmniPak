@@ -79,11 +79,11 @@ function SetTexture()
 {
 	if ( bBlocked )
 	{
-		Texture = Texture'MocaTexturePak.ICO_BrackenPath';
+		Texture = Texture'MocaOmniResources.icon_bracken_path_default';
 	}
 	else
 	{
-		Texture = Texture'MocaTexturePak.ICO_BrackenPathGreen';
+		Texture = Texture'MocaOmniResources.icon_bracken_path_green';
 	}
 }
 
@@ -113,5 +113,5 @@ defaultproperties
 
 	bSpecialCost=True
 	bStatic=False
-	Texture=Texture'MocaTexturePak.ICO_BrackenPathGreen'
+	Texture=Texture'MocaOmniResources.icon_bracken_path_green'
 }

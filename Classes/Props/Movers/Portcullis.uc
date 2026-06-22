@@ -6,7 +6,7 @@ class Portcullis extends HP3Movers;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skPortcullis'
+     Mesh=SkeletalMesh'MocaOmniResources.skPortcullis'
      DrawScale=2.2
      CollisionRadius=70
      CollisionWidth=4

@@ -6,7 +6,7 @@ class Fireplace extends HP3Lights;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skFireplace'
+     Mesh=SkeletalMesh'MocaOmniResources.skFireplace'
      DrawScale=1.7
      CollisionRadius=32
      CollisionWidth=128

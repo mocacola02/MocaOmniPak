@@ -10,5 +10,5 @@ defaultproperties
 	EventToSendOnPickup=FirePickupEvent
 	classStatusGroup=Class'MocaOmniPak.MOCAStatusGroupFire'
 	classStatusItem=Class'MocaOmniPak.MOCAStatusItemFire'
-	Mesh=SkeletalMesh'MocaModelPak.skFireMedalMesh'
+	Mesh=SkeletalMesh'MocaOmniResources.skFireMedalMesh'
 }

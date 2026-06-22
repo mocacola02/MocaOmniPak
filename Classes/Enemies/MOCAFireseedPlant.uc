@@ -169,5 +169,5 @@ defaultproperties
 
 	FireOffset=(Z=70.0)
 
-	Mesh=SkeletalMesh'MocaModelPak.skfireseedplantMesh'
+	Mesh=SkeletalMesh'MocaOmniResources.skfireseedplantMesh'
 }

@@ -11,7 +11,7 @@ defaultproperties
 	SpawnAngle=(Min=-50,Max=50)
 	bRemoveCollisionWhenDone=True
 	Physics=PHYS_None
-	Mesh=SkeletalMesh'MocaModelPak.skVase'
+	Mesh=SkeletalMesh'MocaOmniResources.skVase'
 	DrawScale=3.0
 	PrePivot=(Z=-297)
 	AmbientGlow=32

@@ -6,7 +6,7 @@ class RusticBookshelf extends MOCACakeObjects;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skRusticBookshelf'
+     Mesh=SkeletalMesh'MocaOmniResources.skRusticBookshelf'
      DrawScale=0.7
      CollisionRadius=24
      CollisionWidth=48

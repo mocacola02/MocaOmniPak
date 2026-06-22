@@ -2,7 +2,7 @@ class MOCAStatusItemEssence extends StatusItem;
 
 defaultproperties
 {
-     strHudIcon="MocaTexturePak.Menu.NewEssenceIcon"
+     strHudIcon="MocaOmniResources.HUD.icon_essence"
      bDisplayCount=True
      strToolTipId="InGameMenu_0013"
 }

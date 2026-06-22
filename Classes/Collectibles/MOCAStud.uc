@@ -179,27 +179,24 @@ function Sound SetStudSound()
 
 defaultproperties
 {
-	pickUpSound=Sound'MocaSoundPak.Magic.LowStud'
-	SoundLow=Sound'MocaSoundPak.Magic.LowStud'
-	SoundMid=Sound'MocaSoundPak.Magic.MidStud'
-	SoundHi=Sound'MocaSoundPak.Magic.HiStud'
+	pickUpSound=Sound'MocaOmniResources.Collectibles.pickup_low_stud'
+	SoundLow=Sound'MocaOmniResources.Collectibles.pickup_low_stud'
+	SoundMid=Sound'MocaOmniResources.Collectibles.pickup_mid_stud'
+	SoundHi=Sound'MocaOmniResources.Collectibles.pickup_high_stud'
 	EventToSendOnPickup=StudPickupEvent
 	classStatusGroup=Class'MocaOmniPak.MOCAStatusGroupStuds'
 	classStatusItem=Class'MocaOmniPak.MOCAStatusItemStuds'
 	soundBounce=Sound'HPSounds.Magic_sfx.bean_bounce'
 	bPersistent=True
-	Mesh=SkeletalMesh'MocaModelPak.skLegoStud'
-	AmbientGlow=16
+	Mesh=SkeletalMesh'MocaOmniResources.skLegoStud'
+	AmbientGlow=192
 
-	Color10=Texture'MocaTexturePak.Skins.LegoStud'
-	Color100=Texture'MocaTexturePak.Skins.LegoStudBronze'
-	Color1000=Texture'MocaTexturePak.Skins.LegoStudBlue'
-	Color10000=Texture'MocaTexturePak.Skins.LegoStudPurple'
+	Texture=Texture'MocaOmniResources.PropSkins.lego_stud'
 
-	SilverIcon=Texture'MocaTexturePak.SilverStud.SilverStudIcon_0'
-	BronzeIcon=Texture'MocaTexturePak.BronzeStud.BronzeStudIcon_0'
-	BlueIcon=Texture'MocaTexturePak.BlueStud.BlueStudIcon_0'
-	PurpleIcon=Texture'MocaTexturePak.PurpleStud.PurpleStudIcon_0'
+	SilverIcon=Texture'MocaOmniResources.SilverStud.SilverStudIcon_0'
+	BronzeIcon=Texture'MocaOmniResources.BronzeStud.BronzeStudIcon_0'
+	BlueIcon=Texture'MocaOmniResources.BlueStud.BlueStudIcon_0'
+	PurpleIcon=Texture'MocaOmniResources.PurpleStud.PurpleStudIcon_0'
 
 	fTotalFlyTime=0.5
 

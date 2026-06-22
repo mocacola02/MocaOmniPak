@@ -274,5 +274,5 @@ defaultproperties
 	CollisionRadius=6
 	CollisionWidth=20
 	attachedParticleClass(0)=Class'HPParticle.WizCrackSparkle'
-	Mesh=SkeletalMesh'MocaModelPak.skwizardcrackerMesh'
+	Mesh=SkeletalMesh'MocaOmniResources.skwizardcrackerMesh'
 }

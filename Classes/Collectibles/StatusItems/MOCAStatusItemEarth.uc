@@ -2,7 +2,7 @@ class MOCAStatusItemEarth extends StatusItem;
 
 defaultproperties
 {
-     strHudIcon="MocaTexturePak.Menu.EarthMedalIcon"
+     strHudIcon="MocaOmniResources.HUD.icon_earth_medal"
      bDisplayCount=True
      strToolTipId="InGameMenu_0013"
 }

@@ -2,7 +2,7 @@ class FirecrabStatue extends HP3Misc;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skFirecrabStatueMesh'
+     Mesh=SkeletalMesh'MocaOmniResources.skFirecrabStatueMesh'
      CollisionRadius=14
      CollisionWidth=10
      CollisionHeight=18

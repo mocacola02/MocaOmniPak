@@ -6,7 +6,7 @@ class HP3HangingLamp extends HP3Lights;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skHangingLamp'
+     Mesh=SkeletalMesh'MocaOmniResources.skHangingLamp'
      CollisionRadius=16
      CollisionWidth=10
      CollisionHeight=40

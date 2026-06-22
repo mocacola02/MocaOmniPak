@@ -6,7 +6,7 @@ class MOCASavePoint extends SavePoint;
 
 var() float RegenerateTime;	// Moca: Time it takes for savepoint to reappear. Def: 10.0
 var() float BobStrength;	// Moca: Intensity of the bobbing movement. Def: 10.0
-var() Sound SaveSFX;		// Moca: Sound to play when savepoint is touched. Def: Sound'MocaSoundPak.hp1_save'
+var() Sound SaveSFX;		// Moca: Sound to play when savepoint is touched. Def: Sound'MocaOmniResources.hp1_save'
 
 
 event PostBeginPlay()
@@ -34,7 +34,7 @@ function OnSaveGame()
 
 defaultproperties
 {
-	SaveSFX=Sound'MocaSoundPak.hp1_save'
+	SaveSFX=Sound'MocaOmniResources.hp1_save'
 	RegenerateTime=10.0
 	BobStrength=10.0
 }

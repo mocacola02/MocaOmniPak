@@ -8,5 +8,5 @@ defaultproperties
 	bDestroyAfterInteract=True
 	bHidden=True
 	DrawType=DT_Sprite
-	Texture=Texture'MocaTexturePak.EditorIco.ICO_BlankTrigger'
+	Texture=Texture'MocaOmniResources.icon_blank_trigger'
 }

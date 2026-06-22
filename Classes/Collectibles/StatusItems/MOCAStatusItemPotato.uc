@@ -2,7 +2,7 @@ class MOCAStatusItemPotato extends StatusItem;
 
 defaultproperties
 {
-     strHudIcon="MocaTexturePak.Menu.NewPotatoIcon"
+     strHudIcon="MocaOmniResources.HUD.icon_potato"
      bDisplayCount=True
      strToolTipId="InGameMenu_0013"
 }

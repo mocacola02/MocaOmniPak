@@ -6,7 +6,7 @@ class HP3Books3 extends HP3Books;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skBooks3'
+     Mesh=SkeletalMesh'MocaOmniResources.skBooks3'
      DrawScale=1.15
      CollisionRadius=10
      CollisionWidth=10

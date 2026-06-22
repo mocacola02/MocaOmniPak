@@ -6,7 +6,7 @@ class ChainChandelier extends HP3Lights;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skChainChandelier'
+     Mesh=SkeletalMesh'MocaOmniResources.skChainChandelier'
      CollisionRadius=5
      CollisionWidth=10
      CollisionHeight=5

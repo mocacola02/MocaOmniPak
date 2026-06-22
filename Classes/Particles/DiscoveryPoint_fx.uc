@@ -27,5 +27,5 @@ defaultproperties
 
     bSystemRelative=True
 
-    Textures(0)=Texture'MocaTexturePak.Particles.TexDiscoveryPoint'
+    Textures(0)=Texture'MocaOmniResources.discovery_point'
 }

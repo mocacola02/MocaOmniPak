@@ -2,7 +2,7 @@ class MOCAStatusItemDiscovery extends StatusItem;
 
 defaultproperties
 {
-     strHudIcon="MocaTexturePak.Menu.NewDiscoveryIcon"
+     strHudIcon="MocaOmniResources.HUD.icon_discovery_point"
      bDisplayCount=True
      strToolTipId="InGameMenu_0013"
 }

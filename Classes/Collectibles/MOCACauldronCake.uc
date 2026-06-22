@@ -5,11 +5,11 @@ class MOCACauldronCake extends MOCACollectible;
 
 defaultproperties
 {
-	PickUpSound=Sound'MocaSoundPak.Magic.pickup_cauldroncake'
+	PickUpSound=Sound'MocaOmniResources.Collectibles.pickup_cauldroncake'
 	EventToSendOnPickup=CakePickupEvent
 	classStatusGroup=Class'MocaOmniPak.MOCAStatusGroupCake'
 	classStatusItem=Class'MocaOmniPak.MOCAStatusItemCake'
-	Mesh=SkeletalMesh'MocaModelPak.skCauldronCake'
+	Mesh=SkeletalMesh'MocaOmniResources.skCauldronCake'
 	CollisionRadius=32
 	CollisionHeight=10
 	SoundVolMult=0.7

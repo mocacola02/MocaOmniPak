@@ -11,7 +11,7 @@ defaultproperties
 
 	DrawType=DT_None
 
-    SpellWetTexture=WetTexture'MocaTexturePak.Spells.WetGlacius'
+    SpellWetTexture=WetTexture'MocaOmniResources.GlaciusWet'
 
     AimParticleTexture=Texture'HPParticle.hp_fx.Particles.Sparkle_5'
 
@@ -23,5 +23,5 @@ defaultproperties
     AimLightHue=150
     AimLightSaturation=96
 
-    CastSound=Sound'MocaSoundPak.Magic.spell_glacius_cast'
+    CastSound=Sound'MocaOmniResources.Magic.spell_glacius_cast'
 }

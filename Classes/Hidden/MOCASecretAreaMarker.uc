@@ -48,7 +48,7 @@ function OnFound()
 defaultproperties
 {
 	SoundPool(0)=Sound'HPSounds.Music_Events.Found_Secret_Music'
-	SoundPool(1)=Sound'MocaSoundPak.Magic.found_secret_window'
-	SoundPool(2)=Sound'MocaSoundPak.Magic.lumos_passthrough_sparkle'
+	SoundPool(1)=Sound'MocaOmniResources.Magic.found_secret_window'
+	SoundPool(2)=Sound'MocaOmniResources.Magic.lumos_passthrough_sparkle'
 	FoundSoundVolume=1.0
 }

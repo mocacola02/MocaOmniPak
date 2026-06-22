@@ -7,7 +7,7 @@ defaultproperties
 {
     ShadowClass=None
 
-    Mesh=SkeletalMesh'MocaModelPak.skDementorMesh'
+    Mesh=SkeletalMesh'MocaOmniResources.skDementorMesh'
 
     DrawScale=1.00
 

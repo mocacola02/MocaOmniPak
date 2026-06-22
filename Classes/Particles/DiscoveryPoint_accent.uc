@@ -41,7 +41,7 @@ defaultproperties
 
     Attraction=(X=5.00,Y=5.00,Z=5.00)
 
-    Textures(0)=Texture'MocaTexturePak.Particles.TexDiscoveryPoint'
+    Textures(0)=Texture'MocaOmniResources.discovery_point'
 
     Rotation=(Pitch=16640,Yaw=0,Roll=0)
 }

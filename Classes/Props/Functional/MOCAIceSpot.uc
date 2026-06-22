@@ -236,8 +236,8 @@ defaultproperties
 	GrowthTime=3.0
 	Cooldown=1.0
 
-	FreezeSound=Sound'MocaSoundPak.ice_freeze'
-	ShatterSound=Sound'MocaSoundPak.salamander_explode'
+	FreezeSound=Sound'MocaOmniResources.freeze_multi'
+	ShatterSound=Sound'MocaOmniResources.salamander_explode'
 
 	IdleFX=class'IceBerg_Spot'
 	FreezeFX=class'Iceberg_Grow'
@@ -251,5 +251,5 @@ defaultproperties
 	CollisionWidth=0.0
 	PrePivot=(X=0,Y=0,Z=0)
 	eVulnerableToSpell=SPELL_LocomotorWibbly
-	Mesh=SkeletalMesh'MocaModelPak.skIceberg1'
+	Mesh=SkeletalMesh'MocaOmniResources.skIceberg1'
 }

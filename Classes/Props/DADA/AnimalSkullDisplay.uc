@@ -6,7 +6,7 @@ class AnimalSkullDisplay extends HP3DADA;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skAnimalSkullDisplay'
+     Mesh=SkeletalMesh'MocaOmniResources.skAnimalSkullDisplay'
      DrawScale=1.1
      CollisionRadius=6
      CollisionWidth=10

@@ -152,7 +152,7 @@ defaultproperties
 	soundBounce=Sound'HPSounds.Magic_sfx.bean_bounce'
 	Physics=PHYS_Walking
 	bPersistent=True
-	Mesh=SkeletalMesh'MocaModelPak.skEarthGem'
+	Mesh=SkeletalMesh'MocaOmniResources.skEarthGem'
 	AmbientGlow=200
 	CollisionRadius=22
 	CollisionHeight=12

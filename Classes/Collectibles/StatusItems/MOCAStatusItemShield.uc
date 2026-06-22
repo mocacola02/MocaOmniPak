@@ -2,7 +2,7 @@ class MOCAStatusItemShield extends StatusItem;
 
 defaultproperties
 {
-	strHudIcon="MocaTexturePak.Menu.NewShieldIcon"
+	strHudIcon="MocaOmniResources.HUD.icon_challenge_shield"
 	
 	bDisplayCount=True
 

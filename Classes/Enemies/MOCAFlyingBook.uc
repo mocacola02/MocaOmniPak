@@ -22,8 +22,8 @@ var() float DeathDelay;			// Moca: How long to wait before forcing despawn? Def:
 
 var() name SplineTag;			// Moca: Tag of spline we should follow.
 
-var() Sound FlySound;			// Moca: Sound to loop when flying? Def: Sound'MocaSoundPak.book_flap_Multi'
-var() Sound ShootSound;			// Moca: Sound to play when shooting at Harry? Def: Sound'MocaSoundPak.book_flap_Multi'
+var() Sound FlySound;			// Moca: Sound to loop when flying? Def: Sound'MocaOmniResources.book_flap_Multi'
+var() Sound ShootSound;			// Moca: Sound to play when shooting at Harry? Def: Sound'MocaOmniResources.book_flap_Multi'
 
 var bool bCanGoHome;			// Can we go home
 var bool bGoingHome;			// Are we going home
@@ -463,7 +463,7 @@ defaultproperties
 
 	eVulnerableToSpell=SPELL_Rictusempra
 
-	Mesh=SkeletalMesh'MocaModelPak.skFlyingBookMesh'
+	Mesh=SkeletalMesh'MocaOmniResources.skFlyingBookMesh'
 
 	TransientSoundRadius=1024.0
 
@@ -482,8 +482,8 @@ defaultproperties
 	AttackDelay=5.0
 	StunDurationMult=1.0
 	HomeRange=256.0
-	FlySound=Sound'MocaSoundPak.book_flap_Multi'
-	ShootSound=Sound'MocaSoundPak.book_flap_Multi'
+	FlySound=Sound'MocaOmniResources.book_flap_Multi'
+	ShootSound=Sound'MocaOmniResources.book_flap_Multi'
 	WakeUpMode=WM_Proximity
 	WakeUpRange=768.0
 	DeathDelay=10.0

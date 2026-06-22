@@ -7,9 +7,9 @@ defaultproperties
 {
 	bRemoveCollisionWhenDone=True
 	SpawnerAnims=(Spawning=Hit,EndSpawning=None,Idle=Idle,DoneIdle=HitEndIdle,FinalSpawnEnd=HitEnd)
-	SpawnerSounds=(Opening=MultiSound'MocaSoundPak.Spawners.multi_banner_hit',Ending=MultiSound'MocaSoundPak.Spawners.multi_rollup_sound')
+	SpawnerSounds=(Opening=MultiSound'MocaOmniResources.Spawners.banner_hit_multi',Ending=MultiSound'MocaOmniResources.Spawners.banner_rollup_multi')
 
-	Mesh=SkeletalMesh'MocaModelPak.skHP3Tapestry'
+	Mesh=SkeletalMesh'MocaOmniResources.skHP3Tapestry'
 	DrawScale=1.3
 	PrePivot=(Z=-80)
 	AmbientGlow=32

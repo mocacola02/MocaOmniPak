@@ -6,7 +6,7 @@ class SkullDisplay extends HP3DADA;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skSkullDisplay'
+     Mesh=SkeletalMesh'MocaOmniResources.skSkullDisplay'
      CollisionRadius=6
      CollisionWidth=10
      CollisionHeight=12

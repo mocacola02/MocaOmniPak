@@ -6,7 +6,7 @@ class MaskDisplay extends HP3DADA;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skMaskDisplay'
+     Mesh=SkeletalMesh'MocaOmniResources.skMaskDisplay'
      CollisionRadius=6
      CollisionWidth=10
      CollisionHeight=10

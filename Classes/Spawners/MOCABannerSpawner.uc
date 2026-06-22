@@ -7,8 +7,8 @@ defaultproperties
 {
 	bRemoveCollisionWhenDone=True
 	SpawnerAnims=(Spawning=HitRight,EndSpawning=None,Idle=InsideIdle,DoneIdle=HitEndIdle,FinalSpawnEnd=HitEnd)
-	SpawnerSounds=(Opening=MultiSound'MocaSoundPak.Spawners.multi_banner_hit',Ending=MultiSound'MocaSoundPak.Spawners.multi_rollup_sound')
-	Mesh=SkeletalMesh'MocaModelPak.skBanner'
+	SpawnerSounds=(Opening=MultiSound'MocaOmniResources.Spawners.banner_hit_multi',Ending=MultiSound'MocaOmniResources.Spawners.banner_rollup_multi')
+	Mesh=SkeletalMesh'MocaOmniResources.skBanner'
 	AmbientGlow=32
 	CollisionRadius=8
 	CollisionWidth=50

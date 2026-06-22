@@ -2,7 +2,7 @@ class DraconiforsStatue extends HP3Misc;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skDraconisForsStatueMesh'
+     Mesh=SkeletalMesh'MocaOmniResources.skDraconisForsStatueMesh'
      CollisionRadius=14
      CollisionWidth=10
      CollisionHeight=18

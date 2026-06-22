@@ -6,7 +6,7 @@ class Crate extends HP3Misc;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skCrate'
+     Mesh=SkeletalMesh'MocaOmniResources.skCrate'
      CollisionRadius=30
      CollisionWidth=42
      CollisionHeight=31

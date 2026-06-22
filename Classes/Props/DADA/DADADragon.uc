@@ -6,7 +6,7 @@ class DADADragon extends HP3DADA;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skDADADragon'
+     Mesh=SkeletalMesh'MocaOmniResources.skDADADragon'
      DrawScale=1.2
      CollisionRadius=6
      CollisionWidth=10

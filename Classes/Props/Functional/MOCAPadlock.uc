@@ -4,7 +4,7 @@
 class MOCAPadlock extends MOCAPawn;
 
 var() bool bFastOpen;				// Moca: Play faster unlock animation? Def: False
-var() Sound UnlockSFX;				// Moca: Sound to play on unlock. Def: Sound'MocaSoundPak.padlock_multi'
+var() Sound UnlockSFX;				// Moca: Sound to play on unlock. Def: Sound'MocaOmniResources.padlock_multi'
 var() class<ParticleFX> DespawnFX;	// Moca: Despawn particle class to spawn when padlock despawns. Def: class'HPParticle.Aloh_hit'
 
 auto state stateIdle
@@ -45,7 +45,7 @@ state stateUnlock
 
 defaultproperties
 {
-	UnlockSFX=Sound'MocaSoundPak.padlock_multi'
+	UnlockSFX=Sound'MocaOmniResources.padlock_multi'
 	DespawnFX=class'HPParticle.Aloh_hit'
 
 	DrawScale=2.5
@@ -55,6 +55,6 @@ defaultproperties
 	CollisionWidth=0.0
 	CollideType=CT_OrientedCylinder
 
-	Mesh=SkeletalMesh'MocaModelPak.skPadlock'
+	Mesh=SkeletalMesh'MocaOmniResources.skPadlock'
 	eVulnerableToSpell=SPELL_Alohomora
 }

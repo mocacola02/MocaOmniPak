@@ -41,5 +41,5 @@ defaultproperties
 
 	CollisionHeight=48
 
-	Mesh=SkeletalMesh'MocaModelPak.skChallengeShield'
+	Mesh=SkeletalMesh'MocaOmniResources.skChallengeShield'
 }

@@ -8,8 +8,8 @@ defaultproperties
 {
 	GlobalSpawnOffset=(X=0,Y=0,Z=8)
 	SpawnerAnims=(Spawning=Hit1,EndSpawning=None,Idle=Idle,DoneIdle=IdleEnd,FinalSpawnEnd=HitEnd)
-	SpawnerSounds=(Opening=Sound'MocaSoundPak.Spawners.skull_hit',Ending=Sound'MocaSoundPak.Spawners.skull_hitend')
-	Mesh=SkeletalMesh'MocaModelPak.skCacklingSkull'
+	SpawnerSounds=(Opening=Sound'MocaOmniResources.Spawners.skull_hit',Ending=Sound'MocaOmniResources.Spawners.skull_hit_end')
+	Mesh=SkeletalMesh'MocaOmniResources.skCacklingSkull'
 	DrawScale=1.3
 	AmbientGlow=32
 	CollisionRadius=21

@@ -184,7 +184,7 @@ function AddToSpellBook (Class<baseSpell> spellClass)
 function SetNewMesh()
 {
 	// If harry, goyle
-	if ( bIsGoyle && Mesh == SkeletalMesh'MOCAharry' )
+	if ( bIsGoyle && Mesh == MapDefault.Mesh )
 	{
 		Mesh = SkeletalMesh'skGoyleMesh';
 		DrawScale = 1.15;
@@ -192,7 +192,7 @@ function SetNewMesh()
 	// If goyle, harry
 	if ( !bIsGoyle && Mesh == SkeletalMesh'skGoyleMesh' )
 	{
-		Mesh = SkeletalMesh'MOCAharry';
+		Mesh = MapDefault.Mesh;
 		DrawScale = 1.0;
 	}
 }
@@ -355,7 +355,7 @@ defaultproperties
      SpellMapping(26)=(SpellSlot=SPELL_DuelMimblewimble,SpellClass=Class'HGame.spellDuelMimblewimble')
      SpellMapping(27)=(SpellSlot=SPELL_DuelExpelliarmus,SpellClass=Class'HGame.spellDuelExpelliarmus')
 
-	Mesh=SkeletalMesh'MOCAHarry'
+	Mesh=SkeletalMesh'skMocaHarry'
 	Cutname="harry"
 	RotationRate=(Pitch=20000,Yaw=87500,Roll=3072)
 }

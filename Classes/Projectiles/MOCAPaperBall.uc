@@ -31,8 +31,8 @@ defaultproperties
     ParticleClass=Class'Paper_Fly'
 	DespawnEmitter=Class'Paper_Hit'
 	DamageName=PaperBall
-	Mesh=SkeletalMesh'MocaModelPak.skPaperBallMesh'
+	Mesh=SkeletalMesh'MocaOmniResources.skPaperBallMesh'
 	bFixedRotationDir=True
 	TargetInaccuracy=16.0
-	LandedSound=Sound'MocaSoundPak.book_flap_Multi'
+	LandedSound=Sound'MocaOmniResources.book_flap_Multi'
 }

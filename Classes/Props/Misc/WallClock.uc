@@ -6,7 +6,7 @@ class WallClock extends HP3Misc;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skWallClock'
+     Mesh=SkeletalMesh'MocaOmniResources.skWallClock'
      CollisionRadius=18
      CollisionWidth=1
      CollisionHeight=18

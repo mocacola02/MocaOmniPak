@@ -13,7 +13,7 @@ defaultproperties
 	SpinRate=(Base=0,Rand=0)
 
 	Textures(0)=Texture'HPParticle.hp_fx.Particles.Les_Sparkle_04'
-	Textures(1)=Texture'MocaTexturePak.Particles.TexDiscoveryPoint'
+	Textures(1)=Texture'MocaOmniResources.discovery_point'
 
 	ParticlesMax=360
 

@@ -2,7 +2,7 @@ class MOCAStatusItemFire extends StatusItem;
 
 defaultproperties
 {
-     strHudIcon="MocaTexturePak.Menu.FireMedalIcon"
+     strHudIcon="MocaOmniResources.HUD.icon_fire_medal"
      bDisplayCount=True
      strToolTipId="InGameMenu_0013"
 }

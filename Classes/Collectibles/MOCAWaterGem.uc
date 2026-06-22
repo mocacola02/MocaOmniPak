@@ -5,10 +5,10 @@ class MOCAWaterGem extends MOCACollectible;
 
 defaultproperties
 {
-	PickUpSound=Sound'MocaSoundPak.Magic.ps1_jingle1'
-	soundPickup=Sound'MocaSoundPak.Magic.ps1_jingle1'
+	PickUpSound=Sound'MocaOmniResources.Collectibles.pickup_water'
+	soundPickup=Sound'MocaOmniResources.Collectibles.pickup_water'
 	EventToSendOnPickup=WaterPickupEvent
 	classStatusGroup=Class'MocaOmniPak.MOCAStatusGroupWater'
 	classStatusItem=Class'MocaOmniPak.MOCAStatusItemWater'
-	Mesh=SkeletalMesh'MocaModelPak.skWaterMedalMesh'
+	Mesh=SkeletalMesh'MocaOmniResources.skWaterMedalMesh'
 }

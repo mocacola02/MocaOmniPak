@@ -6,10 +6,10 @@ defaultproperties
 
 	SpinRate=(Base=16,Rand=0)
 
-	Textures(0)=Texture'MocaTexturePak.Particles.PaperScrap1'
-	Textures(1)=Texture'MocaTexturePak.Particles.PaperScrap2'
-	Textures(2)=Texture'MocaTexturePak.Particles.PaperScrap3'
-	Textures(3)=Texture'MocaTexturePak.Particles.PaperScrap4'
+	Textures(0)=Texture'MocaOmniResources.paper_scrap_1'
+	Textures(1)=Texture'MocaOmniResources.paper_scrap_2'
+	Textures(2)=Texture'MocaOmniResources.paper_scrap_3'
+	Textures(3)=Texture'MocaOmniResources.paper_scrap_4'
 
 	ParticlesMax=20
 	ParticlesPerSec=(Base=200,Rand=0)

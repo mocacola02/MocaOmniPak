@@ -74,11 +74,11 @@ defaultproperties
 	bRemoveCollisionWhenDone=True
 	bRandomSpawnDirection=True
 	SpawnerAnims=(Spawning=Hit,EndSpawning=Grow,Idle=None,DoneIdle=HitIdle,FinalSpawnEnd=Hit)
-	SpawnerSounds=(Opening=Sound'MocaSoundPak.pumpkin_explode',Closing=Sound'MocaSoundPak.pumpkin_spawn',Ending=Sound'MocaSoundPak.pumpkin_explode')
+	SpawnerSounds=(Opening=Sound'MocaOmniResources.pumpkin_explode_multi',Closing=Sound'MocaOmniResources.pumpkin_spawn_multi',Ending=Sound'MocaOmniResources.pumpkin_explode_multi')
 	GlobalSpawnOffset=(X=0,Y=0,Z=8)
 	GlobalSpawnRotation=(Pitch=16384,Yaw=0,Roll=0)
 	SpawnAngle=(Min=-60,Max=60)
-	Mesh=SkeletalMesh'MocaModelPak.skPumpkinSpawner'
+	Mesh=SkeletalMesh'MocaOmniResources.skPumpkinSpawner'
 	DrawScale=1.3
 	AmbientGlow=32
 	bAlignBottomAlways=True

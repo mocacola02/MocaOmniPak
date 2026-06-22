@@ -6,7 +6,7 @@ class DollDisplay extends HP3DADA;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skDollDisplay'
+     Mesh=SkeletalMesh'MocaOmniResources.skDollDisplay'
      CollisionRadius=6
      CollisionWidth=10
      CollisionHeight=12

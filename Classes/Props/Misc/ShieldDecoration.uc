@@ -6,7 +6,7 @@ class ShieldDecoration extends HP3Misc;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skShieldDecoration'
+     Mesh=SkeletalMesh'MocaOmniResources.skShieldDecoration'
      DrawScale=0.5
      CollisionRadius=24
      CollisionWidth=2

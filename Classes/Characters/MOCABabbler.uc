@@ -270,7 +270,7 @@ function BabbleString(string InputText)
 		else
 		{
 			// Get sound name from letter
-			SoundName = "MocaSoundPak.babble_"$Letter;
+			SoundName = "MocaOmniResources.babble_"$Letter;
 			SoundRef = Sound(DynamicLoadObject(SoundName, class'Sound'));
 
 			// If valid, set the sound

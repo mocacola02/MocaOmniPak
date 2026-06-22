@@ -6,7 +6,7 @@ class HP3FloorThreeCandlesStraight extends HP3Lights;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skFloorThreeCandlesStraightened'
+     Mesh=SkeletalMesh'MocaOmniResources.skFloorThreeCandlesStraightened'
      DrawScale=2.5
      CollisionRadius=10
      CollisionWidth=128

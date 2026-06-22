@@ -6,7 +6,7 @@ class HP3BookshelfTall extends HP3Books;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skBookshelfTall'
+     Mesh=SkeletalMesh'MocaOmniResources.skBookshelfTall'
      DrawScale=1.5
      CollisionRadius=34
      CollisionWidth=8

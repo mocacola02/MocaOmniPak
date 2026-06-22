@@ -194,7 +194,7 @@ state stateDig
 		SetCollision(True,True,True);
 
 		// Play rise sound
-		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_rise');
+		PlaySound(Sound'MocaOmniResources.Creatures.bundimun_rise');
 
 		// Play rise anim and wait to finish it
 		PlayAnim('Rise');
@@ -208,7 +208,7 @@ state stateDig
 		SetCollision(False,False,False);
 
 		// Play sink sound
-		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_sink');
+		PlaySound(Sound'MocaOmniResources.Creatures.bundimun_sink');
 
 		// Play sink anim and wait to finish it
 		PlayAnim('Sink');
@@ -226,7 +226,7 @@ state stateSpitting
 		bCanHit = True;
 
 		// Set ambient sound to spit sound
-		AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_shoot';
+		AmbientSound = Sound'MocaOmniResources.Creatures.bundimun_shoot';
 
 		// Make us shootable
 		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
@@ -269,10 +269,10 @@ state stateStunned
 		bCantStandOnMe = False;
 
 		// Play hit sound
-		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_hit');
+		PlaySound(Sound'MocaOmniResources.Creatures.bundimun_hit');
 
 		// Loop dazed sound
-		AmbientSound = Sound'MocaSoundPak.Creatures.bundimun_dazed';
+		AmbientSound = Sound'MocaOmniResources.Creatures.bundimun_dazed';
 
 		// Loop dazed anim
 		LoopAnim('Dazed');
@@ -303,7 +303,7 @@ state stateDie
 		ShrinkEmit = Spawn(class'BundimunShrink',Self,,Location,,True);
 
 		// Play death sound
-		PlaySound(Sound'MocaSoundPak.Creatures.bundimun_smash');
+		PlaySound(Sound'MocaOmniResources.Creatures.bundimun_smash');
 
 		// Play bounced on anim
 		PlayAnim('Bounce');
@@ -393,6 +393,6 @@ defaultproperties
 	CollisionHeight=18
 	CollisionRadius=30
 	
-	Mesh=SkeletalMesh'MocaModelPak.skBundimun'
+	Mesh=SkeletalMesh'MocaOmniResources.skBundimun'
 	eVulnerableToSpell=SPELL_Rictusempra
 }

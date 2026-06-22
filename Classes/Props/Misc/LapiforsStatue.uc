@@ -2,7 +2,7 @@ class LapiforsStatue extends HP3Misc;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skLapiforsStatueMesh'
+     Mesh=SkeletalMesh'MocaOmniResources.skLapiforsStatueMesh'
      CollisionRadius=14
      CollisionWidth=10
      CollisionHeight=18

@@ -6,7 +6,7 @@ class HP3FloorSingleCandle extends HP3Lights;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'MocaModelPak.skFloorSingleCandle'
+     Mesh=SkeletalMesh'MocaOmniResources.skFloorSingleCandle'
      DrawScale=2.5
      CollisionRadius=8
      CollisionWidth=10

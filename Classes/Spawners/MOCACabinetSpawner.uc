@@ -6,8 +6,8 @@ class MOCACabinetSpawner extends MOCAVisibleSpawner;
 defaultproperties
 {
 	SpawnerAnims=(Spawning=Hit2,EndSpawning=Close2,Idle=IdleClosed,DoneIdle=IdleEnd,FinalSpawnEnd=HitEnd)
-	SpawnerSounds=(Opening=Sound'MocaSoundPak.Spawners.spawner_armoire',Closing=Sound'MocaSoundPak.Spawners.spawner_armoire_close01')
-	Mesh=SkeletalMesh'MocaModelPak.skBeanDispenser'
+	SpawnerSounds=(Opening=Sound'MocaOmniResources.Spawners.spawner_armoire',Closing=Sound'MocaOmniResources.Spawners.spawner_armoire_close_1')
+	Mesh=SkeletalMesh'MocaOmniResources.skBeanDispenser'
 	DrawScale=1.3
 	AmbientGlow=32
 	CollisionRadius=28

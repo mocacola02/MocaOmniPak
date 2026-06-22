@@ -24,7 +24,7 @@ event PostBeginPlay()
 	AttractionSpeed += FRand() * 10.0;
 
 	// Play point creation sound
-	PlaySound(Sound'MocaSoundPak.Magic.SFX_DiscoveryPointStart',SLOT_None,,,1500);
+	PlaySound(Sound'MocaOmniResources.discovery_point_spawn',SLOT_None,,,1500);
 
 	// If not attracted to Harry, collide with world so we don't fall out
 	bCollideWorld = !bAttractedToHarry;
@@ -133,8 +133,8 @@ defaultproperties
 
 	DrawType=DT_Sprite
 	DrawScale=0.25
-	Texture=Texture'MocaTexturePak.Particles.TexDiscoveryPoint'
-	PickUpSound=Sound'MocaSoundPak.Magic.SFX_DiscoveryPointEnd'
+	Texture=Texture'MocaOmniResources.Particles.discovery_point'
+	PickUpSound=Sound'MocaOmniResources.discovery_point_end'
 	bPickupOnTouch=True
 	EventToSendOnPickup=EssencePickupEvent
 	PickupFlyTo=FT_HudPosition
@@ -155,7 +155,7 @@ defaultproperties
 	bBounce=False
 	attachedParticleClass(0)=Class'MocaOmniPak.DiscoveryPoint_accent'
 	attachedParticleClass(1)=Class'MocaOmniPak.DiscoveryPoint_glow'
-	AmbientSound=Sound'MocaSoundPak.Magic.SFX_DiscoveryPointFollowLoop'
+	AmbientSound=Sound'MocaOmniResources.discovery_point_loop'
 	SoundPitch=128
 	SoundRadius=64
 	SoundVolume=255

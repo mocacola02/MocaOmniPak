@@ -1,7 +1,7 @@
 //================================================================================
-// MOCAWatcher. One of my oldest classes finally rewritten
+// MOCAKnight. One of my oldest classes finally rewritten
 //================================================================================
-class MOCAWatcher extends MOCAChar;
+class MOCAKnight extends MOCAChar;
 
 enum eTurnMode
 {
@@ -78,24 +78,26 @@ function ResetHunters()
 {
 	if ( bResetHuntersOnCatch )
 	{
-		local MOCAWatcherHunter A;
+		local MOCAKnightHunter A;
 		
-		foreach AllActors(class'MOCAWatcherHunter', A)
+		foreach AllActors(class'MOCAKnightHunter', A)
 		{
 			A.Reset();
 		}
 	}
 }
 
-function FadeScreen(float Alpha, float FadeTime)
+function FadeScreen(float Alpha, float FadeDuration)
 {
 	local FadeViewController Fader;
-	Fader.Init(Alpha, CameraFadeColor.R, CameraFadeColor.G, CameraFadeColor.B, FadeTime);
+	Fader.Init(Alpha, CameraFadeColor.R, CameraFadeColor.G, CameraFadeColor.B, FadeDuration);
 }
 
 //==========
 // Helpers
 //==========
+
+function TeleportHarry();
 
 function float GetLookTime()
 {
@@ -119,14 +121,14 @@ function name GetTurnAnim()
 
 	switch(TurnMode)
 	{
-		TM_Random:
+		case TM_Random:
 			return GetRandomTurnAnim();
-		TM_Scan:
-		TM_InOrder:
+		case TM_Scan:
+		case TM_InOrder:
 			return GetOrderedTurnAnim();
-		TM_AlwaysLeft:
+		case TM_AlwaysLeft:
 			return TurnLeftAnim;
-		TM_AlwaysRight:
+		case TM_AlwaysRight:
 			return TurnRightAnim;
 	}
 
@@ -161,11 +163,11 @@ function name GetOrderedTurnAnim()
 // States
 //=========
 
-auto state stateSleep()
+auto state() stateSleep
 {
 }
 
-state stateLook()
+state() stateLook
 {
 	begin:
 		Sleep(GetLookTime());

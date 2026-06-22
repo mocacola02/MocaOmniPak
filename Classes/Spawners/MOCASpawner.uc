@@ -438,7 +438,7 @@ defaultproperties
 	Physics=PHYS_None
 	eVulnerableToSpell=SPELL_Flipendo
 	DrawType=DT_Sprite
-	Texture=Texture'MocaTexturePak.EditorIco.MOCASpawnerIcon'
+	Texture=Texture'MocaOmniResources.icon_spawner'
 	bHidden=True
 	bBlockPlayers=False
 }

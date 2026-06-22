@@ -178,5 +178,5 @@ defaultproperties
 	PresetSpawnClasses(116)=Class'HGame.PoisonCloud'
 	PresetSpawnClasses(117)=Class'HGame.WhompingWillow'
 	Style=STY_Masked
-	Texture=Texture'MocaTexturePak.EditorIco.ICO_RandomSpawner'
+	Texture=Texture'MocaOmniResources.icon_random_spawner'
 }

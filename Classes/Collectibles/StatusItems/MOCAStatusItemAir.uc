@@ -2,7 +2,7 @@ class MOCAStatusItemAir extends StatusItem;
 
 defaultproperties
 {
-     strHudIcon="MocaTexturePak.Menu.CloudMedalIcon"
+     strHudIcon="MocaOmniResources.HUD.icon_cloud_medal"
      bDisplayCount=True
      strToolTipId="InGameMenu_0013"
 }
