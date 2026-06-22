@@ -14,9 +14,10 @@ enum eTurnMode
 
 var() bool bResetHuntersOnCatch;	// Moca: Should MOCAKnightHunters be reset when caught to avoid unfair player situations when using these actors together? Def: True
 var() float HoldTime;				// Moca: How long to hold Harry in place before respawning him. Def: 5.0
-var() float FadeTime;				// Moca: How long to fade out after caught, should be less than HoldTime. Def: 2.0
+var() float FadeTime;				// Moca: How long to fade out after caught. Def: 1.0
 var() Range LookTime;				// Moca: Minimum and maximum time to spend looking in a direction, random value is picked between min and max. Def: Min = 0.75 Max = 2.0
 var() Range TurnSpeed;				// Moca: Minimum and maximum time to it takes to turn in a directon, random value is picked between min and max. Def: Min = 0.334 Max = 0.667
+var() name CaughtAnim;				// Moca: Animation to play on self when Harry gets caught. Def: Shake
 var() name HarryCaughtAnim;			// Moca: Animation to play on Harry when he gets caught. Def: webstuck
 var() Color CameraFadeColor;		// Moca: Color of screen fade after caught. Def: R=0 G=0 B=0
 var() eTurnMode TurnMode;			// Moca: Turn mode for knight, FYI TM_Scan means it always turns side to side without ever centering. Def: TM_Random
@@ -27,6 +28,9 @@ var bool bLastWasRight;
 var name TurnLeftAnim;
 var name TurnRightAnim;
 var name HitAnim;
+
+var MOCAKnightBeam EyeBeam;
+var MOCAStealthTrigger StealthTrigger;
 
 
 //=========
@@ -47,57 +51,66 @@ event Trigger(Actor Other, Pawn EventInstigator)
 	}
 }
 
+event Bump(Actor Other)
+{
+	if ( Other == PlayerHarry )
+	{
+		if ( StealthTrigger != None && !IsInState('stateCatch') )
+		{
+			StealthTrigger.GoToCatch();
+			GoToCatch();
+		}
+	}
+}
+
 
 //=================
-// Harry Handling
+// State Handling
 //=================
 
 function GoToSleep()
 {
 	GotoState('stateSleep');
+
+	DestroyActors();
 }
 
 function GoToAwake()
 {
 	GotoState('stateLook');
+
+	DestroyActors();
+
+	StealthTrigger = Spawn(Class'MOCAStealthTrigger');
+	EyeBeam = Spawn(Class'MOCAKnightBeam');
+
+	AttachToBone(EyeBeam, 'Head');
+	EyeBeam.AttachToBone(StealthTrigger, 'TriggerBone');
 }
 
-function LockHarry()
+function GoToCatch()
 {
-	PlayerHarry.bStationary = True;
-	PlayerHarry.LoopAnim(HarryCaughtAnim);
+	GotoState('stateCatch');
 }
 
-function UnlockHarry()
+function DestroyActors()
 {
-	PlayerHarry.bStationary = False;
-	PlayerHarry.LoopAnim(PlayerHarry.GetCurrIdleAnimName());
-}
-
-function ResetHunters()
-{
-	if ( bResetHuntersOnCatch )
+	if ( StealthTrigger != None )
 	{
-		local MOCAKnightHunter A;
-		
-		foreach AllActors(class'MOCAKnightHunter', A)
-		{
-			A.Reset();
-		}
+		StealthTrigger.Destroy();
+		StealthTrigger = None;
 	}
-}
 
-function FadeScreen(float Alpha, float FadeDuration)
-{
-	local FadeViewController Fader;
-	Fader.Init(Alpha, CameraFadeColor.R, CameraFadeColor.G, CameraFadeColor.B, FadeDuration);
+	if ( EyeBeam != None )
+	{
+		EyeBeam.Destroy();
+		EyeBeam = None;
+	}
 }
 
 //==========
 // Helpers
 //==========
-
-function TeleportHarry();
 
 function float GetLookTime()
 {
@@ -185,19 +198,7 @@ state stateTurn
 state stateCatch
 {
 	begin:
-		LockHarry();
-
-		Sleep(HoldTime - FadeTime);
-		FadeScreen(1.0, FadeTime);
-		Sleep(FadeTime + 0.5);
-
-		TeleportHarry();
-		UnlockHarry();
-
-		FadeScreen(0.0, FadeTime);
-
-		TriggerEvent(Event, self, PlayerHarry);
-		GotoState('stateLook');
+		//LoopAnim()
 }
 
 
@@ -208,8 +209,11 @@ state stateCatch
 defaultproperties
 {
 	bResetHuntersOnCatch=True
+	HoldTime=5.0
+	FadeTime=1.0
 	LookTime=(Min=0.75,Max=2.0)
 	TurnSpeed=(Min=0.334,Max=0.667)
+	CaughtAnim="Shake"
 	HarryCaughtAnim="webstuck"
 	CameraFadeColor=(R=0,G=0,B=0)
 

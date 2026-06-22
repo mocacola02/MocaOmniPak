@@ -355,7 +355,7 @@ defaultproperties
      SpellMapping(26)=(SpellSlot=SPELL_DuelMimblewimble,SpellClass=Class'HGame.spellDuelMimblewimble')
      SpellMapping(27)=(SpellSlot=SPELL_DuelExpelliarmus,SpellClass=Class'HGame.spellDuelExpelliarmus')
 
-	Mesh=SkeletalMesh'skMocaHarry'
+	Mesh=SkeletalMesh'MocaOmniResources.skMocaHarry'
 	Cutname="harry"
 	RotationRate=(Pitch=20000,Yaw=87500,Roll=3072)
 }

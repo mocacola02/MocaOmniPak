@@ -13,7 +13,7 @@ defaultproperties
     DrawScale=1.2
     eVulnerableToSpell=SPELL_None
     IdleAnim=StandIdle
-    Mesh=SkeletalMesh'MocaOmniResources.skKnightWatcher'
+    Mesh=SkeletalMesh'MocaOmniResources.skKnight'
     SleepAnim=Idle
     WalkAnim=StandWalk
 }
