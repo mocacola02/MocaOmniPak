@@ -9,7 +9,7 @@ state PickupProp
 	{
 		Super.BeginState();
 		// Spawn pickup particles
-		Spawn(class'ShieldCollect',,,Location);
+		Spawn(class'MOCAShieldCollect',,,Location);
 	}
 
 	function EndState()

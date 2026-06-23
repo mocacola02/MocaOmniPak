@@ -15,7 +15,7 @@ defaultproperties
 	AmbientGlow=220
 	CollisionRadius=16.00
 	CollisionHeight=24.00
-	attachedParticleClass(0)=Class'MocaOmniPak.Essence_fx'
+	attachedParticleClass(0)=Class'MocaOmniPak.MOCAEssence_fx'
 	bHidden=True
 	AmbientSound=Sound'HPSounds.menu_sfx.sp_gui_amb_0001'
 	SoundPitch=128

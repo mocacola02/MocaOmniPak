@@ -21,7 +21,7 @@ event PostBeginPlay()
 	EmitLocation = Location;
 
 	// Spawn mist particles
-	Spawn(Class'BundimunMist',Self,,EmitLocation,,True);
+	Spawn(Class'MOCABundimunMist',Self,,EmitLocation,,True);
 }
 
 event Touch(Actor Other)

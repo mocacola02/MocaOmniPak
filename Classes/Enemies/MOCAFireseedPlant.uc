@@ -24,8 +24,8 @@ var float RangeIntensity;	// How far of our range to extend to
 function SpawnSmoke()
 {
 	// Spawn smoke actors
-	Spawn(Class'SmokePuff');
-	Spawn(Class'SmokeShoot');
+	Spawn(Class'MOCASmokePuff');
+	Spawn(Class'MOCASmokeShoot');
 }
 
 function SpawnFire()
@@ -38,7 +38,7 @@ function SpawnFire()
 	FireRotation.Pitch += 16384;
 
 	// Spawn smoke puff emitter
-	Spawn(Class'SmokePuff');
+	Spawn(Class'MOCASmokePuff');
 	// Spawn new fireball
 	NewFireBall = Spawn(Class'MOCAFireBall',Self,,Location + FireOffset,FireRotation);
 	// Set fireball speed

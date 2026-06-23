@@ -79,7 +79,7 @@ function Burst()
 	// Play pop sound
 	PlaySound(PopSound,SLOT_Interact);
 	// Spawn burst particles
-	Spawn(class'Firecracker_Burst',,,Location);
+	Spawn(class'MOCAFirecracker_Burst',,,Location);
 	// Destroy self
 	GotoState('stateKill');
 }

@@ -28,8 +28,8 @@ defaultproperties
 	DrawScale=0.8
     DamageToDeal=15
     LaunchSpeed=300
-    ParticleClass=Class'Paper_Fly'
-	DespawnEmitter=Class'Paper_Hit'
+    ParticleClass=Class'MOCAPaper_Fly'
+	DespawnEmitter=Class'MOCAPaper_Hit'
 	DamageName=PaperBall
 	Mesh=SkeletalMesh'MocaOmniResources.skPaperBallMesh'
 	bFixedRotationDir=True

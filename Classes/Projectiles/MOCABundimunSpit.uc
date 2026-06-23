@@ -32,6 +32,6 @@ defaultproperties
 	TargetInaccuracy=0.0
 	DamageName=BundimunSpit
 
-	ParticleClass=Class'BundimunSpitFX'
-	DespawnEmitter=Class'BundimunHit'
+	ParticleClass=Class'MOCABundimunSpitFX'
+	DespawnEmitter=Class'MOCABundimunHit'
 }

@@ -153,8 +153,8 @@ defaultproperties
 	bCollideWorld=False
 	bBlockCamera=False
 	bBounce=False
-	attachedParticleClass(0)=Class'MocaOmniPak.DiscoveryPoint_accent'
-	attachedParticleClass(1)=Class'MocaOmniPak.DiscoveryPoint_glow'
+	attachedParticleClass(0)=Class'MocaOmniPak.MOCADiscoveryPoint_accent'
+	attachedParticleClass(1)=Class'MocaOmniPak.MOCADiscoveryPoint_glow'
 	AmbientSound=Sound'MocaOmniResources.discovery_point_loop'
 	SoundPitch=128
 	SoundRadius=64

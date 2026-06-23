@@ -1,0 +1,16 @@
+//================================================================================
+// MOCAHP3Books3.
+//================================================================================
+
+class MOCAHP3Books3 extends MOCAHP3Books;
+
+defaultproperties
+{
+     Mesh=SkeletalMesh'MocaOmniResources.skBooks3'
+     DrawScale=1.15
+     CollisionRadius=10
+     CollisionWidth=10
+     CollisionHeight=10
+     CollideType=CT_Box
+     bAlignBottomAlways=True
+}

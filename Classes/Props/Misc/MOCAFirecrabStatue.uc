@@ -1,0 +1,10 @@
+class MOCAFirecrabStatue extends MOCAHP3Misc;
+
+defaultproperties
+{
+     Mesh=SkeletalMesh'MocaOmniResources.skFirecrabStatueMesh'
+     CollisionRadius=14
+     CollisionWidth=10
+     CollisionHeight=18
+     CollideType=CT_OrientedCylinder
+}

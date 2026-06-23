@@ -12,9 +12,9 @@ var() float PukeDamage;			// Moca: How much damage does puke do? Def: 7.5
 
 var bool bCanHit;				// Can we hit Harry right now
 
-var BundimunDeath KillEmit;		// Particles for kill
-var BundimunDig DigEmit;		// Particles for dig
-var BundimunShrink ShrinkEmit;	// Particles for shrink
+var MOCABundimunDeath KillEmit;		// Particles for kill
+var MOCABundimunDig DigEmit;		// Particles for dig
+var MOCABundimunShrink ShrinkEmit;	// Particles for shrink
 
 
 event PostBeginPlay()
@@ -34,7 +34,7 @@ event PostBeginPlay()
 	DigRotation.Pitch = 16384;
 
 	// Create dig emitter
-	DigEmit = Spawn(Class'BundimunDig',Self,,DigLocation,DigRotation);
+	DigEmit = Spawn(Class'MOCABundimunDig',Self,,DigLocation,DigRotation);
 }
 
 event Bump(Actor Other)
@@ -114,7 +114,7 @@ function SpawnKillParticles()
 	SpawnRotation.Roll = 0;
 
 	// Spawn emitter
-	KillEmit = Spawn(class'MocaOmniPak.BundimunDeath',Self,,Location,SpawnRotation,True);
+	KillEmit = Spawn(class'MocaOmniPak.MOCABundimunDeath',Self,,Location,SpawnRotation,True);
 }
 
 function bool IsValidJump()
@@ -300,7 +300,7 @@ state stateDie
 		Disable('Tick');
 
 		// Spawn shrink emitter
-		ShrinkEmit = Spawn(class'BundimunShrink',Self,,Location,,True);
+		ShrinkEmit = Spawn(class'MOCABundimunShrink',Self,,Location,,True);
 
 		// Play death sound
 		PlaySound(Sound'MocaOmniResources.Creatures.bundimun_smash');

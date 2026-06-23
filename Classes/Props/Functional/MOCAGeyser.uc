@@ -26,7 +26,7 @@ event PostBeginPlay()
 {
 	if ( bDebugLogging )
 	{
-		Spawn(Class'DebugSprite', self,, Location + Vec(0.0, 0.0, Distance),, True);
+		Spawn(Class'MOCADebugSprite', self,, Location + Vec(0.0, 0.0, Distance),, True);
 	}
 
 	if ( SteamFX == None )

@@ -56,7 +56,7 @@ defaultproperties
 
 	LifeSpan=3.0
 	TransientSoundRadius=4096.0
-	attachedParticleClass(0)=Class'MocaOmniPak.groundfire'
+	attachedParticleClass(0)=Class'MocaOmniPak.MOCAgroundfire'
 	bReallyDynamicLight=True
 	DrawType=DT_None
 	CollisionRadius=35

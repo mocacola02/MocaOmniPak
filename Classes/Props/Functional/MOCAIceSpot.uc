@@ -239,9 +239,9 @@ defaultproperties
 	FreezeSound=Sound'MocaOmniResources.freeze_multi'
 	ShatterSound=Sound'MocaOmniResources.salamander_explode'
 
-	IdleFX=class'IceBerg_Spot'
-	FreezeFX=class'Iceberg_Grow'
-	ShatterFX=class'Ice_Break'
+	IdleFX=class'MOCAIceberg_Spot'
+	FreezeFX=class'MOCAIceberg_Grow'
+	ShatterFX=class'MOCAIce_Break'
 	MeltFX=class'BasilEyeSmoke'
 
 	ShatterSpell=SPELL_Flipendo

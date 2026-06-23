@@ -66,7 +66,7 @@ function ShootPaper()
 	// Play shoot sound
 	PlaySound(ShootSound, SLOT_Talk);
 	// Spawn paper particles
-	Spawn(class'Paper_Hit',Self,,Location);
+	Spawn(class'MOCAPaper_Hit',Self,,Location);
 }
 
 
