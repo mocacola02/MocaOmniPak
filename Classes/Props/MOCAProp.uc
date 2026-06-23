@@ -75,7 +75,16 @@ function DebugLog(string Msg)
 defaultproperties
 {
 	DrawDistance=0.0
+
 	bStatic=True
+
+	bBlockActors=True
+	bBlockCamera=True
+	bBlockPlayers=True
+	bCollideActors=True
+	bCollideWorld=True
+
+	AmbientGlow=32
 	DrawType=DT_Mesh
 	Mesh=SkeletalMesh'skSundialMesh'
 }

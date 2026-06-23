@@ -1,7 +1,7 @@
 //================================================================================
 // MOCAPadlock.
 //================================================================================
-class MOCAPadlock extends MOCAPawn;
+class MOCAPadlock extends MOCAFunctionalProp;
 
 var() bool bFastOpen;				// Moca: Play faster unlock animation? Def: False
 var() Sound UnlockSFX;				// Moca: Sound to play on unlock. Def: Sound'MocaOmniResources.padlock_multi'
@@ -38,7 +38,7 @@ state stateUnlock
 		// Finish anim
 		FinishAnim();
 		// Emit event
-		TriggerEvent(Event,Self,Self);
+		TriggerEvent(Event,Self,None);
 		// Destroy self
 		Destroy();
 }

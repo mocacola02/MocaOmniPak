@@ -3,21 +3,9 @@
 //================================================================================
 class DebugSprite extends Sprite;
 
-var float DespawnDelay;	// How long before despawning
-var float CurrentTime;	// Current time accrued
-
-
-event Tick(float DeltaTime)
+function Setup(float DespawnDelay)
 {
-	Super.Tick(DeltaTime);
-
-	CurrentTime += DeltaTime;	// Increment time
-
-	// If we've surpassed the delay, destroy
-	if ( CurrentTime >= DespawnDelay )
-	{
-		Destroy();
-	}
+	LifeSpan = DespawnDelay;
 }
 
 
@@ -30,5 +18,6 @@ defaultproperties
 	bBlockPlayers=False
 	bCollideActors=False
 	bCollideWorld=False
-	DespawnDelay=10.0
+	
+	LifeSpan=0.0
 }

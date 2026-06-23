@@ -1,4 +1,4 @@
-class MOCAForceField extends MOCAProp;
+class MOCAForceField extends MOCAFunctionalProp;
 
 var() float ForceRange;		// Moca: How far does our force have influence? Def: 512.0
 var() float ForceStrength;	// Moca: How strong is our force? Def: 128.0

@@ -1,4 +1,4 @@
-class MOCAIceSpot extends MOCAPawn;
+class MOCAIceSpot extends MOCAFunctionalProp;
 
 var() bool bDisableCollision;		// Moca: Should actor collision always be off? Use this if you plan on using a mover. Def: False
 var() float Lifetime;				// Moca: How long should iceberg last before melting? Def: 15.0
@@ -103,7 +103,7 @@ state stateFreeze
 		// Play freeze sound
 		PlaySound(FreezeSound);
 		// Emit event, if we have one
-		TriggerEvent(Event,Self,Self);
+		TriggerEvent(Event,Self,None);
 		// If not disabled, enable collision
 		if ( !bDisableCollision )
 		{
