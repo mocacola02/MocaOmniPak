@@ -95,7 +95,7 @@ defaultproperties
 	PopUpMessage="Edit the message from MOCAPopUpTrigger properties."
 	
 	PopUpOpacity=1.0
-	BoxMarginPx=4.0
+	BoxMarginPx=16.0
 	ScreenMarginPx=64.0
 	FontScaleMult=1.5
 	BannerTexture=Texture'leftPanel'

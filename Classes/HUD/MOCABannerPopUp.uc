@@ -182,7 +182,7 @@ function WrapText(
 
 	Lines.Length = 0;
 
-	MaxWidth = C.SizeX * MaxPct;
+	MaxWidth = (C.SizeX * MaxPct) - (BoxMarginPx * 2.0);
 	Remaining = InText;
 
 	while (Remaining != "")
