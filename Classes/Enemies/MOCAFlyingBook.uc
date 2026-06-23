@@ -139,7 +139,7 @@ auto state stateIdle
 
 	begin:
 		// If proximity based and Harry is near, wake up
-		if ( WakeUpMode == WM_Proximity && IsHarryNear(WakeUpRange) )
+		if ( WakeUpMode == WM_Proximity && FastViewCheck(PlayerHarry) && IsHarryNear(WakeUpRange) )
 		{
 			Log("Harry is near, waking up");
 			Goto('wakeup');
@@ -254,7 +254,7 @@ state stateFly
 	event Tick(float DeltaTime)
 	{
 		// If Harry is near, attack
-		if ( IsHarryNear(AttackRange) )
+		if ( FastViewCheck(PlayerHarry) && IsHarryNear(AttackRange) )
 		{
 			Log("Harry is near, attacking from idle");
 			bHomeCooldown = False;
@@ -308,7 +308,7 @@ state stateAttack
 		Sleep(AttackDelay);
 
 		// If Harry is still near, shoot again
-		if ( IsHarryNear(AttackRange) )
+		if ( FastViewCheck(PlayerHarry) && IsHarryNear(AttackRange) )
 		{
 			Log("Harry is near, continuing to attack");
 			Goto('begin');
@@ -372,7 +372,7 @@ state stateHit
 		FinishAnim();
 
 		// If harry is near, attack again
-		if ( IsHarryNear(AttackRange) )
+		if ( FastViewCheck(PlayerHarry) && IsHarryNear(AttackRange) )
 		{
 			Log("Harry is near, attack from hit");
 			GotoState('stateAttack');

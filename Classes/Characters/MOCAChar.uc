@@ -204,6 +204,11 @@ function bool CanISeeHarry(float MinDot, optional bool bRememberLocation)
 	return False;
 }
 
+function bool FastViewCheck(Actor TargetActor)
+{
+	return FastTrace(TargetActor.Location, Location);
+}
+
 
 //////////
 // Magic
