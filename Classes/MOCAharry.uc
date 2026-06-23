@@ -15,7 +15,7 @@ struct SpellMap
 	var() ESpellType SpellToReplicate;
 };
 
-var(MOCAMagic) bool bUseMOCAWand;
+var(MOCAMagic) Class<Weapon> DefaultWeapon;
 var(MOCAMagic) Class<SpellCursor> SpellCursorClass;
 var(MOCAMagic) SpellMap SpellMapping[28];
 
@@ -61,31 +61,31 @@ event PreClientTravel()
 
 event TravelPostAccept()
 {
-    local Weapon weap;
-	local MOCAWand Mweap;	// Mweap. Mweap. Job's gone.
+	local Weapon weap;
 
 	Super.TravelPostAccept();
 
-	if ( FindInventoryType(Class'MOCAWand') == None )
+	if ( FindInventoryType(DefaultWeapon) == None )
 	{
 		// Spawn MOCAWand and make it our weapon
-		weap = Spawn(Class'MOCAWand', self);
+		weap = Spawn(DefaultWeapon, self);
 		weap.BecomeItem();
 		AddInventory(weap);
 
 		weap.WeaponSet(self);
 		weap.GiveAmmo(self);
 
-		DebugLog("We didn't have MOCAWand, so we spawned one: " $ weap);
+		DebugLog("We didn't have " $ DefaultWeapon $ ", so we spawned one: " $ weap);
 	}
 	else
 	{
-		DebugLog("We already have a MOCAWand, so we're not spawning one");
+		DebugLog("We already have a " $ DefaultWeapon $ ", so we're not spawning one");
 	}
 
-	if ( bUseMOCAWand )
+	SetWeaponBySlot(DefaultWeapon.Default.InventoryGroup);
+
+	if ( DefaultWeapon == Class'MOCAWand' )
 	{
-		SetWeaponBySlot(2);
 		UpdateSpellbook();
 	}
 }
@@ -324,36 +324,36 @@ function DebugLog(string Msg)
 
 defaultproperties
 {
-	bUseMOCAWand=True
+	DefaultWeapon=Class'MOCAWand'
 	SpellCursorClass=Class'MOCASpellCursor'
 
-     SpellMapping(1)=(SpellSlot=SPELL_Alohomora,SpellClass=Class'HGame.spellAlohomora')
-     SpellMapping(2)=(SpellSlot=SPELL_Incendio)
-     SpellMapping(3)=(SpellSlot=SPELL_LocomotorWibbly,SpellClass=Class'MocaOmniPak.MOCAspellGlacius')
-     SpellMapping(4)=(SpellSlot=SPELL_Lumos,SpellClass=Class'HGame.spellLumos')
-     SpellMapping(5)=(SpellSlot=SPELL_Nox)
-     SpellMapping(6)=(SpellSlot=SPELL_PetrificusTotalus)
-     SpellMapping(7)=(SpellSlot=SPELL_WingardiumLeviosa)
-     SpellMapping(8)=(SpellSlot=SPELL_Verdimillious)
-     SpellMapping(9)=(SpellSlot=SPELL_Vermillious)
-     SpellMapping(10)=(SpellSlot=SPELL_Flintifores)
-     SpellMapping(11)=(SpellSlot=SPELL_Reparo)
-     SpellMapping(12)=(SpellSlot=SPELL_MucorAdNauseum)
-     SpellMapping(13)=(SpellSlot=SPELL_Flipendo,SpellClass=Class'HGame.spellFlipendo')
-     SpellMapping(14)=(SpellSlot=SPELL_Ectomatic)
-     SpellMapping(15)=(SpellSlot=SPELL_Avifores)
-     SpellMapping(16)=(SpellSlot=SPELL_FireCracker)
-     SpellMapping(17)=(SpellSlot=SPELL_Transfiguration)
-     SpellMapping(18)=(SpellSlot=SPELL_WingSustain)
-     SpellMapping(19)=(SpellSlot=SPELL_Diffindo,SpellClass=Class'HGame.spellDiffindo')
-     SpellMapping(20)=(SpellSlot=SPELL_Skurge,SpellClass=Class'HGame.spellSkurge')
-     SpellMapping(21)=(SpellSlot=SPELL_Spongify,SpellClass=Class'HGame.spellSpongify')
-     SpellMapping(22)=(SpellSlot=SPELL_Rictusempra,SpellClass=Class'HGame.spellRictusempra')
-     SpellMapping(23)=(SpellSlot=SPELL_Ecto)
-     SpellMapping(24)=(SpellSlot=SPELL_Fire)
-     SpellMapping(25)=(SpellSlot=SPELL_DuelRictusempra,SpellClass=Class'HGame.spellDuelRictusempra')
-     SpellMapping(26)=(SpellSlot=SPELL_DuelMimblewimble,SpellClass=Class'HGame.spellDuelMimblewimble')
-     SpellMapping(27)=(SpellSlot=SPELL_DuelExpelliarmus,SpellClass=Class'HGame.spellDuelExpelliarmus')
+	SpellMapping(1)=(SpellSlot=SPELL_Alohomora,SpellClass=Class'HGame.spellAlohomora')
+	SpellMapping(2)=(SpellSlot=SPELL_Incendio)
+	SpellMapping(3)=(SpellSlot=SPELL_LocomotorWibbly,SpellClass=Class'MocaOmniPak.MOCAspellGlacius')
+	SpellMapping(4)=(SpellSlot=SPELL_Lumos,SpellClass=Class'HGame.spellLumos')
+	SpellMapping(5)=(SpellSlot=SPELL_Nox)
+	SpellMapping(6)=(SpellSlot=SPELL_PetrificusTotalus)
+	SpellMapping(7)=(SpellSlot=SPELL_WingardiumLeviosa)
+	SpellMapping(8)=(SpellSlot=SPELL_Verdimillious)
+	SpellMapping(9)=(SpellSlot=SPELL_Vermillious)
+	SpellMapping(10)=(SpellSlot=SPELL_Flintifores)
+	SpellMapping(11)=(SpellSlot=SPELL_Reparo)
+	SpellMapping(12)=(SpellSlot=SPELL_MucorAdNauseum)
+	SpellMapping(13)=(SpellSlot=SPELL_Flipendo,SpellClass=Class'HGame.spellFlipendo')
+	SpellMapping(14)=(SpellSlot=SPELL_Ectomatic)
+	SpellMapping(15)=(SpellSlot=SPELL_Avifores)
+	SpellMapping(16)=(SpellSlot=SPELL_FireCracker)
+	SpellMapping(17)=(SpellSlot=SPELL_Transfiguration)
+	SpellMapping(18)=(SpellSlot=SPELL_WingSustain)
+	SpellMapping(19)=(SpellSlot=SPELL_Diffindo,SpellClass=Class'HGame.spellDiffindo')
+	SpellMapping(20)=(SpellSlot=SPELL_Skurge,SpellClass=Class'HGame.spellSkurge')
+	SpellMapping(21)=(SpellSlot=SPELL_Spongify,SpellClass=Class'HGame.spellSpongify')
+	SpellMapping(22)=(SpellSlot=SPELL_Rictusempra,SpellClass=Class'HGame.spellRictusempra')
+	SpellMapping(23)=(SpellSlot=SPELL_Ecto)
+	SpellMapping(24)=(SpellSlot=SPELL_Fire)
+	SpellMapping(25)=(SpellSlot=SPELL_DuelRictusempra,SpellClass=Class'HGame.spellDuelRictusempra')
+	SpellMapping(26)=(SpellSlot=SPELL_DuelMimblewimble,SpellClass=Class'HGame.spellDuelMimblewimble')
+	SpellMapping(27)=(SpellSlot=SPELL_DuelExpelliarmus,SpellClass=Class'HGame.spellDuelExpelliarmus')
 
 	Mesh=SkeletalMesh'MocaOmniResources.skMocaHarry'
 	Cutname="harry"

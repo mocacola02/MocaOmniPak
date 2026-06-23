@@ -10,8 +10,26 @@ var() float FadeTime;
 var() name HarryCaughtAnim;
 var() Color CameraFadeColor;
 
+var MOCAKnight KnightOwner;
+var MOCAKnightBeam EyeBeam;
 
-function Setup(bool bResetHunters, float HoldT, float FadeT, name CaughtAnim, name EventName, Color FadeColor)
+
+//=========
+// Events
+//=========
+
+event Tick(float DeltaTime)
+{
+	if ( EyeBeam != None )
+	{
+		local Vector TargetPos;
+		TargetPos = EyeBeam.GetTriggerPosition();
+		SetLocation(TargetPos);
+	}
+}
+
+
+function Setup(bool bResetHunters, float HoldT, float FadeT, name CaughtAnim, name EventName, Color FadeColor, MOCAKnight Knight)
 {
 	bResetHuntersOnCatch = bResetHunters;
 	HoldTime = HoldT;
@@ -19,29 +37,46 @@ function Setup(bool bResetHunters, float HoldT, float FadeT, name CaughtAnim, na
 	HarryCaughtAnim = CaughtAnim;
 	CameraFadeColor = FadeColor;
 	Event = EventName;
+	KnightOwner = Knight;
+
+	if ( KnightOwner != None )
+	{
+		EyeBeam = KnightOwner.EyeBeam;
+	}
+
+	LightRadius = 8.0;
 }
 
 function ProcessTrigger(Actor Other, Pawn EventInstigator)
 {
 	if ( Other == PlayerHarry && !IsInState('stateCatch') )
 	{
+		DebugLog("Hit Harry, catching him!");
 		GoToCatch();
+
+		if ( KnightOwner != None )
+		{
+			KnightOwner.GoToCatch();
+		}
 	}
 }
 
 function GoToCatch()
 {
+	DebugLog("We're going to stateCatch");
 	GotoState('stateCatch');
 }
 
 function LockHarry()
 {
+	PlayerHarry.GotoState('stateIdle');
 	PlayerHarry.bStationary = True;
 	PlayerHarry.LoopAnim(HarryCaughtAnim);
 }
 
 function UnlockHarry()
 {
+	PlayerHarry.GotoState('PlayerWalking');
 	PlayerHarry.bStationary = False;
 	PlayerHarry.LoopAnim(PlayerHarry.GetCurrIdleAnimName());
 }
@@ -116,7 +151,18 @@ defaultproperties
 	HarryCaughtAnim="webstuck"
 	CameraFadeColor=(R=0,G=0,B=0)
 
-	CollisionHeight=35
-	CollisionRadius=42
-	CollideType=CT_Box
-}    
+	CollisionHeight=30
+	CollisionRadius=30
+	CollideType=CT_AlignedCylinder
+
+	bHidden=False
+	bDebugLogging=True
+
+	bDynamicLight=True;
+	LightType=LT_Steady;
+	LightEffect=LE_WateryShimmer
+	LightBrightness=150;
+	LightHue=170;
+	LightSaturation=32;
+	LightRadius=0.0
+}

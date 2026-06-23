@@ -19,6 +19,11 @@ event PostBeginPlay()
 		RespawnLocation = Location;
 		RespawnYaw = Rotation.Yaw;
 	}
+
+	if ( !PlayerHarry.IsA('MOCAharry') )
+	{
+		PlayerHarry.ChessTargetLocation = PlayerHarry.Location;
+	}
 }
 
 function ProcessTrigger(Actor Other, Pawn EventInstigator)
