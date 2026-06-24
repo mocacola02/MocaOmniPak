@@ -67,7 +67,6 @@ event TravelPostAccept()
 
 	if ( FindInventoryType(DefaultWeapon) == None )
 	{
-		// Spawn MOCAWand and make it our weapon
 		weap = Spawn(DefaultWeapon, self);
 		weap.BecomeItem();
 		AddInventory(weap);
