@@ -52,19 +52,13 @@ function ProcessTrigger(Actor Other, Pawn EventInstigator)
 	if ( Other == PlayerHarry && !IsInState('stateCatch') )
 	{
 		DebugLog("Hit Harry, catching him!");
-		GoToCatch();
+		GotoState('stateCatch');
 
 		if ( KnightOwner != None )
 		{
-			KnightOwner.GoToCatch();
+			KnightOwner.GotoState('stateCatch');;
 		}
 	}
-}
-
-function GoToCatch()
-{
-	DebugLog("We're going to stateCatch");
-	GotoState('stateCatch');
 }
 
 function LockHarry()
@@ -103,6 +97,7 @@ function ResetHunters()
 function FadeScreen(float Alpha, float FadeDuration)
 {
 	local FadeViewController Fader;
+	Fader = Spawn(Class'FadeViewController');
 	Fader.Init(Alpha, CameraFadeColor.R, CameraFadeColor.G, CameraFadeColor.B, FadeDuration);
 }
 
@@ -136,6 +131,12 @@ state stateCatch
 		FadeScreen(0.0, FadeTime);
 
 		TriggerEvent(Event, self, PlayerHarry);
+
+		if ( KnightOwner != None )
+		{
+			KnightOwner.GotoState('stateIdle');
+		}
+
 		GotoState('stateLook');
 }
 

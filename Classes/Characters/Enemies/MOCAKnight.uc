@@ -1,8 +1,12 @@
 //================================================================================
-// MOCAKnight. One of my oldest classes finally rewritten. Still not amazing but better
+// MOCAKnight.
+//
+// Turns its head to "scan" for Harry, similar to the HP3 6th gen knights.
+// If you want a prop version of this, see MOCAKnightSpawner.
 //================================================================================
 class MOCAKnight extends MOCAChar;
 
+//= Export Vars =//
 enum eTurnMode
 {
 	TM_Random,
@@ -12,43 +16,46 @@ enum eTurnMode
 	TM_Scan
 };
 
-var() bool bStartAwake;				// Moca: Should knight be awake on spawn? Def: False
-var() bool bResetHuntersOnCatch;	// Moca: Should MOCAKnightHunters be reset when caught to avoid unfair player situations when using these actors together? Def: True
-var() float HoldTime;				// Moca: How long to hold Harry in place before respawning him. Def: 5.0
-var() float FadeTime;				// Moca: How long to fade out after caught. Def: 1.0
-var() Range LookTime;				// Moca: Minimum and maximum time to spend looking in a direction, random value is picked between min and max. Def: Min = 0.75 Max = 2.0
-var() Range TurnSpeed;				// Moca: Minimum and maximum time to it takes to turn in a directon, random value is picked between min and max. Def: Min = 0.334 Max = 0.667
-var() name CaughtAnim;				// Moca: Animation to play on self when Harry gets caught. Def: Shake
-var() name HarryCaughtAnim;			// Moca: Animation to play on Harry when he gets caught. Def: webstuck
-var() Color CameraFadeColor;		// Moca: Color of screen fade after caught. Def: R=0 G=0 B=0
-var() eTurnMode TurnMode;			// Moca: Turn mode for knight, FYI TM_Scan means it always turns side to side without ever centering. Def: TM_Random
+var() Range 	LookTime;	// Moca: Minimum and maximum time to spend looking in a direction, random value is picked between min and max. Def: Min = 0.75 Max = 2.0
+var() Range 	TurnTime;	// Moca: Minimum and maximum time to it takes to turn in a directon, random value is picked between min and max. Def: Min = 0.334 Max = 0.667
+var() eTurnMode TurnMode;	// Moca: Turn mode for knight, FYI TM_Scan means it always turns side to side without ever centering. Def: TM_Random
 
-var bool bJustTurned;
-var bool bLastWasRight;
+//= Stealth Vars =//
+var(MOCAStealth) bool 	bStartAwake;				// Moca: Should knight be awake on spawn? Def: True
+var(MOCAStealth) bool 	bResetHuntersOnCatch;		// Moca: Should MOCAKnightHunters be reset when caught to avoid unfair player situations when using these actors together? Def: True
+var(MOCAStealth) float 	HoldTime;					// Moca: How long to hold Harry in place before respawning him. Def: 2.0
+var(MOCAStealth) float 	FadeTime;					// Moca: How long to fade out after caught. Def: 3.0
+var(MOCAStealth) name 	CaughtAnim;					// Moca: Animation to play on self when Harry gets caught. Def: Shake
+var(MOCAStealth) name 	HarryCaughtAnim;			// Moca: Animation to play on Harry when he gets caught. Def: webstuck
+var(MOCAStealth) Color 	CameraFadeColor;			// Moca: Color of screen fade after caught. Def: R=0 G=0 B=0
 
-var float TurnTime;
+//= Head Turn Vars =//
+var bool 	bCentering;
+var float 	WaitTime;
 
-var name TurnLeftAnim;
-var name TurnRightAnim;
-var name HitAnim;
+var name 	AttachBone;
 
-var MOCAKnightBeam EyeBeam;
-var MOCAStealthTrigger StealthTrigger;
+var name 	PrevDir;
+var name 	TargetDir;
+
+var name 	CurrIdleAnim;
+var name 	TargetAnim;
+var name 	IdleLeftAnim;
+var name 	TurnLeftAnim;
+var name 	LeftCenterAnim;
+var name 	IdleRightAnim;
+var name 	TurnRightAnim;
+var name 	RightCenterAnim;
+var name 	HitAnim;
+
+//= Actor Ref Vars =//
+var MOCAKnightBeam 		EyeBeam;
+var MOCAStealthTrigger 	StealthTrigger;
 
 
 //=========
 // Events
 //=========
-
-event PostBeginPlay()
-{
-	LoopAnim(IdleAnimName);
-
-	if ( bStartAwake )
-	{
-		GoToAwake();
-	}
-}
 
 event Trigger(Actor Other, Pawn EventInstigator)
 {
@@ -56,11 +63,11 @@ event Trigger(Actor Other, Pawn EventInstigator)
 
 	if ( !IsInState('stateSleep') )
 	{
-		GoToSleep();
+		GotoState('stateSleep');
 	}
 	else
 	{
-		GoToAwake();
+		GotoState('stateIdle');
 	}
 }
 
@@ -71,44 +78,40 @@ event Bump(Actor Other)
 		if ( StealthTrigger != None && !IsInState('stateCatch') )
 		{
 			DebugLog("I bumped Harry, catching him!");
-			StealthTrigger.GoToCatch();
-			GoToCatch();
+
+			StealthTrigger.GotoState('stateCatch');
+			GotoState('stateCatch');
 		}
 	}
 }
 
 
-//=================
-// State Handling
-//=================
+//================
+// Spawn Helpers
+//================
 
-function GoToSleep()
+function CreateStealthActors()
 {
-	GotoState('stateSleep');
+	if ( EyeBeam == None )
+	{
+		EyeBeam = Spawn(Class'MOCAKnightBeam', self);
 
-	DestroyActors();
+		if ( AttachBone != '' )
+		{
+			AttachToBone(EyeBeam, AttachBone);
+		}
+	}
+
+	if ( StealthTrigger == None )
+	{
+		StealthTrigger = Spawn(Class'MOCAStealthTrigger', self);
+		StealthTrigger.Setup(bResetHuntersOnCatch, HoldTime, FadeTime, HarryCaughtAnim, Event, CameraFadeColor, self);
+	}
+
+	DebugLog("StealthTrigger: " $ StealthTrigger $ " | EyeBeam: " $ EyeBeam);
 }
 
-function GoToAwake()
-{
-	DestroyActors();
-
-	EyeBeam = Spawn(Class'MOCAKnightBeam');
-	AttachToBone(EyeBeam, 'Head');
-
-	
-	StealthTrigger = Spawn(Class'MOCAStealthTrigger');
-	StealthTrigger.Setup(bResetHuntersOnCatch, HoldTime, FadeTime, HarryCaughtAnim, Event, CameraFadeColor, self);
-
-	GotoState('stateLook');
-}
-
-function GoToCatch()
-{
-	GotoState('stateCatch');
-}
-
-function DestroyActors()
+function DestroyStealthActors()
 {
 	if ( StealthTrigger != None )
 	{
@@ -123,55 +126,66 @@ function DestroyActors()
 	}
 }
 
-//==========
-// Helpers
-//==========
 
-function float GetLookTime()
+//======================
+// Animation Selection
+//======================
+
+function name GetTurnAnimation()
 {
-	return RandRange(LookTime.Min, LookTime.Max);
-}
+	local name TempDir;
+	TempDir = GetTurnDirection();
+	PrevDir = TargetDir;
+	TargetDir = TempDir;
 
-function float GetTurnSpeed()
-{
-	return RandRange(TurnSpeed.Min, TurnSpeed.Max);
-}
+	bCentering = False;
 
-function float GetTweenTime(float TurnValue)
-{
-	return TurnValue * TurnValue;
-}
-
-function name GetTurnAnim()
-{
-	DebugLog("Mode is " $ TurnMode);
-
-	if ( bJustTurned && TurnMode != TM_Scan )
+	if ( TargetDir == 'Left' )
 	{
-		DebugLog("Turning to center");
-		bJustTurned = False;
-		return IdleAnimName;
+		return TurnLeftAnim;
 	}
+	else if ( TargetDir == 'Right' )
+	{
+		return TurnRightAnim;
+	}
+	else
+	{
+		bCentering = True;
+		if ( PrevDir == 'Left' )
+		{
+			return LeftCenterAnim;
+		}
+		else
+		{
+			return RightCenterAnim;
+		}
+	}
+}
 
-	bJustTurned = True;
-
+function name GetTurnDirection()
+{
 	switch(TurnMode)
 	{
 		case TM_Random:
 			return GetRandomTurnAnim();
 		case TM_Scan:
 		case TM_InOrder:
-			return GetOrderedTurnAnim();
+			return GetOrderedDirection();
 		case TM_AlwaysLeft:
-			DebugLog("Looking left");
-			return TurnLeftAnim;
-		case TM_AlwaysRight:
-			DebugLog("Looking right");
-			return TurnRightAnim;
+			return GetCenterOrOther('Left');;
 	}
 
-	DebugLog("Looking right");
-	return TurnRightAnim;
+	return GetCenterOrOther('Right');
+}
+
+function name GetCenterOrOther(name OtherDir)
+{
+	if ( TargetDir != 'Center' )
+	{
+		return 'Center';
+	}
+
+	return OtherDir;
 }
 
 function name GetRandomTurnAnim()
@@ -179,28 +193,52 @@ function name GetRandomTurnAnim()
 	local float RandF;
 	RandF = FRand();
 
-	if ( RandF >= 0.5 )
+	if ( TargetDir != 'Center' )
 	{
-		DebugLog("Looking left");
-		return TurnLeftAnim;
+		return 'Center';
 	}
-
-	DebugLog("Looking right");
-	return TurnRightAnim;
+	else if ( RandF > 0.5 )
+	{
+		return 'Left';
+	}
+	else
+	{
+		return 'Right';
+	}
 }
 
-function name GetOrderedTurnAnim()
+function name GetOrderedDirection()
 {
-	if ( bLastWasRight )
+	if ( TargetDir != 'Center' )
 	{
-		bLastWasRight = False;
-		DebugLog("Looking left");
-		return TurnLeftAnim;
+		return 'Center';
 	}
+	else if ( PrevDir == 'Right' )
+	{
+		return 'Left';
+	}
+	else
+	{
+		return 'Right';
+	}
+}
 
-	bLastWasRight = True;
-	DebugLog("Looking right");
-	return TurnRightAnim;
+
+//===============
+// Time Helpers
+//===============
+
+function float GetLookTime()
+{
+	return RandRange(LookTime.Min, LookTime.Max);
+}
+
+function float GetTurnTime()
+{
+	local float TurnRate;
+	TurnRate = 1.0 / RandRange(TurnTime.Min, TurnTime.Max);
+	DebugLog("TurnRate: " $ TurnRate);
+	return TurnRate;
 }
 
 
@@ -210,32 +248,88 @@ function name GetOrderedTurnAnim()
 
 auto state stateSleep
 {
+	event BeginState()
+	{
+		DestroyStealthActors();
+
+		LoopAnim(IdleAnimName);
+		
+		eVulnerableToSpell = SPELL_None;
+	}
+
+	begin:
+		if ( bStartAwake )
+		{
+			bStartAwake = False;
+			GotoState('stateIdle');
+		}
 }
 
-state stateLook
+state stateIdle
 {
+	event BeginState()
+	{
+		CreateStealthActors();
+
+		eVulnerableToSpell = MapDefault.eVulnerableToSpell;
+
+		if ( CurrIdleAnim == '' )
+		{
+			CurrIdleAnim = IdleAnimName;
+		}
+
+		LoopAnim(CurrIdleAnim);
+
+		DebugLog("Finished entering stateIdle");
+	}
+
 	begin:
-		DebugLog("Waiting to turn again");
-		Sleep(GetLookTime());
+		WaitTime = GetLookTime();
+		DebugLog("Sleeping for " $ WaitTime $ " seconds");
+
+		Sleep(WaitTime);
+
+		DebugLog("Going to turn");
 		GotoState('stateTurn');
 }
 
 state stateTurn
 {
 	begin:
-		TurnTime = GetTurnSpeed();
-		TweenAnim(GetTurnAnim(), GetTweenTime(TurnTime));
-		DebugLog("TweenTime = " $ GetTweenTime(TurnTime));
-		DebugLog("Waiting for " $ TurnTime);
-		Sleep(TurnTime);
-		
-		GotoState('stateLook');
+		TargetAnim = GetTurnAnimation();
+
+		DebugLog("TargetDir: " $ TargetDir $ " | PrevDir: " $ PrevDir $ " | TargetAnim: " $ TargetAnim);
+		DebugLog("Now playing " $ TargetAnim);
+
+		PlayAnim(TargetAnim, GetTurnTime());
+		FinishAnim();
+
+		if ( TurnMode == TM_Scan && bCentering )
+		{
+			Goto('begin');
+		}
+		if ( TargetDir == 'Left' )
+		{
+			CurrIdleAnim = IdleLeftAnim;
+		}
+		else if ( TargetDir == 'Right' )
+		{
+			CurrIdleAnim = IdleRightAnim;
+		}
+		else
+		{
+			CurrIdleAnim = IdleAnimName;
+		}
+
+		GotoState('stateIdle');
 }
 
 state stateCatch
 {
-	begin:
+	event BeginState()
+	{
 		LoopAnim(CaughtAnim);
+	}
 }
 
 
@@ -245,25 +339,37 @@ state stateCatch
 
 defaultproperties
 {
+	bStartAwake=True
 	bResetHuntersOnCatch=True
-	HoldTime=5.0
-	FadeTime=1.0
-	LookTime=(Min=1.667,Max=3.334)
-	TurnSpeed=(Min=1.667,Max=3.334)
-	CaughtAnim="Shake"
+	HoldTime=2.0
+	FadeTime=3.0
+	CaughtAnim="IdleHit"
 	HarryCaughtAnim="webstuck"
 	CameraFadeColor=(R=0,G=0,B=0)
 
+	LookTime=(Min=1.667,Max=3.334)
+	TurnTime=(Min=0.667,Max=1.334)
+
+	AttachBone="Head"
+
+	PrevDir="Center"
+	TargetDir="Center"
+
 	IdleAnimName="Idle"
-	TurnLeftAnim="IdleLeft"
-	TurnRightAnim="IdleRight"
-	CaughtAnim="IdleHit"
+	IdleLeftAnim="IdleLeft"
+	TurnLeftAnim="IdleLookLeft"
+	IdleRightAnim="IdleRight"
+	TurnRightAnim="IdleLookRight"
+	LeftCenterAnim="Left2Center"
+	RightCenterAnim="Right2Center"
 	HitAnim="IdleHit"
 
-	bDebugLogging=True
-
+	bAlignBottomAlways=True
+	CollisionRadius=21
 	CollisionHeight=54
+	CollideType=CT_OrientedCylinder
 
+	AmbientGlow=32
 	DrawScale=1.15
 	Mesh=SkeletalMesh'MocaOmniResources.skKnight'
 }
