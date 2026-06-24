@@ -1,15 +1,12 @@
 //================================================================================
-// MOCAKnightHunter.
+// MOCADementorHunter.
 //================================================================================
-class MOCAKnightHunter extends MOCAHunter;
+class MOCADementorHunter extends MOCAHunter;
 
 defaultproperties
 {
-	CaughtMusicCue=Sound'MocaOmniResources.stealth_caught'
-	CaughtSFX=Sound'MocaOmniResources.armor_clink_multi'
-
-	HuntIdleAnims(0)="HuntIdle1"
-	HuntIdleAnims(1)="HuntIdle2"
+	HuntIdleAnims(0)="Idle"
+	HuntIdleAnims(1)="patrol"
 	CatchAnim="IdleHit"
 	WakeUpAnim="WakeUp"
 
@@ -19,10 +16,10 @@ defaultproperties
 	CollideType=CT_OrientedCylinder
 
 	AmbientGlow=32
-	DrawScale=1.15
-	Mesh=SkeletalMesh'MocaOmniResources.skKnight'
+	Mesh=SkeletalMesh'MocaOmniResources.skDementorMesh'
 
 	IdleAnimName="Idle"
-	WalkAnimName="HuntWalk"
-	RunAnimName="HuntWalk"
+	WalkAnimName="AttackApproachFly"
+	RunAnimName="BlownBack"
 }
+  

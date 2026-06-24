@@ -89,7 +89,7 @@ function ResetHunters()
 		
 		foreach AllActors(class'MOCAKnightHunter', A)
 		{
-			A.Reset();
+			A.Reset(True);
 		}
 	}
 }
