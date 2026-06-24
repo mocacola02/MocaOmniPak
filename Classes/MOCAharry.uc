@@ -165,6 +165,16 @@ function PlaySpellCastSound (ESpellType SpellType)
 // Stock Overrides
 //==================
 
+exec function AltFire (optional float f)
+{
+	Super.AltFire(f);
+
+	if ( !Weapon.IsA('baseWand') )
+	{
+		Weapon.AltFire(f);
+	}
+}
+
 function AddToSpellBook (Class<baseSpell> spellClass)
 {
 	local ESpellType ST;

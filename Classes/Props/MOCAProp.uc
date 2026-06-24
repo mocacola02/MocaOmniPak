@@ -50,6 +50,94 @@ event Tick (float DeltaTime)
 	}
 }
 
+
+//////////
+// Magic
+//////////
+
+// Redirect all stock handle spell functions to our new generic HandleSpell function
+function bool HandleSpellAlohomora (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDiffindo (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellEcto (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellFlipendo (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellLumos (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellRictusempra (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellSkurge (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellSpongify (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelRictusempra (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelMimblewimble (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpellDuelExpelliarmus (optional baseSpell spell, optional Vector vHitLocation)
+{
+	return HandleSpell(spell,vHitLocation);
+}
+
+function bool HandleSpell(optional baseSpell Spell, optional Vector HitLocation)
+{
+	if ( eVulnerableToSpell == DetermineSpellType(Spell.Class) )
+	{
+		// React to spell
+		ProcessSpell();
+		return True;
+	}
+
+	return False;
+}
+
+function ESpellType DetermineSpellType(class<baseSpell> TestSpell)
+{
+	if ( PlayerHarry.IsA('MOCAharry') )
+	{
+		return MOCAharry(PlayerHarry).GetSpellType(TestSpell);
+	}
+	else
+	{
+		return TestSpell.Default.SpellType;
+	}
+}
+
+function ProcessSpell(); // Define in child classes.
+
+
 function GetDetail()
 {
 	switch(PlayerHarry.ObjectDetail)
