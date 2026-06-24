@@ -1,522 +1,298 @@
 //================================================================================
 // MOCAStalker.
 //================================================================================
-class MOCAStalker extends MOCAChar;
+class MOCAStalker extends MOCANavigator;
 
-var() float AngerRate;		// Moca: How fast do we gain anger each second? Def: 3.0
-var() float RelaxRate;		// Moca: How fast do we lose anger each second? Def: 1.5
-var() float RequiredAnger;	// Moca: How angry do we need to be to attack? Def: 25.0
-var() float ChaseSpeed;		// Moca: How fast do we move during a chase (aka attack)? Def: 400.0
-var() float StalkCooldown;	// Moca: How long to wait before stalking again? Def: 10.0
-var() float MinDot; 		// Moca: Minimum dot product to compare when determining if we're seen. Def: 0.25
-var() float ActiveRadius;	// Moca: How close does Harry have to be for us to become active? Def: 163840.0 (aka "infinite")
+var() float AngerRate;
+var() float RelaxRate;
+var() float MaxAnger;
+var() float StareChance;
+var() Range StareDuration;
 
-// Sound vars
-var Sound RetreatSound;	// Sound on retreat
-var Sound AttackSound;	// Sound on attack
-var Sound KillSound;	// Sound when killing Harry
-var Sound DieSound;		// Sound when dying
+var() name KillAnim;
 
-// Anim vars
-var name WaitAnim;		// Wait anim (idle)
-var float WaitAnimRate;	// Wait anim rate
+var() Sound AttackSound;
+var() Sound RetreatSound;
+var() Sound KillSound;
 
-var name SneakAnim;		// Sneak anim (stalk mode)
-var float SneakAnimRate;// Sneak anim rate
+var bool bAttacking;
+var bool bSeen;
+var bool bStaring;
+var float CurrAnger;
 
-var name RetreatAnim;	// Retreat anim
-var float RetreatAnimRate;	// Retreat anim rate
-
-var name StareAnim;		// Stare anim (when building up anger)
-var float StareAnimRate;// Star anim rate
-
-var name AttackAnim;	// Attack anim (chasing)
-var float AttackAnimRate;// Attack anim rate
-
-var name KillAnim;		// Kill anim
-var float KillAnimRate;	// Kill anim rate
-
-var name DieAnim;		// Die anim
-var float DieAnimRate;	// Die anim rate
-
-var bool bIsStaring;	// Are we staring to build anger?
-
-var int RandInt;		// Random int storage
-var float CurrentAnger;	// Current anger level
-
-var NavigationPoint RetreatNavP;	// navP to retreat to
-
-
-///////////
-// Events
-///////////
-
-event PostBeginPlay()
-{
-	Super.PostBeginPlay();
-
-	// Turn to Harry
-	EnableTurnTo(PlayerHarry);
-
-	if ( !DoesActorExist(class'MOCAStalkerNode') )
-	{
-		PushError("MOCAStalker actors (like MOCABracken) require MOCAStalkerNodes. Make sure you have these implemented.");
-	}
-}
 
 event Bump(Actor Other)
 {
-	Super.Bump(Other);
-
-	// If we bumped into Harry and we aren't killing him, kill him
-	if ( Other == PlayerHarry && !IsInState('stateKill') )
+	if ( Other == PlayerHarry )
 	{
 		GotoState('stateKill');
 	}
 }
 
-event HitWall(Vector HitNormal, Actor HitWall)
-{
-	Super.HitWall(HitNormal,HitWall);
-
-	// If we hit a wall, retreat to be safe
-	if ( ( !IsInState('stateStalkDerailed') || !IsInState('stateAttackDerailed') ) && !IsInState('stateRetreat') )
-	{
-		GotoState('stateRetreat','retreat');
-	}
-}
-
 event Tick(float DeltaTime)
 {
-	Super.Tick(DeltaTime);
-
-	local bool bSeenByHarry;
-
-	// Determine if Harry sees us
-	bSeenByHarry = CanHarrySeeMe(MinDot);
-
-	//Log(string(Self)$" can harry see us: "$string(bSeenByHarry));
-
-	// If we're staring and Harry sees us, or Harry is too close to us
-	if ( ( bIsStaring && bSeenByHarry ) || ( GetDistanceFromHarry() < 128.0 ) )
+	if ( !IsInState('stateIdle') )
 	{
-		// Build anger and clamp it
-		CurrentAnger += AngerRate * DeltaTime;
-		CurrentAnger = FClamp(CurrentAnger,0.0,RequiredAnger);
-	}
-	// If we have anger and are not seen by Harry
-	else if ( CurrentAnger > 0.0 && !bSeenByHarry )
-	{
-		// Lose anger and clamp it
-		CurrentAnger -= RelaxRate * DeltaTime;
-		CurrentAnger = FClamp(CurrentAnger,0.0,RequiredAnger);
-	}
+		bSeen = CanHarrySeeMe(ViewDot);
+		HandleSeen(bSeen, DeltaTime);
 
-	// If seen by Harry and we should retreat, then retreat and stare
-	if ( bSeenByHarry && ShouldRetreat() )
-	{
-		GotoState('stateRetreat','stare');
+		if ( !IsHarryNear(ActivationRadius) )
+		{
+			GotoState('stateIdle');
+		}
 	}
 }
 
-
-//////////
-// Magic
-//////////
-
-function ProcessSpell()
+function HandleSeen(bool bIsSeen, float DeltaTime)
 {
-	// Increase hits taken
-	HitsTaken++;
+	local float PrevAnger;
+	PrevAnger = CurrAnger;
 
-	// If we've taken enough hits, die
-	if ( ShouldDie() )
+	if ( bIsSeen && bStaring )
 	{
-		GotoState('stateDie');
+		CurrAnger += AngerRate * DeltaTime;	
+	}
+	else
+	{
+		CurrAnger -= RelaxRate * DeltaTime;
+	}
+
+	CurrAnger = FClamp(CurrAnger, 0.0, MaxAnger);
+
+	if ( CurrAnger != PrevAnger )
+	{
+		DebugLog("CurrAnger changed to " $ CurrAnger);
 	}
 }
 
-
-////////////////////
-// Helper Functions
-////////////////////
-
-function bool ShouldRetreat()
-{
-	// If we aren't retreating, attacking, killing, or dying, then retreat!
-	return !IsInState('stateRetreat') && !IsInState('stateAttack') && !IsInState('stateAttackDerailed') && !IsInState('stateKill') && !IsInState('stateDie');
-}
-
-function UpdateNodeViewDistance(float NewDistance)
-{
-	local MOCAStalkerNode A;
-	
-	// Set new view distance on all stalker nodes
-	foreach AllActors(class'MOCAStalkerNode', A)
-	{
-		A.SetRequiredDistance(NewDistance);
-	}
-}
-
-
-function ScreenFade(float TargetOpacity, float FadeOutTime)
-{
-	local FadeViewController CamFade;
-	// Spawn fade controller and fade
-	CamFade = Spawn(Class'FadeViewController');
-	CamFade.Init(TargetOpacity,0,0,0,FadeOutTime);
-}
-
-
-///////////
-// States
-///////////
-
-auto state stateWait
+auto state stateIdle
 {
 	event BeginState()
 	{
-		Log(string(Self)$": entering stateWait");
-		// Loop wait anim
-		LoopAnim(WaitAnim, WaitAnimRate);
+		CurrAnger = 0.0;
+		LoopAnim(IdleAnimName);
 	}
 
-	event Tick(float DeltaTime)
-	{
-		Global.Tick(DeltaTime);
-
-		// If Harry is within our active radius
-		if ( IsHarryNear(ActiveRadius) )
-		{
-			// Find a path toward Harry
-			navP = NavigationPoint(FindPathToward(PlayerHarry));
-			// If we found a path, stalk him
-			if ( navP != None )
-			{
-				GotoState('stateStalk','stalk');
-			}
-		}
-	}
+	event Tick(float DeltaTime);
 
 	begin:
-		// Stop moving
 		StopMoving();
+
+		while ( !IsHarryNear(ActivationRadius) && navP == None )
+		{
+			DebugLog("Idling");
+			navP = GetValidDestination(PlayerHarry.Location);
+			Sleep(1.0);
+		}
+
+		GotoState('stateStalk');
 }
 
 state stateStalk
 {
 	event BeginState()
 	{
-		Log(string(Self)$": entering stateStalk");
-		// Reset node view distance
-		UpdateNodeViewDistance(2000.0);
-		// Loop sneak anim
-		LoopAnim(SneakAnim,SneakAnimRate);
-	}
-
-	stalk:
-		// Stop previous movement
-		StopMoving();
-
-		// While we have a valid navP and Harry is in active radius
-		while ( navP != None && IsHarryNear(ActiveRadius) )
+		if ( bAttacking )
 		{
-			// If we see Harry, derail
-			if ( CanISeeHarry(MinDot,True) )
-			{
-				GotoState('stateStalkDerailed');
-			}
-
-			// Strafe to Harry and face him
-			StrafeFacing(navP.Location,PlayerHarry);
-
-			// Find next path to Harry
-			navP = NavigationPoint(FindPathToward(PlayerHarry));
-			// Sleep for a tick
-			SleepForTick();
+			DebugLog("Attacking");
+			LoopAnim(RunAnimName);
+			GroundSpeed = GroundRunSpeed;
+			PlaySound(AttackSound, SLOT_Talk);
 		}
-
-		// Go to wait
-		GotoState('stateWait');
-}
-
-state stateStalkDerailed
-{
-	stalk:
-		Log(string(Self)$": entering stateStalkDerailed");
-		// Stop previous movement
-		StopMoving();
-
-		// While Harry is in our active radius and we see him
-		while ( IsHarryNear(ActiveRadius) && CanISeeHarry(MinDot,True) )
+		else
 		{
-			// Strafe towards Harry directly
-			StrafeFacing(PlayerHarry.Location,PlayerHarry);
-			SleepForTick();
+			DebugLog("Stalking");
+			LoopAnim(WalkAnimName);
+			GroundSpeed = GroundWalkSpeed;
 		}
-
-		// Go back to stalk
-		GotoState('stateStalk','stalk');
-}
-
-state stateRetreat
-{
-	event BeginState()
-	{
-		Log(string(Self)$": entering stateRetreat");
-		// Shorten node view distance
-		UpdateNodeViewDistance(GetDistanceFromHarry() - 32.0);
-		// Set to chase speed
-		GroundSpeed = ChaseSpeed;
-		// Play retreat sound
-		PlaySound(RetreatSound,SLOT_Talk,1.0);
-		// Find retreat destination
-		RetreatNavP = GetFurthestNavPFromActor(PlayerHarry);
-		// Find path to retreat
-		navP = NavigationPoint(FindPathToward(RetreatNavP));
-	}
-
-	event EndState()
-	{
-		// No longer staring, go back to normal speed
-		bIsStaring = False;
-		GroundSpeed = MapDefault.GroundSpeed;
 	}
 
 	event Tick(float DeltaTime)
 	{
 		Global.Tick(DeltaTime);
 
-		// 1/32 chance of staring
-		RandInt = Rand(32);
-		if ( RandInt == 0 )
+		if ( bSeen && !bAttacking )
 		{
-			// Stare at Harry to build up anger
-			GotoState('stateRetreat','stare');
+			DebugLog("Retreating");
+			GotoState('stateRetreat');
 		}
-	}
-
-	retreat:
-		Log(string(Self)$": start retreating");
-		// Loop retreat anim
-		LoopAnim(RetreatAnim,RetreatAnimRate);
-
-		// While valid navP
-		while ( navP != None && navP != RetreatNavP )
-		{
-			Log(string(Self)$": retreating to new navP");
-			// Strafe towards navP and face Harry
-			StrafeFacing(navP.Location,PlayerHarry);
-
-			// Find next path
-			navP = NavigationPoint(FindPathToward(RetreatNavP));
-
-			SleepForTick();
-		}
-
-		// If we're done retreating but Harry still sees us, attack
-		if ( CanHarrySeeMe(MinDot) )
-		{
-			GotoState('stateAttack');
-		}
-
-		// Otherwise, enter cooldown
-		GotoState('stateCooldown');
-	
-	stare:
-		Log(string(Self)$": staring");
-		// We are staring
-		bIsStaring = True;
-		// Stop moving
-		StopMoving();
-		// Loop stare anim
-		LoopAnim(StareAnim,StareAnimRate);
-
-		// Get rand int, 1/24 chance of going back to retreat
-		RandInt = Rand(24);
-
-		// If we're angry enough, attack
-		if ( CurrentAnger >= RequiredAnger )
-		{
-			GotoState('stateAttack');
-		}
-		// If we rolled a 0, retreat again
-		else if ( RandInt == 0 )
-		{
-			bIsStaring = False;
-			Goto('retreat');
-		}
-		// Otherwise, keep staring
-		else
-		{
-			SleepForTick();
-			Goto('stare');
-		}
-}
-
-state stateAttack
-{
-	event BeginState()
-	{
-		Log(string(Self)$": entering stateAttack");
-		// Make node view irrelevant
-		UpdateNodeViewDistance(0.0);
-		// Use chase speed
-		GroundSpeed = ChaseSpeed;
-		// Play attack sound
-		PlaySound(AttackSound,SLOT_Talk,1.0);
-		// Loop attack anim
-		LoopAnim(AttackAnim,AttackAnimRate);
-	}
-
-	event EndState()
-	{
-		// Reset movement speed
-		GroundSpeed = MapDefault.GroundSpeed;
 	}
 
 	begin:
-		// Stop previous movement
-		StopMoving();
+		destP = GetValidDestination(PlayerHarry.Location);
+		UpdateNavP();
 
-		// While anger is over a third of requried anger and we have valid navP
-		while ( CurrentAnger > (RequiredAnger / 3) && navP != None )
+		while ( IsValidNavP() )
 		{
-			// If we see Harry, derail
-			if ( CanISeeHarry(MinDot,True) )
+			if ( FastViewCheck(PlayerHarry) )
 			{
-				GotoState('stateAttackDerailed');
+				DebugLog("Derailing");
+				Goto('derail');
 			}
 
-			// Strafe to navP
-			StrafeFacing(navP.Location,PlayerHarry);
+			DebugLog("Pathing to Harry");
+			StrafeFacing(navP.Location, PlayerHarry);
 
-			// Get next navP
-			navP = NavigationPoint(FindPathToward(PlayerHarry));
+			destP = GetValidDestination(PlayerHarry.Location);
+			UpdateNavP();
 
 			SleepForTick();
 		}
 
-		// Retreat again
-		GotoState('stateRetreat','retreat');
+		Goto('begin');
+	
+	derail:
+		while ( FastViewCheck(PlayerHarry) )
+		{
+			DebugLog("Moving directly to Harry");
+			StrafeFacing(PlayerHarry.Location, PlayerHarry);
+			SleepForTick();
+		}
+
+		Goto('begin');
 }
 
-state stateAttackDerailed
+state stateRetreat
 {
 	event BeginState()
 	{
-		Log(string(Self)$": entering stateAttackDerailed");
-		// Make sure we are using chase speed
-		GroundSpeed = ChaseSpeed;
-		// Play attack sound
-		PlaySound(AttackSound,SLOT_Talk,1.0);
-		// Loop attack anim
-		LoopAnim(AttackAnim,AttackAnimRate);
+		LoopAnim(RunAnimName);
+		GroundSpeed = GroundRunSpeed;
+		SetTimer(0.25, True);
+
+		if ( RetreatSound != None )
+		{
+			PlaySound(RetreatSound, SLOT_Talk);
+		}
 	}
 
 	event EndState()
 	{
-		// Reset speed
-		GroundSpeed = MapDefault.GroundSpeed;
+		SetTimer(0.0, False);
 	}
 
-	begin:
-		// While we see Harry and anger is over one third of required anger
-		while ( CanISeeHarry(MinDot,True) && CurrentAnger > (RequiredAnger / 3) )
+	event Tick(float DeltaTime)
+	{
+		Global.Tick(DeltaTime);
+
+		if ( CurrAnger >= MaxAnger )
 		{
-			// Strafe towards Harry
-			StrafeFacing(PlayerHarry.Location,PlayerHarry);
+			DebugLog("ANGERY!!!!!!!!!!!!!!!!!!!!!!!!");
+			bAttacking = True;
+			GotoState('stateStalk');
+			return;
+		}
+	}
+
+	event Timer()
+	{
+		if ( FRand() >= StareChance )
+		{
+			DebugLog("Random staring");
+			GotoState('stateRetreat', 'stare');
+		}
+	}
+
+	stare:
+		DebugLog("Staring");
+		bStaring = True;
+		StopMoving();
+		TurnToward(PlayerHarry);
+		Sleep(RandRange(StareDuration.Min, StareDuration.Max));
+		bStaring = False;
+
+	loop:
+		destP = GetFurthestNavPFromActor(PlayerHarry);
+		UpdateNavP();
+
+		while ( IsValidNavP() )
+		{
+			DebugLog("Moving towards retreat");
+			StrafeFacing(navP.Location, PlayerHarry);
+			UpdateNavP();
 			SleepForTick();
 		}
 
-		// If anger has lowered, go to retreat
-		if ( CurrentAnger <= (RequiredAnger / 3) )
-		{
-			GotoState('stateRetreat','retreat');
-		}
-
-		// Otherwise, return to path-based attack
-		SleepForTick();
-		GotoState('stateAttack');
-}
-
-state stateKill
-{
-	begin:
-		Log(string(Self)$": entering stateKill");
-		// Stop moving
-		StopMoving();
-
-		// Keep Harry still
-		PlayerHarry.bKeepStationary = True;
-
-		// Get in kill position
-		StrafeTo(Location - Vector(Rotation) * (PlayerHarry.CollisionRadius / 2), PlayerHarry.Location);
-
-		// Play kill anim & sound
-		PlayAnim(KillAnim,KillAnimRate);
-		PlaySound(KillSound,SLOT_Interact,1.0,,TransientSoundRadius);
-
-		// Wait briefly
-		Sleep(0.8);
-		// Fade to black
-		ScreenFade(1.0,0.02);
-		Sleep(2.0);
-		// Wait 2 seconds and reload save
-		ConsoleCommand("LoadGame 0");
-}
-
-state stateDie
-{
-	begin:
-		Log(string(Self)$": entering stateDie");
-		// Stop moving
-		StopMoving();
-		// Turn to Harry's location, using the same Z to avoid tilting forward
-		TurnTo(LocationSameZ(PlayerHarry.Location));
-		// Play death anim &  sound
-		PlayAnim(DieAnim,DieAnimRate);
-		PlaySound(DieSound,SLOT_Talk,1.0,,TransientSoundRadius);
-		FinishAnim();
-		Sleep(0.2);
-		// Destroy
-		Destroy();
+		GotoState('stateCooldown');
 }
 
 state stateCooldown
 {
+	event Tick(float DeltaTime)
+	{
+		Global.Tick(DeltaTime);
+
+		if ( bSeen )
+		{
+			GotoState('stateRetreat');
+		}
+	}
+
 	begin:
-		Log(string(Self)$": entering stateCooldown");
-		// Stop moving
+		DebugLog("Cooling down");
+		
+		while ( CurrAnger > 0.0 )
+		{
+			DebugLog("Still cooling down, anger is " $ CurrAnger);
+			Sleep(1.0);
+		}
+
+		GotoState('stateStalk');
+}
+
+state stateKill
+{
+	event BeginState()
+	{
+		DebugLog("Damn, he ain't gonna be in Rush Hour 3");
+		PlayerHarry.bKeepStationary = True;
+
+		GroundSpeed = GroundWalkSpeed;
+		PlayAnim(RunAnimName);
+	}
+
+	begin:
 		StopMoving();
-		// Wait for our cooldown
-		Sleep(StalkCooldown);
-		// Return to wait
-		GotoState('stateWait');
+		StrafeFacing(Location - Vector(Rotation) * (PlayerHarry.CollisionRadius * 0.5), PlayerHarry);
+
+		PlayAnim(KillAnim);
+
+		if ( KillSound != None )
+		{
+			PlaySound(KillSound, SLOT_Interact);
+		}
+
+		Sleep(0.8);
+		FadeScreen(1.0, 0.025);
+		Sleep(2.0);
+		ConsoleCommand("LoadGame 0");
 }
 
 
 defaultproperties
 {
-	AngerRate=3.0
-	RelaxRate=1.5
-	RequiredAnger=25.0
-	ChaseSpeed=400.0
-	StalkCooldown=10.0
-	MinDot=0.25
-	ActiveRadius=163840.0
+	AngerRate=1.0
+	RelaxRate=1.0
+	MaxAnger=5.0
+	StareChance=0.075
+	StareDuration=(Min=0.5,Max=1.5);
+	KillAnim="Kill"
+	
+	AttackSound=Sound'MocaOmniResources.Creatures.bracken_angry'
+	KillSound=Sound'MocaOmniResources.Creatures.bracken_kill'
+	RetreatSound=Sound'MocaOmniResources.Creatures.bracken_retreat'
 
-	ShadowClass=None
-	SightRadius=512.0
-	CollisionHeight=65.0
-	bAdvancedTactics=True
-	GroundSpeed=340.0
 	MaxTravelDistance=163840.0
-	WaitAnimRate=1.0
-	SneakAnimRate=1.0
-	RetreatAnimRate=1.0
-	StareAnimRate=1.0
-	AttackAnimRate=1.0
-	KillAnimRate=1.0
-	DieAnimRate=1.0
+
+	CollisionHeight=65.0
+
+	DrawScale=1.2
+	Mesh=SkeletalMesh'MocaOmniResources.skBracken'
+	ShadowClass=None
+	IdleAnimName="Idle"
+	WalkAnimName="Sneak"
+	RunAnimName="AttackWalk"
+
+	GroundWalkSpeed=340.0
+	GroundRunSpeed=400.0
 }

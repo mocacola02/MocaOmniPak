@@ -1,19 +1,14 @@
 //================================================================================
 // MOCAHunter.
 //================================================================================
-class MOCAHunter extends MOCAChar;
+class MOCAHunter extends MOCANavigator;
 
-const MAX_VERIFIES = 5;
-
-var() int 	MaxChaseAttempts;			// Moca: How many attempts to try and find Harry after losing sight of him? Def: 2
-var() float WakeUpRadius;			// Moca: How close does Harry have to get to wake us up? If 0.0, proximity does not awaken us. Def: 384.0
-var() float ViewDot;				// Moca: What is the minimum dot product to be considered as within our view? Def: 0.25
+var() int 	MaxChaseAttempts;		// Moca: How many attempts to try and find Harry after losing sight of him? Def: 2
 var() float CatchTime;				// Moca: How long to hold Harry in place before fading out after caught? Def: 2.0
-var() float FadeTime;				// Moca: How long to fade out the screen before respawning? Def: 3.0
 var() Range IdleTime;				// Moca: What range of time will we idle in between patrolling? Def: Min=1.0 Max=3.0
 var() Sound CaughtMusicCue;			// Moca: What music cue to play when caught? Def: None, set in child actors
 var() Sound CaughtSFX;				// Moca: What sound to play when caught? Def: None, set in child actors
-var() Color CameraFadeColor;		// Moca: What color to use for screen fade? Def: R=0 G=0 B=0
+
 
 var(MOCAAnims) array<name> HuntIdleAnims;
 var(MOCAAnims) name CatchAnim;		// Moca: What anim to play when catching Harry? Def: None, set in child actors
@@ -34,64 +29,6 @@ event Bump(Actor Other)
 	{
 		GotoState('stateCatch');
 	}
-}
-
-event Tick(float DeltaTime)
-{
-	if ( CanISeeHarry(ViewDot, True) )
-	{
-		HandleHarrySpotted();
-	}
-}
-
-
-//=====================
-// Navigation Helpers
-//=====================
-
-function HandleHarrySpotted();
-
-function UpdateNavP()
-{
-	navP = NavigationPoint(FindPathToward(destP));
-	DebugLog("Updated navP: " $ navP);
-}
-
-function bool IsValidNavP()
-{
-	DebugLog("Is navP valid: " $ navP != destP $ " and " $ navP != None);
-	return navP != destP && navP != None;
-}
-
-function NavigationPoint GetDestination(optional Vector TargetPos)
-{
-	if ( VSize(TargetPos) >= 0.1 )
-	{
-		DebugLog("Finding path to " $ TargetPos);
-		return NavigationPoint(FindPathTo(TargetPos));
-	}
-
-	DebugLog("Finding random dest");
-	return FindRandomDest();
-}
-
-function NavigationPoint GetValidDestination(optional Vector TargetPos)
-{
-	local int CurrAttempts;
-	local NavigationPoint WorkingNavP;
-
-	WorkingNavP = GetDestination(TargetPos);
-
-	while ( (WorkingNavP == LastNavP || WorkingNavP == None) && CurrAttempts < MAX_VERIFIES )
-	{
-		CurrAttempts++;
-
-		DebugLog("Attempt #" $ CurrAttempts $ ": We had a duplicate or null navP of " $ WorkingNavP);
-		WorkingNavP = GetDestination(TargetPos);
-	}
-
-	DebugLog("Selected " $ WorkingNavP);
-	return WorkingNavP;
 }
 
 
@@ -121,13 +58,6 @@ function Reset(optional bool bGoToIdle)
 	}
 }
 
-function FadeScreen(float Alpha, float FadeT)
-{
-	local FadeViewController FVC;
-	FVC = Spawn(Class'FadeViewController');
-	FVC.Init(Alpha, CameraFadeColor.R, CameraFadeColor.G, CameraFadeColor.B, FadeT);
-}
-
 function TeleportHarry(Vector NewLocation, Rotator NewRotation)
 {
 	PlayerHarry.SetLocation(NewLocation);
@@ -153,7 +83,7 @@ state() stateSleep
 
 	event Tick(float DeltaTime)
 	{
-		if ( WakeUpRadius > 0.0 && IsHarryNear(WakeUpRadius) )
+		if ( ActivationRadius > 0.0 && IsHarryNear(ActivationRadius) )
 		{
 			GotoState('stateIdle', 'awaken');
 		}
@@ -203,7 +133,7 @@ state stateWander
 		}
 		
 		GroundSpeed = GroundWalkSpeed;
-		destP = GetValidDestination(DestPos);
+		destP = GetValidDestination(DestPos, True);
 		DebugLog("Got wander destP: " $ destP);
 		LoopAnim(WalkAnimName);
 	}
@@ -260,7 +190,7 @@ state stateChase
 	}
 
 	search:
-		destP = GetValidDestination(PlayerHarry.Location);
+		destP = GetValidDestination(PlayerHarry.Location, True);
 		UpdateNavP();
 
 		while ( IsValidNavP() && !bDerailed )
@@ -278,7 +208,7 @@ state stateChase
 		{
 			CurrChaseAttempts++;
 			DebugLog("Trying again, attempt #" $ CurrChaseAttempts);
-			destP = GetValidDestination(PlayerHarry.Location);
+			destP = GetValidDestination(PlayerHarry.Location, True);
 			Goto('search');
 		}
 		else
@@ -364,14 +294,10 @@ function float GetIdleTime()
 defaultproperties
 {
 	MaxChaseAttempts=2
-	WakeUpRadius=384.0
-	ViewDot=0.25
 	CatchTime=2.0
-	FadeTime=3.0
 	IdleTime=(Min=1.0,Max=3.0)
 	CaughtMusicCue=Sound'MocaOmniResources.stealth_caught'
 	CaughtSFX=Sound'MocaOmniResources.armor_clink_multi'
-	CameraFadeColor=(R=0,G=0,B=0)
 
 	HuntIdleAnims(0)="HuntIdle1"
 	HuntIdleAnims(1)="HuntIdle2"
@@ -379,12 +305,7 @@ defaultproperties
 	HarryCatchAnim="webstuck"
 	WakeUpAnim="WakeUp"
 
-	bTiltOnMovement=False
-
 	eVulnerableToSpell=SPELL_None
-
-	bAdvancedTactics=True
-	SightRadius=2500.0
 
 	bAlignBottomAlways=True
 	CollisionRadius=21

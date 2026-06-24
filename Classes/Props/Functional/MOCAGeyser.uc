@@ -317,6 +317,8 @@ defaultproperties
 	ClassesToAffect(0)="Pawn"
 	ClassesToAffect(1)="MOCAProp"
 
+	bHidden=True
+
 	bBlockActors=False
 	bBlockCamera=False
 	bBlockPlayers=False

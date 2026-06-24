@@ -74,109 +74,10 @@ function float GetDistanceFromHarry()
 	return GetDistanceBetweenActors(Self,PlayerHarry);
 }
 
-function float GetDistanceFromSelf(Actor ActorToCheck)
-{
-	return GetDistanceBetweenActors(Self, ActorToCheck);
-}
-
-function NavigationPoint GetNearestNavP()
-{
-	local float Distance, ClosestDist;
-	local NavigationPoint TestNav, BestNav;
-	local Vector DirectionToNav, ForwardDirection;
-
-	// Default to something high
-	ClosestDist = 999999.0;
-
-	// Get forward direction
-	ForwardDirection = Vector(Rotation);
-	
-	// For each NavigationPoint in level
-	foreach AllActors(class'NavigationPoint', TestNav)
-	{
-		// Get direction to the tested navigation point
-		DirectionToNav = Normal(TestNav.Location - Location);
-		// Get distance between self and tested nav p
-		Distance = GetDistanceFromSelf(TestNav);
-
-		// If distance is larger than our recorded ClosestDist
-		if ( Distance < ClosestDist )
-		{
-			// Set new distance and best nav
-			ClosestDist = Distance;
-			BestNav = TestNav;
-		}
-	}
-
-	// Return our best nav
-	return BestNav;
-}
-
-function NavigationPoint GetNearbyNavPInView(float MaxRange)
-{
-	local NavigationPoint TestNav, BestNav;
-	local Vector DirectionToNav, ForwardDirection;
-	local float Distance, DotProduct, ClosestDist;
-
-	// Default to something high
-	ClosestDist = 999999.0;
-
-	// Get forward direction
-	ForwardDirection = Vector(Rotation);
-	
-	// For each NavigationPoint in level
-	foreach AllActors(class'NavigationPoint', TestNav)
-	{
-		// Get direction to the tested navigation point
-		DirectionToNav = Normal(TestNav.Location - Location);
-		// Get distance between self and tested nav p
-		Distance = GetDistanceFromSelf(TestNav);
-		// Get dot product from direction to nav & forward direction
-		DotProduct = DirectionToNav Dot ForwardDirection;
-
-		// If our tested distance doesn't exceed MaxRange AND distance is larger than our recorded ClosestDist AND we're facing the test nav p
-		if ( Distance <= MaxRange && Distance < ClosestDist && DotProduct > 0.0 )
-		{
-			// Set new distance and best nav
-			ClosestDist = Distance;
-			BestNav = TestNav;
-		}
-	}
-
-	// Return our best nav
-	return BestNav;
-}
-
-function NavigationPoint GetFurthestNavPFromActor(Actor ActorToCheck)
-{
-	local NavigationPoint TestNav;
-	local NavigationPoint FurthestNav;
-	local float TestDistance;
-	local float FurthestDistance;
-	
-	foreach AllActors(class'NavigationPoint', TestNav)
-	{
-		TestDistance = GetDistanceBetweenActors(TestNav, ActorToCheck);
-
-		if ( FurthestNav == None || ( TestDistance > FurthestDistance ) )
-		{
-			FurthestNav = TestNav;
-			FurthestDistance = TestDistance;
-		}
-	}
-
-	return FurthestNav;
-}
-
 
 //////////
 // Sight
 //////////
-
-function bool CanHarrySeeMe(float MinDot)
-{
-	return IsFacingOther(PlayerHarry,Self,MinDot) && PlayerCanSeeMe();
-}
 
 function bool IsFacingOther(Actor SourceActor, Actor Other, float MinDot)
 {
@@ -185,6 +86,16 @@ function bool IsFacingOther(Actor SourceActor, Actor Other, float MinDot)
 	DotProduct = Vector(SourceActor.Rotation) Dot Normal(Other.Location - SourceActor.Location);
 
 	return DotProduct > MinDot;
+}
+
+function bool CanHarrySeeMe(optional float MinDot)
+{
+	if ( MinDot <= 0.0 )
+	{
+		MinDot = 0.25;
+	}
+
+	return ( PlayerCanSeeMe() && IsFacingOther(PlayerHarry, self, MinDot) && Abs(PlayerHarry.Location.Z - Location.Z) <= 50.0 );
 }
 
 function bool CanISeeHarry(float MinDot, optional bool bRememberLocation)
@@ -326,18 +237,6 @@ function bool ShouldDie()
 {
 	// If we've taken enough hits and HitsToKill isn't 0
 	return HitsTaken >= HitsToKill && HitsToKill > 0;
-}
-
-function bool DoesActorExist(Class<Actor> ActorToCheck)
-{
-	local Actor A;
-	
-	foreach AllActors(ActorToCheck, A)
-	{
-		return True;
-	}
-
-	return False;
 }
 
 function DebugLog(string Msg)
