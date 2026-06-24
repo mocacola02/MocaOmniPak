@@ -1,8 +1,6 @@
 # MocaOmniPak
-Repo for all of my custom HP2 classes.
-Models, textures, and sounds are only included in Releases due to Github file size limits. The packages can be found in [Releases](https://github.com/mocacola02/MocaOmniPak/releases).
-
-**This is a compilation of various custom actors I have made over the years. The quality of code varies and is still very work-in-progress, so expect a lot of messiness. That being said, it has been bug-tested a fair bit and I will fix any reported bugs as fast as I can.**
+A compilation of my custom content for HP2.
+The MocaOmniResources package is only included in Releases due to Github file size limits. The latest packages can be found [here](https://github.com/mocacola02/MocaOmniPak/releases/latest).
 
 Please do not ping or message the HP2 New Engine (M212 Engine) developers regarding bugs in my content. Direct ALL bug or feature requests to this repo, or ping me in the HP Modding Discord (@moca). Preferably, you can open a ticket in [Issues](https://github.com/mocacola02/MocaOmniPak/issues).
 
@@ -16,20 +14,20 @@ This content requires the M212 Engine for HP2. As of now, it is currently in bet
 After downloading the engine installer from the server, run the installer and install the engine into your HP2 game installation.
 
 ### Pre-Built Packages
-To install pre-built content packages, download the latest files from [Releases](https://github.com/mocacola02/MocaOmniPak/releases). **You will need to download the latest MocaOmniPak, MocaTexturePak, MocaModelPak, and MocaSoundPak.**
+To install pre-built content packages, download the latest files from [Releases](https://github.com/mocacola02/MocaOmniPak/releases/latest). **You will need to download the latest MocaOmniPak AND MocaOmniResources packages.**
 
 Once downloaded, copy each package file into the System folder of your HP2 installation. Do NOT copy it into your Windows system folder.
 
+To load the classes in the editor, go to the Actor Classes browser, click the open button, and open `MocaOmniPak.u`.
+
 ### Building from Source
-Download the MocaOmniPak source code from this repo. You will still need to download the MocaTexturePak, MocaModelPak, and MocaSoundPak packages and place them into the System folder.
+Download the MocaOmniPak source code from this repo. You will still need to download the MocaOmniResources package and place it into the System folder.
 
 If you downloaded MocaOmniPak as a .zip file, extract it. Copy the MocaOmniPak folder into the HP2 game folder (next to the other folders like System, Textures, etc). Inside the MocaOmniPak folder should be another folder called "Classes". If not, then please make sure your folders are ordered properly.
 
 Go into the game's System folder, and make a copy of the 'Default.ini' file. Rename it to something else (e.g. Moca.ini). Open the file in Notepad (or another text editor) and search for EditPackages. You should find a list of EditPackages values with the stock game packages listed. At the end of the list (after M212Share), paste the following:
 
-    EditPackages=MocaTexturePak
-    EditPackages=MocaSoundPak
-    EditPackages=MocaModelPak
+    EditPackages=MocaOmniResources
     EditPackages=MocaOmniPak
     
 Save the .ini file and close it. Open a terminal/cmd window in the System folder, and type the following:
@@ -42,3 +40,16 @@ Save the .ini file and close it. Open a terminal/cmd window in the System folder
     ./ucc make ini=[ini name]
 
 Allow the UAC pop-up, and then the package should begin compiling. It will auto-close, and the MocaOmniPak.u file should now be present in the System folder. If not, go to your Documents folder for the game (Harry - Coding Evolved by default), and check for errors in the UCC.log file. Please upload it in a bug ticket [here](https://github.com/mocacola02/MocaOmniPak/issues).
+
+## Special Thanks
+Thanks to the following people:
+
+- Metallicafan212 for helping with scripting questions
+- Omega59 for helping with scripting questions and improved Harry model & textures
+- DarkCakeKing (David) for ideas and playtesting
+- WinterSweptie for ideas and playtesting
+- HPLabs for ideas and playtesting
+- Paperclip for ideas and playtesting
+- RaazaTab for ideas and playtesting
+- U_0001 for ideas and playtesting
+- bszilveszter for ideas and playtesting
