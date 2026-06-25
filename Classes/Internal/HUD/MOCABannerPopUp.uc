@@ -78,11 +78,17 @@ function Draw(Canvas C)
 	local float MsgY;
 	local float StartY;
 
+	local float OldFS;
+	local Font OldFont;
+
 	Ratios = GetScreenRatio(C);
 	Margins = GetScreenMargin(Ratios);
 
 	ScaleX = Ratios.X;
 	ScaleY = Ratios.Y;
+
+	OldFS = C.FontScale;
+	OldFont = C.Font;
 
 	C.Font = TextFont;
 	C.FontScale = FClamp(FontScale * ScaleX, 0.05, FontScale);
@@ -158,6 +164,9 @@ function Draw(Canvas C)
 
 		MsgY += LineH;
 	}
+
+	C.Font = OldFont;
+	C.FontScale = OldFS;
 }
 
 function WrapText(

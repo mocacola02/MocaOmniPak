@@ -23,6 +23,10 @@ var float CurrAnger;
 
 event PostBeginPlay()
 {
+	Log("MOCAStalker is currently unstable and should not be used.");
+	Destroy();
+	return;
+
 	if ( bDebugLogging )
 	{
 		local int i;
