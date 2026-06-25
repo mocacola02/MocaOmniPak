@@ -3,113 +3,85 @@
 //=============================================================================
 class MOCAStalkerNode extends PathNode;
 
-var() bool bPerformanceMode;	// Moca: Makes node check only once or twice a second instead of every tick. Def: False
-var() float MinDot;				// Moca: Minimum dot product required to be seen. Def: 0.25
-var() float RequiredDistance;	// Moca: Required proximity to be triggered as seen. Def: 2000.0
+var() float MinDot;
+var() float RequiredDistance;
 
 var harry PlayerHarry;
 
 
-///////////
+//=========
 // Events
-///////////
+//=========
 
 event PostBeginPlay()
 {
-	Super.PostBeginPlay();
+	PlayerHarry = harry(Level.PlayerHarryActor);
 
-	// If performance mode, use manual timer and disable tick
-	if ( bPerformanceMode )
-	{
-		local float TimerRate;
-		TimerRate = RandRange(0.334,0.667);
-		SetTimer(TimerRate,True);
-		Disable('Tick');
-	}
-}
-
-event Tick(float DeltaTime)
-{
-	CheckForHarry();
+	// Probably not necessary, but I'm gonna randomize update rate so
+	// everything doesn't tick all at once in case you have a ton of these
+	SetTimer(RandRange(0.334, 0.5), True);
 }
 
 event Timer()
 {
-	CheckForHarry();
+	if ( VSize(PlayerHarry.Location - Location) <= RequiredDistance )
+	{
+		bBlocked = IsSeen();
+
+		if ( bBlocked )
+		{
+			Texture = Texture'MocaOmniResources.icon_bracken_path_default';
+		}
+		else
+		{
+			Texture = MapDefault.Texture;
+		}
+	}
 }
 
 
-///////////////////
-// Main Functions
-///////////////////
+//================
+// View Handling
+//================
 
-function CheckForHarry()
+function bool IsSeen()
 {
-	// If Harry is near
-	if ( GetDistanceBetweenActors(Self,PlayerHarry) < RequiredDistance )
-	{
-		local bool bIsOtherFacing,bPlayCanSeeMe;
-		bIsOtherFacing = IsOtherFacing(PlayerHarry,MinDot);
-		bPlayCanSeeMe = PlayerCanSeeMe();
-		//Log(string(bIsOtherFacing)$" | "$string(bPlayCanSeeMe));
-		// If Harry is facing self, become blocked
-		bBlocked = IsOtherFacing(PlayerHarry,MinDot) && PlayerCanSeeMe();
-	}
-	// Otherwise, don't be blocked
-	else
-	{
-		bBlocked = False;
-	}
-
-	SetTexture();
+	return PlayerCanSeeMe() && IsFacingOther(PlayerHarry, self, MinDot) && Abs(PlayerHarry.Location.Z - Location.Z) <= 50.0;
 }
 
-function SetRequiredDistance(float NewDistance)
-{
-	// Set required distance to 1.0 if it is 0.0
-	if ( NewDistance <= 0.0 )
-	{
-		NewDistance = 1.0;
-	}
-
-	RequiredDistance = NewDistance;
-}
-
-function SetTexture()
-{
-	if ( bBlocked )
-	{
-		Texture = Texture'MocaOmniResources.icon_bracken_path_default';
-	}
-	else
-	{
-		Texture = Texture'MocaOmniResources.icon_bracken_path_green';
-	}
-}
-
-
-/////////////////////
-// Helper Functions
-/////////////////////
-
-function float GetDistanceBetweenActors(Actor A, Actor B)
-{
-	return VSize(A.Location - B.Location);
-}
-
-function bool IsOtherFacing(Actor Other, float MinDotProduct)
+function bool IsFacingOther(Actor SourceActor, Actor Other, float DotMin)
 {
 	local float DotProduct;
-	DotProduct = Vector(Other.Rotation) Dot Normal(Location - Other.Location);
 
-	return DotProduct > MinDotProduct;
+	DotProduct = Vector(SourceActor.Rotation) Dot Normal(Other.Location - SourceActor.Location);
+
+	return DotProduct > DotMin;
 }
 
+
+//=================
+// State Handling
+//=================
+
+function EnableNode()
+{
+	RequiredDistance = MapDefault.RequiredDistance;
+}
+
+function DisableNode()
+{
+	RequiredDistance = 0.0;
+}
+
+
+//=====================
+// Default Properties
+//=====================
 
 defaultproperties
 {
-	MinDot=0.25
-	RequiredDistance=2000
+	MinDot=0.35
+	RequiredDistance=2000.0
 
 	bSpecialCost=True
 	bStatic=False

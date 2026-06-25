@@ -21,6 +21,23 @@ var bool bStaring;
 var float CurrAnger;
 
 
+event PostBeginPlay()
+{
+	if ( bDebugLogging )
+	{
+		local int i;
+		local MOCAStalkerNode A;
+		
+		foreach AllActors(class'MOCAStalkerNode', A)
+		{
+			A.bHidden = False;
+			i++;
+		}
+
+		DebugLog("Unhid " $ i $ " MOCAStalkerNodes since bDebugLogging = True");
+	}
+}
+
 event Bump(Actor Other)
 {
 	if ( Other == PlayerHarry )
@@ -65,6 +82,23 @@ function HandleSeen(bool bIsSeen, float DeltaTime)
 	}
 }
 
+function SetStalkerNodes(bool bEnableNodes)
+{
+	local MOCAStalkerNode A;
+	
+	foreach AllActors(class'MOCAStalkerNode', A)
+	{
+		if ( bEnableNodes )
+		{
+			A.EnableNode();
+		}
+		else
+		{
+			A.DisableNode();
+		}
+	}
+}
+
 auto state stateIdle
 {
 	event BeginState()
@@ -78,10 +112,11 @@ auto state stateIdle
 	begin:
 		StopMoving();
 
-		while ( !IsHarryNear(ActivationRadius) && navP == None )
+		while ( !IsHarryNear(ActivationRadius) || navP == None )
 		{
 			DebugLog("Idling");
-			navP = GetValidDestination(PlayerHarry.Location);
+			destP = GetValidDestinationTo(PlayerHarry.Location,,True);
+			UpdateNavP();
 			Sleep(1.0);
 		}
 
@@ -104,6 +139,7 @@ state stateStalk
 			DebugLog("Stalking");
 			LoopAnim(WalkAnimName);
 			GroundSpeed = GroundWalkSpeed;
+			SetStalkerNodes(True);
 		}
 	}
 
@@ -119,10 +155,12 @@ state stateStalk
 	}
 
 	begin:
-		destP = GetValidDestination(PlayerHarry.Location);
+		destP = GetValidDestinationTo(PlayerHarry.Location);
 		UpdateNavP();
 
-		while ( IsValidNavP() )
+		SleepForTick();
+
+		while ( navP != None && IsHarryNear(ActivationRadius) )
 		{
 			if ( FastViewCheck(PlayerHarry) )
 			{
@@ -133,7 +171,7 @@ state stateStalk
 			DebugLog("Pathing to Harry");
 			StrafeFacing(navP.Location, PlayerHarry);
 
-			destP = GetValidDestination(PlayerHarry.Location);
+			destP = GetValidDestinationTo(PlayerHarry.Location);
 			UpdateNavP();
 
 			SleepForTick();
@@ -156,6 +194,8 @@ state stateRetreat
 {
 	event BeginState()
 	{
+		SetStalkerNodes(False);
+
 		LoopAnim(RunAnimName);
 		GroundSpeed = GroundRunSpeed;
 		SetTimer(0.25, True);
@@ -205,7 +245,7 @@ state stateRetreat
 		destP = GetFurthestNavPFromActor(PlayerHarry);
 		UpdateNavP();
 
-		while ( IsValidNavP() )
+		while ( navP != None && IsHarryNear(ActivationRadius) )
 		{
 			DebugLog("Moving towards retreat");
 			StrafeFacing(navP.Location, PlayerHarry);
@@ -282,9 +322,11 @@ defaultproperties
 	KillSound=Sound'MocaOmniResources.Creatures.bracken_kill'
 	RetreatSound=Sound'MocaOmniResources.Creatures.bracken_retreat'
 
+	ActivationRadius=163840.0
 	MaxTravelDistance=163840.0
 
-	CollisionHeight=65.0
+	CollisionHeight=60.0
+	CollisionRadius=12.0
 
 	DrawScale=1.2
 	Mesh=SkeletalMesh'MocaOmniResources.skBracken'

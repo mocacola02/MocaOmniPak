@@ -133,7 +133,7 @@ state stateWander
 		}
 		
 		GroundSpeed = GroundWalkSpeed;
-		destP = GetValidDestination(DestPos, True);
+		destP = GetValidDestinationTo(DestPos, True);
 		DebugLog("Got wander destP: " $ destP);
 		LoopAnim(WalkAnimName);
 	}
@@ -190,7 +190,7 @@ state stateChase
 	}
 
 	search:
-		destP = GetValidDestination(PlayerHarry.Location, True);
+		destP = GetValidDestinationTo(PlayerHarry.Location, True);
 		UpdateNavP();
 
 		while ( IsValidNavP() && !bDerailed )
@@ -208,7 +208,7 @@ state stateChase
 		{
 			CurrChaseAttempts++;
 			DebugLog("Trying again, attempt #" $ CurrChaseAttempts);
-			destP = GetValidDestination(PlayerHarry.Location, True);
+			destP = GetValidDestinationTo(PlayerHarry.Location, True);
 			Goto('search');
 		}
 		else

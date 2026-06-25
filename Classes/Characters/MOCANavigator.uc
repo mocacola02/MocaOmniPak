@@ -2,10 +2,14 @@ class MOCANavigator extends MOCAChar;
 
 const MAX_VERIFIES = 5;
 
+var() int MaxPathFails;
 var() float ActivationRadius;
 var() float ViewDot;
 var() float FadeTime;				// Moca: How long to fade out the screen before respawning? Def: 3.0
 var() Color CameraFadeColor;		// Moca: What color to use for screen fade? Def: R=0 G=0 B=0
+
+var int FailCount;
+var NavigationPoint PrevCandidate;
 
 
 event Tick(float DeltaTime)
@@ -42,7 +46,7 @@ function bool IsValidNavP()
 	return navP != destP && navP != None;
 }
 
-function NavigationPoint GetDestination(optional Vector TargetPos)
+function NavigationPoint GetDestinationTo(optional Vector TargetPos)
 {
 	if ( VSize(TargetPos) >= 0.1 )
 	{
@@ -54,27 +58,44 @@ function NavigationPoint GetDestination(optional Vector TargetPos)
 	return FindRandomDest();
 }
 
-function NavigationPoint GetValidDestination(optional Vector TargetPos, optional bool bTryFallback)
+function NavigationPoint GetValidDestinationTo(optional Vector TargetPos, optional bool bTryFallback, optional bool bIgnoreFail)
 {
 	local int CurrAttempts;
 	local NavigationPoint WorkingNavP;
 
-	WorkingNavP = GetDestination(TargetPos);
+	WorkingNavP = GetDestinationTo(TargetPos);
 
-	while ( (WorkingNavP == LastNavP || WorkingNavP == None) && CurrAttempts < MAX_VERIFIES )
+	while ( (WorkingNavP == PrevCandidate || WorkingNavP == None) && CurrAttempts < MAX_VERIFIES )
 	{
 		CurrAttempts++;
 
 		DebugLog("Attempt #" $ CurrAttempts $ ": We had a duplicate or null navP of " $ WorkingNavP);
-		WorkingNavP = GetDestination(TargetPos);
+		WorkingNavP = GetDestinationTo(TargetPos);
 	}
 
-	if ( bTryFallback && (WorkingNavP == LastNavP || WorkingNavP == None) )
+	if ( bTryFallback && (WorkingNavP == PrevCandidate || WorkingNavP == None) )
 	{
 		DebugLog("Trying one more time, looking for a nearest navP");
 		WorkingNavP = GetClosestNavPToPoint(TargetPos);
 	}
 
+	if ( WorkingNavP == None && !bIgnoreFail )
+	{
+		FailCount++;
+		DebugLog("We have hit " $ FailCount $ " pathing fails.");
+
+		if ( FailCount > MaxPathFails )
+		{
+			ErrorMsg(self $ " has failed " $ MaxPathFails $ " pathing checks with bIgnoreFail set to false, closing to avoid an infinite loop hardlock. Try decreasing MOCANavigator's collision radius.");
+			return None;
+		}
+	}
+	else
+	{
+		FailCount = 0;
+	}
+
+	PrevCandidate = WorkingNavP;
 	DebugLog("Selected " $ WorkingNavP);
 	return WorkingNavP;
 }
@@ -125,9 +146,11 @@ function NavigationPoint GetClosestNavPToPoint(Vector TargetPos)
 defaultproperties
 {
 	ActivationRadius=384.0
-	ViewDot=0.25
+	ViewDot=0.35
 	FadeTime=3.0
 	CameraFadeColor=(R=0,G=0,B=0)
+
+	MaxPathFails=64
 
 	bTiltOnMovement=False
 
