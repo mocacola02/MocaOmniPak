@@ -301,18 +301,6 @@ function SetRespawnPosition(Vector NewLocation, optional float NewYaw)
 	RespawnRotation = NewRotation;
 }
 
-function SetAnimSet(enumHarryAnimSet NewSet)
-{
-	HarryAnimSet = NewSet;
-}
-
-function ScreenFade(float TargetOpacity, float FadeOutTime)
-{
-	local FadeViewController CamFade;
-	CamFade = Spawn(Class'FadeViewController');
-	CamFade.Init(TargetOpacity,0,0,0,FadeOutTime);
-}
-
 
 //========
 // Debug
