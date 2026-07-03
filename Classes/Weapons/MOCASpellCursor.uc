@@ -71,6 +71,7 @@ function UpdateCursor (optional bool bJustStopAtClosestPawnOrWall)
 		if ( aHitActor == Owner || IsBlacklisted(aHitActor) || (!aHitActor.IsA('Pawn') &&  !aHitActor.IsA('GridMover') &&  !aHitActor.IsA('spellTrigger')) )
 		{
 			// Continue to the next traced actor, if any
+			DebugLog("Not a compatible actor: " $ aHitActor);
 			continue;
 		}
 
