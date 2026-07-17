@@ -20,7 +20,7 @@ var int i;	// Current index
 function ProcessTrigger(Actor Other, Pawn EventInstigator)
 {
 	// If not dispatching, dispatch
-	if ( !IsInState('stateDispatch') )
+	if ( !IsInState('stateDispatch') && ListOfEvents.Length > 0 )
 	{
 		Instigator = EventInstigator;
 		GotoState('stateDispatch');
