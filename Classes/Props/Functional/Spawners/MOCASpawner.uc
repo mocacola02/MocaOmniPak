@@ -3,28 +3,25 @@
 //================================================================================
 class MOCASpawner extends MOCAPawn;
 
-struct SpawnedProperty
+struct SpawnedProperties
 {
 	var() string PropertyName;	// Moca: Name of property to edit on spawn.
 	var() string PropertyValue;	// Moca: Value to assign to that property. Must be compatible type (ex: you can't assign a text string to a integer property).
 };
 
-struct SpawnSetting
+struct SpawnSettings
 {
-	var() class<Actor> ActorToSpawn;				// Moca: Class of actor to spawn.
-	var() class<ParticleFX> SpawnParticles;			// Moca: Particle class to use when spawning.
-	var() Sound SpawnSound;							// Moca: Sound to play when spawning.
-
-	var() byte SpawnChance;							// Moca: Chance of spawning versus other spawn options. Higher = more likely.
+	var() class<Actor> actorToSpawn;				// Moca: Class of actor to spawn.
+	var() byte spawnChance;							// Moca: Chance of spawning versus other spawn options. Higher = more likely.
+	var() float spawnDelay;							// Moca: How long of a delay to have after spawning.
+	var() Vector spawnLocationOffset;						// Moca: Location offset to spawn location.
+	var() Rotator spawnRotation;					// Moca: Rotation to use on spawned actor.
+	var() float velocityMult;					// Moca: Intensity of velocity on spawned actor.
+	var() Sound spawnSound;							// Moca: Sound to play when spawning.
+	var() class<ParticleFX> spawnParticle;			// Moca: Particle class to use when spawning.
+	var() array<SpawnedProperty> spawnProperties;	// Moca: List of properties to set on spawned actor.
+	
 	var float FinalWeight;							// Moca: Final calculated weight.
-
-	var() float SpawnDelay;							// Moca: How long of a delay to have after spawning.
-	var() float SpawnVelocityMult;					// Moca: Intensity of velocity on spawned actor.
-
-	var() Vector SpawnOffset;						// Moca: Location offset to spawn location.
-	var() Rotator SpawnRotation;					// Moca: Rotation to use on spawned actor.
-
-	var() array<SpawnedProperty> SpawnProperties;	// Moca: List of properties to set on spawned actor.
 };
 
 var() array<SpawnSetting> ListOfSpawns;	// Moca: List of actors that can be spawned.

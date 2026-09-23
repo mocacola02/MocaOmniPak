@@ -5,8 +5,8 @@ class MOCATimelineTrigger extends MOCATrigger;
 
 struct TimedEvent
 {
-	var() name EventName;		// Moca: Event to emit.
-	var() float TimeToSendEvent;// Moca: When to send event.
+	var() name timedEventName;		// Moca: Event to emit.
+	var() float timeToSendEvent;	// Moca: When to send event.
 };
 
 var() array<TimedEvent> Timeline;	// Moca: List of events to play on timeline.
