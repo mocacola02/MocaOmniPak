@@ -102,7 +102,7 @@ defaultproperties
 
 	SpawnCount=(Min=6.0,Max=16.0)
 	SpawnAngle=(Min=-180.0,Max=180.0)
-	ListOfSpawns(0)=(ActorToSpawn=class'Jellybean',SpawnParticles=class'Spawn_flash_1',SpawnSound=Sound'spawn_bean01',SpawnChance=255,SpawnDelay=0.01,SpawnVelocityMult=1.0)
+	ListOfSpawns(0)=(ActorToSpawn=class'Jellybean',spawnParticle=class'Spawn_flash_1',SpawnSound=Sound'spawn_bean01',SpawnChance=255,SpawnDelay=0.01,velocityMult=1.0)
 
 	bHidden=True
 	bPersistent=True

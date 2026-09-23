@@ -79,7 +79,7 @@ function SendEvent()
 		return;
 	}
 	// Emit event
-	TriggerEvent(Timeline[CurrentIndex].EventName,Self,None);
+	TriggerEvent(Timeline[CurrentIndex].timedEventName,Self,None);
 	// Increment index
 	CurrentIndex++;
 }

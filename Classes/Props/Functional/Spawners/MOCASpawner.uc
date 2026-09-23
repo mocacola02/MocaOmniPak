@@ -19,12 +19,12 @@ struct SpawnSettings
 	var() float velocityMult;					// Moca: Intensity of velocity on spawned actor.
 	var() Sound spawnSound;							// Moca: Sound to play when spawning.
 	var() class<ParticleFX> spawnParticle;			// Moca: Particle class to use when spawning.
-	var() array<SpawnedProperty> spawnProperties;	// Moca: List of properties to set on spawned actor.
+	var() array<SpawnedProperties> spawnProperties;	// Moca: List of properties to set on spawned actor.
 	
 	var float FinalWeight;							// Moca: Final calculated weight.
 };
 
-var() array<SpawnSetting> ListOfSpawns;	// Moca: List of actors that can be spawned.
+var() array<SpawnSettings> ListOfSpawns;	// Moca: List of actors that can be spawned.
 
 var() bool bRandomSpawnOrder;			// Moca: Should spawn order be random? If false, spawns in the order of ListOfSpawns. Def: True
 var() bool bRandomSpawnDirection;		// Moca: Spawn actors in random directions? Def: False
@@ -104,7 +104,7 @@ function SpawnItem()
 	}
 
 	// Get spawn location from spawner location + the global spawn offset + spawn-specific offset
-	SpawnLocation = Location + GlobalSpawnOffset + ListOfSpawns[CurrentSpawnIdx].SpawnOffset;
+	SpawnLocation = Location + GlobalSpawnOffset + ListOfSpawns[CurrentSpawnIdx].spawnLocationOffset;
 
 	// If use random spawn direction
 	if ( bRandomSpawnDirection )
@@ -126,13 +126,13 @@ function SpawnItem()
 	}
 
 	// Spawn particles at spawn location
-	SpawnedParticle = Spawn(GetSpawnParticles(),,,SpawnLocation);
+	SpawnedParticle = Spawn(GetSpawnParticle(),,,SpawnLocation);
 
 	// Play spawn sound
-	SpawnedParticle.PlaySound(GetSpawnSound());
+	SpawnedParticle.PlaySound(GetspawnSound());
 
 	// Spawn actor with proper location & rotation
-	SpawnedActor = Spawn(ListOfSpawns[CurrentSpawnIdx].ActorToSpawn,,,SpawnLocation,SpawnRotation);
+	SpawnedActor = Spawn(ListOfSpawns[CurrentSpawnIdx].actorToSpawn,,,SpawnLocation,SpawnRotation);
 
 	// If we are varying our velocity
 	if ( bVaryVelocity )
@@ -147,7 +147,7 @@ function SpawnItem()
 	}
 
 	// Get speed scale
-	FinalSpeed = BaseSpeed * RandVelocityMult * ListOfSpawns[CurrentSpawnIdx].SpawnVelocityMult;
+	FinalSpeed = BaseSpeed * RandVelocityMult * ListOfSpawns[CurrentSpawnIdx].velocityMult;
 
 	// Set actor velocity along the spawn direction at the computed speed
 	SpawnedActor.Velocity = SpawnDirection * FinalSpeed;
@@ -208,13 +208,13 @@ function SetSpawnWeights()
 	for ( i = 0; i < ListLength; i++ )
 	{
 		// Increase total weight by current item's spawn chance
-		TotalWeight += int(ListOfSpawns[i].SpawnChance);
+		TotalWeight += int(ListOfSpawns[i].spawnChance);
 	}
 
 	// Determine final weight for each item
 	for ( i = 0; i < ListLength; i++ )
 	{
-		ListOfSpawns[i].FinalWeight = float(ListOfSpawns[i].SpawnChance) / float(TotalWeight);
+		ListOfSpawns[i].FinalWeight = float(ListOfSpawns[i].spawnChance) / float(TotalWeight);
 	}
 }
 
@@ -273,10 +273,10 @@ function int GetWeightedRandomIndex()
 	return 0;
 }
 
-function float GetSpawnDelay()
+function float GetspawnDelay()
 {
 	// Return current item's spawn delay
-	return ListOfSpawns[CurrentSpawnIdx].SpawnDelay;
+	return ListOfSpawns[CurrentSpawnIdx].spawnDelay;
 }
 
 function Vector GetRandomDirection()
@@ -336,16 +336,16 @@ function Vector GetConeSpreadDirection(Vector BaseDirection, float MinAngleDeg, 
 	return (Forward * CosCone) + ((Right * Cos(RollAngleRad) + Up * Sin(RollAngleRad)) * SinCone);
 }
 
-function Sound GetSpawnSound()
+function Sound GetspawnSound()
 {
 	// Return current item's spawn sound
-	return ListOfSpawns[CurrentSpawnIdx].SpawnSound;
+	return ListOfSpawns[CurrentSpawnIdx].spawnSound;
 }
 
-function class<ParticleFX> GetSpawnParticles()
+function class<ParticleFX> GetSpawnParticle()
 {
 	// Return current item's spawn particles
-	return ListOfSpawns[CurrentSpawnIdx].SpawnParticles;
+	return ListOfSpawns[CurrentSpawnIdx].spawnParticle;
 }
 
 
@@ -399,7 +399,7 @@ state stateSpawn
 		SpawnItem();
 
 		// Wait for spawn delay
-		Sleep(GetSpawnDelay());
+		Sleep(GetspawnDelay());
 
 		// If we've exceeded max spawn count, go to idle
 		if ( CurrentSpawnCount >= FinalMaxSpawnCount )
@@ -421,7 +421,7 @@ state stateDestroy
 
 defaultproperties
 {
-	ListOfSpawns(0)=(ActorToSpawn=class'Jellybean',SpawnParticles=class'Spawn_flash_1',SpawnSound=Sound'spawn_bean01',SpawnChance=255,SpawnDelay=0.1,SpawnVelocityMult=1.0)
+	ListOfSpawns(0)=(actorToSpawn=class'Jellybean',spawnParticle=class'Spawn_flash_1',spawnSound=Sound'spawn_bean01',spawnChance=255,spawnDelay=0.1,velocityMult=1.0)
 
 	bRandomSpawnOrder=True
 	bVaryVelocity=True
