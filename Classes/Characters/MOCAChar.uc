@@ -101,7 +101,7 @@ function bool CanHarrySeeMe(optional float MinDot)
 function bool CanISeeHarry(float MinDot, optional bool bRememberLocation)
 {
 	// If Harry can see us and we're facing him and we're within 50 units on Z (up & down)
-	if ( PlayerCanSeeMe() && IsFacingOther(Self,PlayerHarry,MinDot) && Abs(PlayerHarry.Location.Z - Location.Z) <= 50.0 )
+	if ( PlayerCanSeeMe() && GetDistanceFromHarry() <= SightRadius && IsFacingOther(Self,PlayerHarry,MinDot) && Abs(PlayerHarry.Location.Z - Location.Z) <= 50.0 )
 	{
 		if ( bRememberLocation )
 		{
@@ -252,5 +252,6 @@ defaultproperties
 {
 	AmbientGlow=48.0
 	MaxTravelDistance=1024.0
+	SightRadius=2048.0
 	bTiltOnMovement=True
 }

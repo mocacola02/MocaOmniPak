@@ -155,5 +155,4 @@ defaultproperties
 	bTiltOnMovement=False
 
 	bAdvancedTactics=True
-	SightRadius=2048.0
 }
