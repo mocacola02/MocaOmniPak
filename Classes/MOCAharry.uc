@@ -107,6 +107,11 @@ function StartAimSoundFX()
 		return;
 	}
 
+	if ( Weapon.IsA('MOCAWandless') )
+	{
+		return;
+	}
+
 	PlaySound(Sound'Spell_aim',SLOT_Misc);
 
 	if ( bInDuelingMode && (CurrentDuelSpell == 1) )

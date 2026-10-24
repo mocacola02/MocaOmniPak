@@ -48,7 +48,7 @@ function HandleTrace()
 		}
 		else if ( HitActor.IsA('MOCAInteractiveProp') )
 		{
-			MOCAInteractiveProp(HitActor).HandleWandlessInteract();
+			MOCAInteractiveProp(HitActor).InteractTraceHit();
 		}
 	}
 }

@@ -1,7 +1,7 @@
 //================================================================================
 // MOCAInteractTrigger.
 //================================================================================
-class MOCAInteractTrigger extends MOCAInteractProp;
+class MOCAInteractTrigger extends MOCAInteractiveProp;
 
 defaultproperties
 {
