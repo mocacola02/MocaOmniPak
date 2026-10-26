@@ -1,4 +1,7 @@
-# MocaOmniPak & MocaOmniResources License
+# License
+
+Moca's Modding License (M2L) is my standard license for most of my modded content.
+This is a [copyleft](https://en.wikipedia.org/wiki/Copyleft) license that requires all users to follow the terms of use below.
 
 ## Terms of Use
 
@@ -10,10 +13,10 @@ By using any portion of this repository or its contents, you agree to the follow
 
 2. **Non-Commercial Use Only**  
    - You may not use this content in any commercial product, project, or mod.
-   - This includes redistributing the assets directly or reusing them in another commercial project.
+   - This includes redistributing the assets directly, reusing them in another commercial project, or any other method of redistribution that requires payment.
 
 3. **Community Guidelines**  
-   - Please do not use this content is anything that would be considered harmful or offensive to the HP Modding community.
+   - Please do not use this content in anything that would be considered harmful or offensive to the HP Modding community.
 
 4. **Feature Requests and Contributions**  
    - All feature requests will be publicly visible; there will be no exclusive features for specific people.  
@@ -21,9 +24,13 @@ By using any portion of this repository or its contents, you agree to the follow
    - If you are interested in contributing, feel free to reach out!
 
 5. **Ownership of Third-Party Content**  
-   - Any content derived from other sources (including Epic Games, KnowWonder, Zeekerss, Metallicafan212, or other community members) remains the property of their respective owners.
+   - Any content derived from other sources (including Epic Games, KnowWonder, Scott Cawthon, Metallicafan212, or other community members) remains the property of their respective owners.
+   - I am only claiming ownership over my original assets and code.
 
-6. **Most Importantly**
+6. **Preserve the License**
+   - Any modifications made to this content must use the M2L license as well.
+
+7. **Most Importantly**
    - Have fun!
 
 ---
