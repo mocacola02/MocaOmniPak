@@ -6,6 +6,8 @@ class MOCAharry extends harry;
 //= General Exports =//
 var() bool bSaveOnLoad;		// Moca: Should the game save when we load in? Def: False
 
+var() Texture CrosshairTexture;
+
 //= Magic Exports =//
 
 struct SpellMap
@@ -45,6 +47,18 @@ event PostBeginPlay()
 	{
 		MOCASpellCursor(SpellCursor).bDebugLogging = bDebugLogging;
 	}
+
+	// jank for fnaf in hp2
+	if( Cam != None )
+	{
+		Cam.Destroy();
+	}
+
+	Cam = Spawn(class'MOCABaseCam');
+	SpellCursor.TickParent = Cam;
+	ViewClass(class'MOCABaseCam', true);
+
+	MOCABaseCam(Cam).CrosshairTexture = CrosshairTexture;
 
 	// If we're set to save on load, then save
 	if ( bSaveOnLoad )
@@ -95,6 +109,10 @@ event Touch(Actor Other)
 	PickupActor(Other);
 }
 
+event RenderOverlays(Canvas C)
+{
+	Cam.RenderOverlays(C);
+}
 
 //============
 // Magic SFX
@@ -326,38 +344,36 @@ function DebugLog(string Msg)
 
 defaultproperties
 {
-	DefaultWeapon=Class'MOCAWand'
-	SpellCursorClass=Class'MOCASpellCursor'
-
-	SpellMapping(1)=(SpellSlot=SPELL_Alohomora,SpellClass=Class'HGame.spellAlohomora')
-	SpellMapping(2)=(SpellSlot=SPELL_Incendio)
-	SpellMapping(3)=(SpellSlot=SPELL_LocomotorWibbly,SpellClass=Class'MocaOmniPak.MOCAspellGlacius')
-	SpellMapping(4)=(SpellSlot=SPELL_Lumos,SpellClass=Class'HGame.spellLumos')
-	SpellMapping(5)=(SpellSlot=SPELL_Nox)
-	SpellMapping(6)=(SpellSlot=SPELL_PetrificusTotalus)
-	SpellMapping(7)=(SpellSlot=SPELL_WingardiumLeviosa)
-	SpellMapping(8)=(SpellSlot=SPELL_Verdimillious)
-	SpellMapping(9)=(SpellSlot=SPELL_Vermillious)
-	SpellMapping(10)=(SpellSlot=SPELL_Flintifores)
-	SpellMapping(11)=(SpellSlot=SPELL_Reparo)
-	SpellMapping(12)=(SpellSlot=SPELL_MucorAdNauseum)
-	SpellMapping(13)=(SpellSlot=SPELL_Flipendo,SpellClass=Class'HGame.spellFlipendo')
-	SpellMapping(14)=(SpellSlot=SPELL_Ectomatic)
-	SpellMapping(15)=(SpellSlot=SPELL_Avifores)
-	SpellMapping(16)=(SpellSlot=SPELL_FireCracker)
-	SpellMapping(17)=(SpellSlot=SPELL_Transfiguration)
-	SpellMapping(18)=(SpellSlot=SPELL_WingSustain)
-	SpellMapping(19)=(SpellSlot=SPELL_Diffindo,SpellClass=Class'HGame.spellDiffindo')
-	SpellMapping(20)=(SpellSlot=SPELL_Skurge,SpellClass=Class'HGame.spellSkurge')
-	SpellMapping(21)=(SpellSlot=SPELL_Spongify,SpellClass=Class'HGame.spellSpongify')
-	SpellMapping(22)=(SpellSlot=SPELL_Rictusempra,SpellClass=Class'HGame.spellRictusempra')
-	SpellMapping(23)=(SpellSlot=SPELL_Ecto)
-	SpellMapping(24)=(SpellSlot=SPELL_Fire)
-	SpellMapping(25)=(SpellSlot=SPELL_DuelRictusempra,SpellClass=Class'HGame.spellDuelRictusempra')
-	SpellMapping(26)=(SpellSlot=SPELL_DuelMimblewimble,SpellClass=Class'HGame.spellDuelMimblewimble')
-	SpellMapping(27)=(SpellSlot=SPELL_DuelExpelliarmus,SpellClass=Class'HGame.spellDuelExpelliarmus')
-
-	Mesh=SkeletalMesh'MocaOmniResources.skMocaHarry'
-	Cutname="harry"
-	RotationRate=(Pitch=20000,Yaw=87500,Roll=3072)
+     DefaultWeapon=Class'MocaOmniPak.MOCAWand'
+     SpellCursorClass=Class'MocaOmniPak.MOCASpellCursor'
+     SpellMapping(1)=(SpellSlot=SPELL_Alohomora,SpellClass=Class'HGame.spellAlohomora')
+     SpellMapping(2)=(SpellSlot=SPELL_Incendio)
+     SpellMapping(3)=(SpellSlot=SPELL_LocomotorWibbly,SpellClass=Class'MocaOmniPak.MOCAspellGlacius')
+     SpellMapping(4)=(SpellSlot=SPELL_Lumos,SpellClass=Class'HGame.spellLumos')
+     SpellMapping(5)=(SpellSlot=SPELL_Nox)
+     SpellMapping(6)=(SpellSlot=SPELL_PetrificusTotalus)
+     SpellMapping(7)=(SpellSlot=SPELL_WingardiumLeviosa)
+     SpellMapping(8)=(SpellSlot=SPELL_Verdimillious)
+     SpellMapping(9)=(SpellSlot=SPELL_Vermillious)
+     SpellMapping(10)=(SpellSlot=SPELL_Flintifores)
+     SpellMapping(11)=(SpellSlot=SPELL_Reparo)
+     SpellMapping(12)=(SpellSlot=SPELL_MucorAdNauseum)
+     SpellMapping(13)=(SpellSlot=SPELL_Flipendo,SpellClass=Class'HGame.spellFlipendo')
+     SpellMapping(14)=(SpellSlot=SPELL_Ectomatic)
+     SpellMapping(15)=(SpellSlot=SPELL_Avifores)
+     SpellMapping(16)=(SpellSlot=SPELL_FireCracker)
+     SpellMapping(17)=(SpellSlot=SPELL_Transfiguration)
+     SpellMapping(18)=(SpellSlot=SPELL_WingSustain)
+     SpellMapping(19)=(SpellSlot=SPELL_Diffindo,SpellClass=Class'HGame.spellDiffindo')
+     SpellMapping(20)=(SpellSlot=SPELL_Skurge,SpellClass=Class'HGame.spellSkurge')
+     SpellMapping(21)=(SpellSlot=SPELL_Spongify,SpellClass=Class'HGame.spellSpongify')
+     SpellMapping(22)=(SpellSlot=SPELL_Rictusempra,SpellClass=Class'HGame.spellRictusempra')
+     SpellMapping(23)=(SpellSlot=SPELL_Ecto)
+     SpellMapping(24)=(SpellSlot=SPELL_Fire)
+     SpellMapping(25)=(SpellSlot=SPELL_DuelRictusempra,SpellClass=Class'HGame.spellDuelRictusempra')
+     SpellMapping(26)=(SpellSlot=SPELL_DuelMimblewimble,SpellClass=Class'HGame.spellDuelMimblewimble')
+     SpellMapping(27)=(SpellSlot=SPELL_DuelExpelliarmus,SpellClass=Class'HGame.spellDuelExpelliarmus')
+     Mesh=SkeletalMesh'MocaOmniResources.skMocaHarry'
+     RotationRate=(Yaw=87500)
+     CutName="harry"
 }
